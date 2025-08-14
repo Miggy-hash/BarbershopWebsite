@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
+        <h1 class="font-playfair font-semibold text-[35px] text-black">We Value Your Feedback</h1>
+    </div>
+    <div class="w-full h-[1000px] flex flex-col lg:flex-row justify-center p-6 gap-8 bg-black">
+
+        {# Ratings & Reviews column - column 1 of 3 #}
+    {% set ratings_counts = ratings_counts | default({5: 8, 4: 1, 3: 0, 2: 0, 1: 1}) %}
+    {# if total_reviews is not provided, compute it from ratings_counts #}
+    {% set total_reviews = total_reviews | default(ratings_counts.values() | sum) %}
+    {# compute weighted average from ratings_counts when average_rating not supplied #}
+    {% set _sum_values = 0 %}
+    {% for k, v in ratings_counts.items() %}
+        {% set _sum_values = _sum_values + (k * v) %}
+    {% endfor %}
+    {% if total_reviews > 0 %}
+        {% set _computed_avg = (_sum_values / total_reviews) | round(1) %}
+    {% else %}
+        {% set _computed_avg = 0 %}
+    {% endif %}
+    {% set average_rating = average_rating | default(_computed_avg) %}
+       <section class="bg-white rounded-lg p-4 min-w-[330px] max-w-sm w-full lg:w-[300px] h-[190px] mt-15 border-white border-2 shadow-[4px_4px_8px_white]">
+    <div class="flex flex-col items-start">
+        <h3 class=" font-montserrat text-[20px] font-normal text-gray-800 mb-2 ml-2">Ratings and reviews</h3>
+
+        <!-- Main container: row layout -->
+        <div class="flex items-start gap-3">
+
+            <!-- Left: average rating, stars, total reviews -->
+            <div class="flex flex-col items-center mt-2">
+                <div class="text-6xl font-montserrat leading-none text-black">{{ average_rating }}</div>
+                <div class="flex items-center gap-1">
+                    {% set full_stars = (average_rating // 1) | int %}
+                    {% for i in range(1,6) %}
+                        {% if i <= full_stars %}
+                            <svg class="w-4 h-4 text-black-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
+                            </svg>
+                        {% else %}
+                            <svg class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
+                            </svg>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="text-sm font-montserrat text-gray-500">{{ total_reviews }} reviews</div>
+            </div>
+
+            <!-- Right: rating breakdown -->
+            <ul class="flex flex-col">
+                {% for n in [5,4,3,2,1] %}
+                {% set count = ratings_counts.get(n, 0) %}
+                {% if total_reviews > 0 %}
+                    {% set pct = ((count * 100) / total_reviews) | round(0) %}
+                {% else %}
+                    {% set pct = 0 %}
+                {% endif %}
+                <li class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 w-full">
+                        <div class="flex-shrink-0 text-base w-6 text-right text-gray-700">{{ n }}</div>
+                        <div class="relative w-[130px] h-2">
+                            <div class="absolute inset-0 bg-gray-300 border border-black rounded-full" style="height:11px"></div>
+                            <div class="absolute left-0 top-0 bg-black border border-black rounded-full bar" data-count="{{ count }}" data-total="{{ total_reviews }}" style="height:10px; width:0px;"></div>
+                        </div>
+                        <div class="text-[10px] font-montserrat text-gray-600 ml-2">{{ count }}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+</section>
+
+
+
+        {# Middle column: Comments (3 by default) #}
+        {% set comments = comments | default([
+            {'name':'Maria Osawa','rating':5,'date':'2025-08-14T12:00:00Z','text':'I had a great experience at the barbershop. The barber took time to understand what I wanted and gave great suggestions.'},
+            {'name':'Mario Osawa','rating':4,'date':'2025-08-13T09:30:00Z','text':'Good service and friendly staff. My haircut looked sharp.'},
+            {'name':'Leopard Lucy','rating':2,'date':'2025-08-10T16:45:00Z','text':'I went for the first time and unfortunately I wasn\'t impressed. The barber seemed rushed and didn\'t listen to what I asked for.'}
+        ]) %}
+
+        <section class="bg-transparent w-full lg:w-[560px] h-auto flex flex-col gap-3 mt-15">
+            {% for c in comments %}
+            <article class="bg-white rounded-lg shadow p-4 relative">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <div class="avatar w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" data-name="{{ c.name }}">A</div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="font-semibold text-gray-800">{{ c.name }}</div>
+                                <div class="flex items-center">
+                                    {% for i in range(1,6) %}
+                                        {% if i <= c.rating %}
+                                            <svg class="w-4 h-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
+                                        {% else %}
+                                            <svg class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 timestamp" data-date="{{ c.date }}">Today</div>
+                        </div>
+
+                        <div class="w-[400px] max-w-full h-px bg-gray-200 my-2"></div>
+
+                        <div class="text-sm text-gray-700">{{ c.text }}</div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        {# Right column: Rate our service form #}
+        <section class="bg-white rounded-lg shadow p-4 w-full lg:w-[320px] h-auto mt-15">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <!-- star logo -->
+                    <svg class="w-6 h-6 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
+                    <div class="text-lg font-semibold text-gray-800">Rate our service</div>
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-500 mt-1">Tell other's what you think</div>
+
+            <div class="mt-4">
+                <div class="rating-widget inline-flex gap-1" data-rating="0">
+                    {% for i in range(1,6) %}
+                        <button type="button" class="star transition-colors duration-150 p-1" data-value="{{ i }}" aria-label="Rate {{ i }} stars">
+                            <svg class="w-6 h-6 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <form class="mt-4" action="#" method="post" onsubmit="return false;">
+                <label class="block text-sm text-gray-600 mb-1">Leave a comment</label>
+                <textarea name="comment" class="w-full h-28 p-2 border border-gray-200 rounded resize-y" placeholder="Write your feedback..."></textarea>
+                <input type="hidden" name="rating" value="0" />
+                <div class="mt-3 flex justify-end">
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Submit</button>
+                </div>
+            </form>
+        </section>
+
+    </div>
+
+    <script>
+        // compute and set bar widths based on data attributes
+        (function(){
+            function setBars(){
+                document.querySelectorAll('.bar').forEach(function(el){
+                    var count = parseFloat(el.getAttribute('data-count')) || 0;
+                    var total = parseFloat(el.getAttribute('data-total')) || 0;
+                    var pct = total > 0 ? (count / total) : 0;
+                    // compute width from the bar's parent container so it's robust
+                    var container = el.parentElement;
+                    var containerWidth = (container && container.clientWidth) ? container.clientWidth : 100;
+                    // set width as percent of the container to avoid clientWidth issues
+                    var pct100 = Math.max(0, Math.min(1, pct)) * 100;
+                    if(window.console && console.debug){
+                        console.debug('bar debug', {count: count, total: total, pct: pct, pct100: pct100, el: el});
+                    }
+                    el.style.width = pct100 + '%';
+                });
+            }
+            function setAvatarsAndTimestamps(){
+                // avatars: set initial and pick a pastel color based on name
+                document.querySelectorAll('.avatar').forEach(function(el){
+                    var name = el.getAttribute('data-name') || '';
+                    var initial = (name.trim().split(' ')[0] || 'A').charAt(0).toUpperCase();
+                    el.textContent = initial;
+                    // deterministic color from name hash
+                    var hash = 0; for(var i=0;i<name.length;i++){ hash = name.charCodeAt(i) + ((hash<<5)-hash); }
+                    var h = Math.abs(hash) % 360;
+                    // pastel HSL
+                    el.style.backgroundColor = 'hsl(' + h + ', 70%, 40%)';
+                });
+
+                // timestamps: relative (Today, 1 day ago, 2 days ago...)
+                document.querySelectorAll('.timestamp').forEach(function(el){
+                    var dateStr = el.getAttribute('data-date');
+                    if(!dateStr) return;
+                    var d = new Date(dateStr);
+                    if(isNaN(d)) return;
+                    var now = new Date();
+                    // normalize to local midnight differences
+                    var diffMs = now - d;
+                    var diffDays = Math.floor(diffMs / (1000*60*60*24));
+                    var text = '';
+                    if(diffDays <= 0) text = 'Today';
+                    else if(diffDays === 1) text = 'A day ago';
+                    else text = diffDays + ' days ago';
+                    el.textContent = text;
+                });
+            }
+            window.addEventListener('load', setBars);
+            window.addEventListener('resize', setBars);
+            window.addEventListener('load', setAvatarsAndTimestamps);
+            // star widget interactions
+            window.addEventListener('load', function(){
+                var widget = document.querySelector('.rating-widget');
+                if(!widget) return;
+                var stars = widget.querySelectorAll('.star');
+                var inputRating = widget.closest('section').querySelector('input[name=rating]');
+                function paint(n){
+                    stars.forEach(function(s){
+                        var v = parseInt(s.getAttribute('data-value'));
+                        var svg = s.querySelector('svg');
+                        if(v <= n) svg.classList.remove('text-gray-300'), svg.classList.add('text-yellow-500');
+                        else svg.classList.add('text-gray-300'), svg.classList.remove('text-yellow-500');
+                    });
+                }
+                stars.forEach(function(s){
+                    var v = parseInt(s.getAttribute('data-value'));
+                    s.addEventListener('mouseenter', function(){ paint(v); });
+                    s.addEventListener('mouseleave', function(){ var current = parseInt(widget.getAttribute('data-rating')) || 0; paint(current); });
+                    s.addEventListener('click', function(){ widget.setAttribute('data-rating', v); if(inputRating) inputRating.value = v; paint(v); });
+                });
+            });
+        })();
+    </script>
+
+</body>
+
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+</style>
