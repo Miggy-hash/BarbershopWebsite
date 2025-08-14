@@ -1,0 +1,43 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Faustina:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
+        <h1 class="font-playfair font-semibold text-[35px] text-black">ARTIST</h1>
+        <p class="font-lato font-light text-[18px] text-gray-600 -mt-2">Creator Behind Arts</p>
+    </div>
+
+    <div class="w-full bg-gallery h-[800px]">
+        <div class="max-w-[1200px] mx-auto flex justify-center gap-50">
+            <div class="relative h-[470px] w-[450px] bg-white p-[10px] rounded-[35px] mt-50">
+                <img src="{{ url_for('static', filename='images/emel.jpg') }}"
+                    alt="Gallery Image" 
+                    class="h-full w-full object-cover rounded-[25px]">
+                    <div class="absolute bottom-[30px] left-[30px] text-white text-3xl font-semibold"
+                        style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                            Emel Calomos
+                    </div>
+            </div>
+            <div class="relative h-[470px] w-[450px] bg-white p-[10px] rounded-[35px] mt-50">
+                    <img src="{{ url_for('static', filename='images/boboy.jpg') }}"
+                        alt="Gallery Image" 
+                        class="h-full w-full object-cover rounded-[25px]">
+                <div class="absolute bottom-[30px] left-[30px] text-white text-3xl font-semibold"
+                        style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                            Super Angelo Paballa
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<style>
+
+.bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover; 
+    background-position: center;
+}
+.font-faustina {
+        font-family: 'Faustina', serif;
+    }
+    </style>

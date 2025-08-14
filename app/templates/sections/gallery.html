@@ -1,0 +1,79 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300&display=swap" rel="stylesheet">
+
+    <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
+        <h1 class="font-playfair font-semibold text-[35px] text-black">GALLERY</h1>
+        <p class="font-lato font-light text-[18px] text-gray-600 -mt-2">Meticulously Crafted Artworks</p>
+    </div>
+
+
+<div class="w-full bg-gallery">
+    <div class="flex gap-[5px]  mb-[5px] justify-center">
+        <div class="bg-white p-[5px] rounded-[5px] mt-30">
+            <img src="{{ url_for('static', filename='images/H1.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mt-30">
+            <img src="{{ url_for('static', filename='images/h2.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mt-30">
+            <img src="{{ url_for('static', filename='images/h3.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mt-30">
+            <img src="{{ url_for('static', filename='images/h4.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mt-30">
+            <img src="{{ url_for('static', filename='images/h5.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+    </div>
+
+    <div class="flex gap-[5px] justify-center pl-[150px]">
+        <div class="bg-white p-[5px] rounded-[5px] mb-30">
+            <img src="{{ url_for('static', filename='images/H1.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mb-30">
+            <img src="{{ url_for('static', filename='images/h2.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mb-30">
+            <img src="{{ url_for('static', filename='images/h3.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mb-30">
+            <img src="{{ url_for('static', filename='images/h4.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+        <div class="bg-white p-[5px] rounded-[5px] mb-30">
+            <img src="{{ url_for('static', filename='images/h5.jpg') }}"
+                alt="Gallery Image" 
+                class="h-[450px] w-auto object-cover rounded-[5px]">
+        </div>
+    </div>
+</div>
+
+<style>
+    .font-playfair {
+        font-family: 'Playfair Display', serif;
+    }
+    .font-lato {
+        font-family: 'Lato', sans-serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Flask App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar fixed top-0 left-0 w-full z-50">
+        {% include '/sections/navbar.html' %}
+    </header>
+    <main class="pt-[75px]"> 
+    <section class="banner h-screen relative">
+        {% include '/sections/banner.html' %}
+    </section>
+    <section class="gallery">
+        {% include '/sections/gallery.html' %}
+    </section>
+    <section class="artist">
+        {% include '/sections/artist.html' %}
+    </section>
+    <section class="services">
+        {% include '/sections/services.html' %}
+    </section>
+    <section>
+        {% include '/sections/appointment.html' %}
+    </section>
+
+ 
+    </main>
+</body>
+</html>

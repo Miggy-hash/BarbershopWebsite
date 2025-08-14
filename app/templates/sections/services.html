@@ -1,0 +1,96 @@
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Faustina:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+<div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
+        <h1 class="font-playfair font-semibold text-[35px] text-black">SERVICES</h1>
+</div>
+
+<div class="w-full bg-gallery h-[800px]">
+    <div class="max-w mx-auto mr-10 ml-10 flex justify-center gap-[15px]">
+        <div class="relative h-65 w-250 bg-white border-black border-[6px] p-[10px] rounded-[35px] mt-50 flex items-center">
+            <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
+            alt="Beard Service" 
+            class="w-[95px] h-[95px] object-contain">
+            
+            <div class="w-[2px] h-[200px] bg-black mx-[10px]"></div>
+
+            <div class="flex flex-col leading-tight">
+                <span class="text-5xl font-faustina font-bold">Beard Service</span>
+                <span class="text-sm font-faustina text-gray-500">
+                    Transform your look with our expert beard care service.</span>
+                    <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00 </span>
+            </div>
+
+        </div>
+        <div class="relative h-65 w-250 bg-white border-black border-[6px] p-[10px] rounded-[35px] mt-60 flex items-center">
+            <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
+            alt="Beard Service" 
+            class="w-[95px] h-[95px] object-contain">
+            
+            <div class="w-[2px] h-[200px] bg-black mx-[10px]"></div>
+
+            <div class="flex flex-col leading-tight">
+                <span class="text-5xl font-faustina font-bold">Men's Haircut</span>
+                <span class="text-sm font-faustina text-gray-500">
+                   Upgrade your look with a haircut designed for your lifestyle and personality.</span>
+                    <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00 </span>
+            </div>
+
+        </div>
+        <div class="relative h-75 w-250 bg-white border-black border-[6px] p-[10px] rounded-[35px] mt-70 flex items-center">
+            <img src="{{ url_for('static', filename ='icons/home.png') }}" 
+            alt="Beard Service" 
+            class="w-[85px] h-[85px] object-contain">
+            
+            <div class="w-[2px] h-[200px] bg-black mx-[10px]"></div>
+
+            <div class="flex flex-col leading-tight">
+                <span class="text-5xl font-faustina font-bold">Home Service</span>
+                <span class="text-sm font-faustina text-gray-500">
+                   Upgrade your look with a haircut designed for your lifestyle and personality.</span>
+                    <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00 </span>
+            </div>
+        </div>
+        <div class="relative h-75 w-250 bg-white border-black border-[6px] p-[10px] rounded-[35px] mt-60 flex items-center">
+            <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
+            alt="Beard Service" 
+            class="w-[95px] h-[95px] object-contain">
+            
+            <div class="w-[2px] h-[200px] bg-black mx-[10px]"></div>
+
+            <div class="flex flex-col leading-tight">
+                <span class="text-5xl font-faustina font-bold">Full Service</span>
+                <span class="text-sm font-faustina text-gray-500">
+                   Upgrade your look with a haircut designed for your lifestyle and personality.</span>
+                    <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00 </span>
+            </div>
+        </div>
+        <div class="relative h-75 w-250 bg-white border-black border-[6px] p-[10px] rounded-[35px] mt-50 flex items-center">
+            <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
+            alt="Beard Service" 
+            class="w-[95px] h-[95px] object-contain">
+            
+            <div class="w-[2px] h-[200px] bg-black mx-[10px]"></div>
+
+            <div class="flex flex-col leading-tight">
+                <span class="text-5xl font-faustina font-bold">Full Shave</span>
+                <span class="text-sm font-faustina text-gray-500">
+                   Upgrade your look with a haircut designed for your lifestyle and personality.</span>
+                    <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00 </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<style>
+.bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover; 
+    background-position: center;
+}
+.font-faustina {
+        font-family: 'Faustina', serif;
+    }
+</style>
