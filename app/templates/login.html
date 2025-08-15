@@ -2,11 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Flask App</title>
+    <title>Login - My Flask App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Faustina:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
- <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
-        <h1 class="font-playfair font-semibold text-[35px] text-black">APPOINTMENT</h1>
-    </div>
+    <body class="min-h-screen flex flex-col justify-center items-center bg-gallery">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <section class="w-full flex-1 flex justify-center items-center">
+        <div class="bg-black backdrop-blur-lg p-8 rounded-lg border border-white-80 w-full max-w-md shadow-[4px_4px_10px_rgba(255,255,255,0.3),
+            -4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] 
+            transition duration-300">
+    <h2 class="text-4xl font-faustina font-extrabold text-center mb-8 text-white">Slick Grind <br> Barber</h2>
+    <form method="POST" action="{{ url_for('routes.LOGIN') }}" class="space-y-4">
+        <div>
+            <label for="full_name" class="block mb-1 text-sm font-montserrat text-white">Full Name</label>
+            <input type="text" id="full_name" name="full_name" required
+                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+            <label for="cellphone" class="block mb-1 text-sm font-montserrat text-white">Cellphone Number</label>
+            <input type="tel" id="cellphone" name="cellphone" pattern="[0-9]{11}" required
+                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+            <label for="email" class="block mb-1 text-sm font-montserrat text-white">Email Address</label>
+            <input type="email" id="email" name="email" required
+                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <button type="submit" id="confirmBtn" disabled
+            class="w-full py-2 bg-black border border-white text-white rounded hover:bg-white hover:text-black hover:border-black disabled:bg-gray-300/50 disabled:border-white disabled:text-white  disabled:cursor-not-allowed">
+            Confirm
+        </button>
+    </form>
+</div>
+    </section>
+
+
+    <script>
+        const fullName = document.getElementById('full_name');
+        const cellphone = document.getElementById('cellphone');
+        const email = document.getElementById('email');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        function validateForm() {
+            const isValid = fullName.value.trim() && cellphone.value.trim() && email.value.trim();
+            confirmBtn.disabled = !isValid;
+        }
+
+        [fullName, cellphone, email].forEach(input => {
+            input.addEventListener('input', validateForm);
+        });
+    </script>
+</body>
+</html>
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>
+
+

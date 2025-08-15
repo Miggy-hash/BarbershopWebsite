@@ -10,30 +10,30 @@
 
 {# Footer section for the barbershop site - included in base templates #}
 <footer class="bg-gray-900 text-gray-200">
-	<div class="max-w-6xl mx-auto px-6 py-12">
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+	<div class="w-full max-w-auto mx-auto px-42 py-12">
+		<div class="grid grid-cols-1 md:grid-cols-4">
 			<!-- Brand / About -->
-			<div class="space-y-4">
+			<div class=" flex flex-col  items-center text-center">
 				<a href="/" class="flex items-center gap-3">
 					<img src="{{ url_for('static', filename='images/Slick.jpg') }}" alt="logo" class="h-12 w-16 object-cover rounded-sm border-1 border-white">
 					<span class="text-2xl font-faustina font-bold text-white">Slick Grind Barber</span>
 				</a>
-				<p class="text-sm text-gray-300">Visit our shop and rediscover your confidence.</p>
-				<div class="flex items-center gap-3">
+				<p class="text-sm mt-2 text-gray-300">Visit our shop and rediscover your confidence.</p>
+				<div class="flex items-center space-y-4 gap-3">
 					<img src="{{ url_for('static', filename='icons/phone.png') }}" alt="phone" class="h-6 w-4">
                     <div class="flex flex-col leading-tight">
                         <a href="tel:+1234567890" class="text-sm text-gray-300 hover:text-white">+63-909-555-3904</a>
                         <a href="tel:+1234567890" class="text-sm text-gray-300 hover:text-white">+63-907-555-7690</a>
                     </div>
 				</div>
-				<div class="flex items-center gap-3">
+				<div class="flex items-center space-y-4 gap-3">
 					<img src="{{ url_for('static', filename='icons/gmail-logo.png') }}" alt="email" class="h-5 w-5">
 					<a href="mailto:info@barbershop.example" class="text-sm text-gray-300 hover:text-white">info@barbershop.example</a>
 				</div>
 			</div>
 
 			<!-- Services -->
-			<div>
+			<div class="flex flex-col items-center text-center">
 				<h3 class="text-white font-semibold mb-3">Services</h3>
 				<ul class="space-y-2 text-sm text-gray-300">
 					<li><a href="#services" class="hover:text-white">Home Service</a></li>
@@ -45,7 +45,7 @@
 			</div>
 
 			<!-- Gallery / Links -->
-			<div>
+			<div class="flex flex-col items-center text-center">
 				<h3 class="text-white font-semibold mb-3">Explore</h3>
 				<ul class="space-y-2 text-sm text-gray-300">
 					<li><a href="/gallery" class="hover:text-white">Gallery</a></li>
@@ -58,7 +58,7 @@
 			</div>
 
 			<!-- Social / Hours -->
-			<div>
+			<div class="flex flex-col items-center text-center">
 				<h3 class="text-white font-semibold mb-3">Connect</h3>
 				<div class="flex items-center gap-3 mb-4">
 					<a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
@@ -78,7 +78,7 @@
 		<div class="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 			{# Use current_year if passed into template, else try Flask config YEAR, else use Jinja now() to compute current year #}
 			<p class="text-sm text-gray-400">© {{ current_year if current_year is defined else (config.get('YEAR') if config is defined and config and config.get('YEAR') else currecnt_year) }} BarberShop. All rights reserved.</p>
-			<div class="text-sm text-gray-400">Designed with care · <a href="/privacy" class="hover:text-white">Privacy</a> · <a href="/terms" class="hover:text-white">Terms</a></div>
+			<div class="text-sm text-gray-400">Designed with care - MDO · <a href="/privacy" class="hover:text-white">Privacy</a> · <a href="/terms" class="hover:text-white">Terms</a></div>
 		</div>
 	</div>
 </footer>
