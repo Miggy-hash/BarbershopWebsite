@@ -9,3 +9,7 @@ def HOME():
 @routes_bp.route('/login')
 def LOGIN():
     return render_template('login.html')
+
+@routes_bp.route('/barber')
+def BARBER():
+    return render_template('barber.html')
