@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Receipt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Faustina:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100 font-montserrat">
+
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-4 font-faustina">Appointment Receipt</h1>
+
+        <div class="border-t border-b border-gray-300 py-4 mb-4">
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Full Name:</span>
+                <span id="fullName">John Doe</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Cellphone Number:</span>
+                <span id="cellNumber">+63 9123456789</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Email Address:</span>
+                <span id="emailAddress">john@example.com</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Service:</span>
+                <span id="serviceType">Beard Service</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-semibold">Barber:</span>
+                <span id="barberName">Emel Calomos</span>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <span class="text-sm text-gray-500">Thank you for booking your appointment with us!</span>
+        </div>
+
+        <img src="{{ url_for('static', filename='images/Slick.jpg') }}" alt="Slick Grind Barber logo" class="w-17 h-12 mx-auto mt-1 rounded-[2px]" />
+    </div>
+
+</body>
+</html>

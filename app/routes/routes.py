@@ -17,3 +17,7 @@ def BARBER():
 @routes_bp.route('/services')
 def SERVICES():
     return render_template('services.html')
+
+@routes_bp.route('/receipt')
+def RECEIPT():
+    return render_template('receipt.html')

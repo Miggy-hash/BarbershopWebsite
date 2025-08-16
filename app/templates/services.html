@@ -21,67 +21,93 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"></div>
 
-    <!-- Beard Service -->
-    <div class="relative w-[350px] h-[130px] bg-white border-black border-[6px] p-4 rounded-[15px] flex items-center">
-      <img src="{{ url_for('static', filename ='icons/beard.png') }}" alt="Beard Service" 
-           class="w-[75px] h-[75px] object-contain">
-      <div class="w-[2px] h-full bg-black mx-4"></div>
-      <div class="flex flex-col leading-tight">
-        <span class="text-xl font-faustina font-bold">Beard Service</span>
-        <span class="text-sm font-faustina text-gray-500">Transform your look with our expert beard care service.</span>
-        <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00</span>
-      </div>
-    </div>
+              <!-- Beard Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Beard Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Beard Service</span>
+                </div>
+              </div>
 
 
-    <!-- Men’s Haircut -->
-    <div class="relative w-[350px] h-[130px] bg-white border-black border-[6px] p-4 rounded-[15px] flex items-center">
-      <img src="{{ url_for('static', filename ='icons/erazor.png') }}" alt="Men's Haircut" 
-           class="w-[75px] h-[75px] object-contain">
-      <div class="w-[2px] h-full bg-black mx-4"></div>
-      <div class="flex flex-col leading-tight">
-        <span class="text-xl font-faustina font-bold">Men's Haircut</span>
-        <span class="text-sm font-faustina text-gray-500">Upgrade your look with a haircut designed for your lifestyle.</span>
-        <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00</span>
-      </div>
-    </div>
 
-    <!-- Home Service -->
-    <div class="relative w-[350px] h-[130px] bg-white border-black border-[6px] p-4 rounded-[15px] flex items-center">
-      <img src="{{ url_for('static', filename ='icons/home.png') }}" alt="Home Service" 
-           class="w-[65px] h-[65px] object-contain">
-      <div class="w-[2px] h-full bg-black ml-7 mx-4"></div>
-      <div class="flex flex-col leading-tight">
-        <span class="text-xl font-faustina font-bold">Home Service</span>
-        <span class="text-sm font-faustina text-gray-500">Enjoy barber services from the comfort of your home.</span>
-        <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00</span>
-      </div>
-    </div>
+              <!-- Mens' Haircut -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Men's Haircut</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Men's Haircut</span>
+                </div>
+              </div>
 
-    <!-- Full Service -->
-    <div class="relative w-[350px] h-[130px] bg-white border-black border-[6px] p-4 rounded-[15px] flex items-center">
-      <img src="{{ url_for('static', filename ='icons/chair.png') }}" alt="Full Service" 
-           class="w-[75px] h-[75px] object-contain">
-      <div class="w-[2px] h-full bg-black mx-4"></div>
-      <div class="flex flex-col leading-tight">
-        <span class="text-xl font-faustina font-bold">Full Service</span>
-        <span class="text-sm font-faustina text-gray-500">Complete grooming experience for modern gentlemen.</span>
-        <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00</span>
-      </div>
-    </div>
+              <!-- Home Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/home.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Home Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Home Service</span>
+                </div>
+              </div>
 
-    <!-- Full Shave -->
-    <div class="relative w-[350px] h-[130px] bg-white border-black border-[6px] p-4 rounded-[15px] flex items-center">
-      <img src="{{ url_for('static', filename ='icons/razor.png') }}" alt="Full Shave" 
-           class="w-[75px] h-[75px] object-contain">
-      <div class="w-[2px] h-full bg-black mx-4"></div>
-      <div class="flex flex-col leading-tight">
-        <span class="text-xl font-faustina font-bold">Full Shave</span>
-        <span class="text-sm font-faustina text-gray-500">Classic clean shave with professional precision.</span>
-        <span class="text-lg font-faustina font-semibold mt-2">₱ 250.00</span>
-      </div>
-    </div>
-</div>
+              <!-- Full Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Full Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Full Service</span>
+                </div>
+              </div>
+
+              <!-- Full Shave -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Full Shave</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Full Shave</span>
+                </div>
+              </div>
+              </div>
 
 
     <!-- Appointment Section (Right) -->
