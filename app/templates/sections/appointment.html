@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="bg-gray-100">
 
@@ -17,20 +17,30 @@
     <!-- Main content -->
 <div class="w-full h-auto flex flex-col md:flex-row justify-center p-6 gap-8">
 
-   <!-- Calendar Section -->
-    <div class="bg-white border rounded-[8px] border-black md:w-[533px]">
-        <!-- Month Name -->
-        <div class="flex items-center justify-between px-4 py-2 border-b border-black">
-            <button id="prevMonth" class="text-xl">&lt;</button>
-            <div id="monthName" class="text-center text-xl font-bold"></div>
-            <button id="nextMonth" class="text-xl">&gt;</button>
-        </div>
-        
-        <div id="calendar" class="grid grid-cols-7"></div>
+<!-- Calendar Section -->
+<div class="bg-white border rounded-xl border-gray-300 shadow-lg p-4 md:w-[600px] w-full">
+    <!-- Month Name & Navigation -->
+    <div class="flex items-center justify-between mb-2">
+        <button id="prevMonth" class="text-xl font-bold">&lt;</button>
+        <div id="monthName" class="text-center text-lg font-bold"></div>
+        <button id="nextMonth" class="text-xl font-bold">&gt;</button>
     </div>
+    <!-- Day Names -->
+    <div class="grid grid-cols-7 text-center font-semibold text-gray-700 mb-2">
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+        <div>Sun</div>
+    </div>
+    <!-- Calendar Days -->
+    <div id="calendar" class="grid grid-cols-7 gap-2"></div>
+</div>
 
         <!-- Appointment Section -->
-    <div class="bg-black text-white md:w-[450px] md:h-[400px] p-6 rounded-xl shadow-md border-2 border-white">
+        <div class="bg-black text-white md:w-[450px] md:h-[400px] p-6 rounded-xl shadow-md border-2 border-white">
             <h2 class="text-lg font-semibold mb-4">Select appointment time:</h2>
             <h3 class="text-sm font-normal mb-4">Wednesday - August 14, 2025</h3>
             <div class="grid grid-cols-2 gap-3">
@@ -54,79 +64,7 @@
         </div>
     </div>
 
-    <script>
-        const calendar = document.getElementById("calendar");
-        calendar.innerHTML = "";
-
-        const today = new Date(2025, 7, 14); // Simulating August 14, 2025 as per your request
-        const month = today.getMonth();
-        const year = today.getFullYear();
-        const currentDay = today.getDate();
-
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0=Sun, 1=Mon, ...
-        const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-        // Month Name
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        document.getElementById("monthName").textContent = `${monthNames[month]} ${year}`;
-
-        // Day names
-        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        dayNames.forEach(d => {
-            const dayEl = document.createElement('div');
-            dayEl.textContent = d;
-            dayEl.className = "text-center text-sm py-2 border-r border-b border-black last:border-r-0";
-            calendar.appendChild(dayEl);
-        });
-
-        // Blank days for previous month
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            const dateEl = document.createElement('div');
-            dateEl.className = "w-full aspect-square relative border-b border-r border-gray-500 text-gray-500 text-xs last:border-r-0";
-            dateEl.textContent = daysInPrevMonth - firstDayOfMonth + i + 1;
-            calendar.appendChild(dateEl);
-        }
-
-        // Dates for current month
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dateEl = document.createElement('div');
-            dateEl.className = "w-full aspect-square relative cursor-pointer hover:bg-gray-100 border-[1px] border-black last:border-r-0";
-
-            const numberEl = document.createElement('span');
-            numberEl.textContent = i;
-            numberEl.className = "absolute top-1 left-2 text-sm font-normal";
-
-            if (i === currentDay && month === today.getMonth() && year === today.getFullYear()) {
-                dateEl.classList.add("bg-[#E6EEF8]");
-            }
-
-            dateEl.appendChild(numberEl);
-            calendar.appendChild(dateEl);
-        }
-        
-        // Fill remaining grid with next month's dates
-        const remainingDays = 35 - (firstDayOfMonth + daysInMonth); // Make it a 5x7 grid
-        for (let i = 1; i <= remainingDays; i++) {
-            const dateEl = document.createElement('div');
-            dateEl.className = "w-full aspect-square relative border-r border-b border-black last:border-r-0";
-            dateEl.textContent = i;
-            calendar.appendChild(dateEl);
-        }
-        const totalCells = firstDayOfMonth + daysInMonth;
-        const remainingCells = (totalCells % 7 === 0) ? 0 : 7 - (totalCells % 7);
-
-        for (let i = 1; i <= remainingCells; i++) {
-            const dateEl = document.createElement('div');
-            dateEl.className = "w-full aspect-square relative rounded border border-gray-200";
-            
-            const numberEl = document.createElement('span');
-            numberEl.textContent = i;
-            numberEl.className = "absolute top-1 left-1 text-sm font-normal text-gray-400";
-            
-            dateEl.appendChild(numberEl);
-            calendar.appendChild(dateEl);
-        }
+    <script src="{{ url_for('static', filename='js/calendar.js') }}">
     </script>
 
 </body>
