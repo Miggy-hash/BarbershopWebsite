@@ -13,3 +13,7 @@ def LOGIN():
 @routes_bp.route('/barber')
 def BARBER():
     return render_template('barber.html')
+
+@routes_bp.route('/services')
+def SERVICES():
+    return render_template('services.html')
