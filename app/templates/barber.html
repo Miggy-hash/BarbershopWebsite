@@ -34,9 +34,11 @@
                     <!-- Hover overlay that reveals the button -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
                                 transition duration-500 pointer-events-none font-montserrat z-10">
-                        <button class="pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg">
-                        Book Now
-                        </button>
+                        <a href="{{ url_for('routes.SERVICES') }}">
+                            <button class="pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg">
+                                Book Now
+                            </button>
+                        </a>
                     </div>
 
                     <!-- Name label -->

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link href="{{ url_for('static', filename='css/calendar.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex flex-col justify-center items-center bg-gallery">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
+<section class="w-full flex-1 flex justify-center items-center">
+<div class="w-full h-auto flex flex-col md:flex-row justify-center items-start p-6 gap-6 z-10">
+
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-[90%] max-w-[500px]">
+    <div class="flex justify-between items-center mb-4">
+        <button id="prevMonth" class="px-2 sm:px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">&lt;</button>
+        <h2 id="monthYear" class="text-lg font-semibold"></h2>
+        <button id="nextMonth" class="px-2 sm:px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">&gt;</button>
+    </div>
+    <div class="grid grid-cols-7 gap-1 text-center font-medium text-gray-700">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+    </div>
+    <div id="calendarDays" class="grid grid-cols-7 gap-2 mt-2"></div>
+</div>
+
+<div class="bg-black text-white md:w-[450px] min-h-[400px] self-start p-6 rounded-xl shadow-md border-2 border-white">
+    <h2 class="text-sm font-normal mb-4">Select appointment time:</h2>
+    <h3 id="selectedDate" class="text-xl font-semibold mb-4"></h3>
+    
+    <!-- Time Slot Buttons -->
+    <div class="grid grid-cols-2 gap-3">
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="09:00">
+            9:00 AM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="10:00">
+           10:00 AM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="11:00">
+            11:00 AM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="01:00">
+           1:00 PM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="02:00">
+           2:00 PM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="03:00">
+           3:00 PM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="04:00">
+            4:00 PM
+        </button>
+        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="05:00">
+            5:00 PM
+        </button>
+    </div>
+
+    <!-- Proceed button OUTSIDE the grid -->
+     <div class="flex justify-center">
+    <a id="proceedBtn-emel"
+        href="{{ url_for('routes.LOGIN') }}"
+        class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
+        Proceed to Login
+    </a>
+    </div>
+
+    <!-- Notes -->
+    <h4 class="font-light text-[10px] mt-2">•Please provide your FULL NAME.</h4>
+    <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
+    <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
+    <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
+</div>
+
+
+
+     <!-- Appointment Section (Right) -->
+    <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
+        <h2 class="text-lg font-normal mb-4">Selected appointment time:</h2>
+        
+
+                <div class="flex justify-center">
+                <div class="relative h-[200px] w-[180px] bg-black rounded-[25px] border-4 border-white">
+                    <!-- Image (blurs on hover) -->
+                    <img
+                        src="{{ url_for('static', filename='images/emel.jpg') }}"
+                        alt="Gallery Image"
+                        class="h-full w-full object-cover rounded-[20px] transition duration-500 group-hover:blur-sm"
+                    />
+                    <!-- Name label -->
+                        <div class="absolute bottom-[10px] left-[10px] text-white text-lg font-normal"
+                            style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                            Emel Calomos
+                    </div>
+                </div>
+                </div>
+
+                                      <!-- Mens' Haircut -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden mt-2 mb-2">
+                <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 ">
+                <div class="w-[2px] h-full bg-black mx-4 "></div>
+                <div class="relative flex flex-col leading-tight ">
+                  <span class="text-xl font-faustina text-black font-bold mb-[-6px]">Men's Haircut</span>
+                  <span class="text-base font-faustina text-black font-normal">₱ 250.00</span>
+                </div>
+              </div>
+
+              <h3 id="selectedDateAppointment" class="text-3xl text-center font-faustina font-semibold mb-4"> Wednesday <br> August 14, 2025</h3>
+
+        
+        <h4 class="font-light text-[10px] mt-5">•Please provide your FULL NAME.</h4>
+        <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
+        <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
+        <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
+    </div>
+</div>
+
+           
+
+</section>
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+</body>
+
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+     .font-lato {
+        font-family: "Lato", serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>
+</html>

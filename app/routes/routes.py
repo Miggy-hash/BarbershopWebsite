@@ -14,6 +14,10 @@ def LOGIN():
 def BARBER():
     return render_template('barber.html')
 
+@routes_bp.route('/calendar')
+def CALENDAR():
+    return render_template('calendar.html')
+
 @routes_bp.route('/services')
 def SERVICES():
     return render_template('services.html')

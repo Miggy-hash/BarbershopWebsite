@@ -1,109 +1,115 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const calendarEl = document.getElementById("calendar");
-    const monthNameEl = document.getElementById("monthName");
-    const prevBtn = document.getElementById("prevMonth");
-    const nextBtn = document.getElementById("nextMonth");
-    const selectedDateEl = document.getElementById("selectedDate");
+const calendarDays = document.getElementById('calendarDays');
+const monthYear = document.getElementById('monthYear');
+const prevMonthBtn = document.getElementById('prevMonth');
+const nextMonthBtn = document.getElementById('nextMonth');
 
-    let today = new Date(); // Current date
-    let displayedMonth = today.getMonth();
-    let displayedYear = today.getFullYear();
-    let selectedDay = today.getDate(); // Default selected day is today
+let today = new Date();
+updateHeadings(today);
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+let selectedDateAppointment = null;
+let selectedDate = null;
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+function updateHeadings(date) {
+    const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    const timeslotHeading = document.getElementById('selectedDate');
+    const appointmentHeading = document.getElementById('selectedDateAppointment');
 
-    function renderCalendar(month, year) {
-        calendarEl.innerHTML = "";
+    if (timeslotHeading) {
+        timeslotHeading.textContent = date.toLocaleDateString('en-US', options);
+    }
+    if (appointmentHeading) {
+        appointmentHeading.textContent = date.toLocaleDateString('en-US', options);
+    }
+}
 
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
 
-        // Adjust so week starts on Monday
-        const startDay = firstDay === 0 ? 6 : firstDay - 1;
+function renderCalendar(month, year) {
+    calendarDays.innerHTML = '';
 
-        // Update month name
-        monthNameEl.textContent = `${monthNames[month]} ${year}`;
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
+    monthYear.textContent = monthName + ' ' + year;
 
-        // Previous month's trailing days
-        const prevDays = new Date(year, month, 0).getDate();
-        for (let i = startDay; i > 0; i--) {
-            const dayEl = document.createElement("div");
-            dayEl.textContent = prevDays - i + 1;
-            dayEl.className = "text-gray-400 text-center cursor-pointer rounded-md aspect-square flex items-center justify-center";
-            calendarEl.appendChild(dayEl);
-        }
-
-        // Current month days
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayEl = document.createElement("div");
-            dayEl.textContent = i;
-            dayEl.className = "text-center cursor-pointer rounded-md hover:bg-blue-100 transition duration-150 aspect-square flex items-center justify-center";
-
-            // Highlight today
-            if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                dayEl.classList.add("bg-blue-400", "text-white", "font-bold");
-            }
-
-            // Highlight selected day
-            if (i === selectedDay && month === displayedMonth && year === displayedYear) {
-                dayEl.classList.add("bg-blue-200");
-            }
-
-            // Click event to select day
-            dayEl.addEventListener("click", () => {
-                selectedDay = i;
-
-                // Update the display in appointment section
-                const clickedDate = new Date(year, month, i);
-                const dayName = dayNames[clickedDate.getDay()];
-                selectedDateEl.textContent = `${dayName} - ${monthNames[month]} ${i}, ${year}`;
-
-                // Remove highlight from other days
-                calendarEl.querySelectorAll("div").forEach(d => d.classList.remove("bg-blue-200"));
-
-                // Highlight clicked day
-                dayEl.classList.add("bg-blue-200");
-            });
-
-            calendarEl.appendChild(dayEl);
-        }
-
-        // Fill remaining grid for consistent layout
-        const totalCells = startDay + daysInMonth;
-        const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-        for (let i = 0; i < remaining; i++) {
-            const dayEl = document.createElement("div");
-            dayEl.textContent = "";
-            calendarEl.appendChild(dayEl);
-        }
+    // Empty boxes for previous month
+    for (let i = 0; i < firstDay; i++) {
+        const emptyBox = document.createElement('div');
+        emptyBox.classList.add('day', 'invisible');
+        calendarDays.appendChild(emptyBox);
     }
 
-    // Navigation buttons
-    prevBtn.addEventListener("click", () => {
-        displayedMonth--;
-        if (displayedMonth < 0) {
-            displayedMonth = 11;
-            displayedYear--;
+    // Days of the month
+    for (let day = 1; day <= lastDate; day++) {
+        const dayBox = document.createElement('div');
+        dayBox.textContent = day;
+        dayBox.classList.add('day', 'text-center');
+
+        // Highlight today
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayBox.classList.add('today');
         }
-        renderCalendar(displayedMonth, displayedYear);
-    });
 
-    nextBtn.addEventListener("click", () => {
-        displayedMonth++;
-        if (displayedMonth > 11) {
-            displayedMonth = 0;
-            displayedYear++;
-        }
-        renderCalendar(displayedMonth, displayedYear);
-    });
+        // Click listener
+        dayBox.addEventListener('click', () => {
+            document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+            dayBox.classList.add('selected');
 
-    // Initial render
-    renderCalendar(displayedMonth, displayedYear);
+            selectedDate = new Date(year, month, day);
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
 
-    // Initialize the selected date display
-    const todayName = dayNames[today.getDay()];
-    selectedDateEl.textContent = `${todayName} - ${monthNames[displayedMonth]} ${today.getDate()}, ${displayedYear}`;
+            const timeslotHeading = document.getElementById('selectedDate');
+            const appointmentHeading = document.getElementById('selectedDateAppointment');
+
+            if (timeslotHeading) {
+                timeslotHeading.textContent = selectedDate.toLocaleDateString('en-US', options);
+            }
+            if (appointmentHeading) {
+                appointmentHeading.textContent = selectedDate.toLocaleDateString('en-US', options);
+            }
+
+            console.log('Selected date:', selectedDate);
+        });
+
+        calendarDays.appendChild(dayBox);
+    }
+}
+
+// Attach month navigation listeners **outside the function**
+prevMonthBtn.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
+    renderCalendar(currentMonth, currentYear);
 });
 
+nextMonthBtn.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    renderCalendar(currentMonth, currentYear);
+});
+
+// Initial render
+renderCalendar(currentMonth, currentYear);
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const appointmentBtns = document.querySelectorAll('.appointment-btn');
+    const proceedBtn = document.getElementById('proceedBtn-emel');
+
+    appointmentBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            appointmentBtns.forEach(b => b.classList.remove('date'));
+            btn.classList.add('date');
+            proceedBtn.classList.remove('hidden');
+
+            const selectedTime = btn.dataset.time;
+            console.log('Selected time:', selectedTime);
+        });
+    });
+});
