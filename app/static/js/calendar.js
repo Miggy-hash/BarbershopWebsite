@@ -1,4 +1,3 @@
-console.log("✅ appointment.js is loaded!");
 document.addEventListener("DOMContentLoaded", function() {
     const calendarEl = document.getElementById("calendar");
     const monthNameEl = document.getElementById("monthName");

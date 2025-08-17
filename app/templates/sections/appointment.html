@@ -8,112 +8,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="bg-gray-100">
-
+<div id="appointmentSection">
     <!-- Header -->
-    <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
-        <h1 class="font-playfair font-semibold text-[35px] text-black">APPOINTMENT</h1>
+    <div id="appointmentHeader"></div>
+
+    <!-- Appointment & Calendar Wrapper -->
+    <div id="appointmentWrapper" class="w-full h-auto flex flex-col md:flex-row justify-center p-6 gap-8">
+        <!-- Appointment & Calendar will be dynamically loaded here -->
     </div>
 
-    <!-- Main content -->
-<div class="w-full h-auto flex flex-col md:flex-row justify-center p-6 gap-8">
-
-<!-- Calendar Section -->
-<div class="bg-white border rounded-xl border-gray-300 shadow-lg p-4 md:w-[600px] w-full">
-    <!-- Month Name & Navigation -->
-    <div class="flex items-center justify-between mb-2">
-        <button id="prevMonth" class="text-xl font-bold">&lt;</button>
-        <div id="monthName" class="text-center text-lg font-bold"></div>
-        <button id="nextMonth" class="text-xl font-bold">&gt;</button>
-    </div>
-    <!-- Day Names -->
-    <div class="grid grid-cols-7 text-center font-semibold text-gray-700 mb-2">
-        <div>Mon</div>
-        <div>Tue</div>
-        <div>Wed</div>
-        <div>Thu</div>
-        <div>Fri</div>
-        <div>Sat</div>
-        <div>Sun</div>
-    </div>
-    <!-- Calendar Days -->
-    <div id="calendar" class="grid grid-cols-7 gap-2"></div>
+    <script src="{{ url_for('static', filename='js/appointment.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
 </div>
 
-<div class="bg-black text-white md:w-[450px] md:h-[400px] p-6 rounded-xl shadow-md border-2 border-white">
-    <h2 class="text-lg font-semibold mb-4">Select appointment time:</h2>
-    <h3 id="selectedDate" class="text-sm font-normal mb-4">Wednesday - August 14, 2025</h3>
-    
-    <!-- Time Slot Buttons -->
-    <div class="grid grid-cols-2 gap-3">
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="09:00">
-            <span class="w-3 h-3 rounded-full bg-red-500"></span>9:00 AM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="10:00">
-            <span class="w-3 h-3 rounded-full bg-sky-500"></span>10:00 AM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="11:00">
-            <span class="w-3 h-3 rounded-full bg-orange-500"></span>11:00 AM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="01:00">
-            <span class="w-3 h-3 rounded-full bg-blue-600"></span>1:00 PM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="02:00">
-            <span class="w-3 h-3 rounded-full bg-yellow-600"></span>2:00 PM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="03:00">
-            <span class="w-3 h-3 rounded-full bg-purple-600"></span>3:00 PM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="04:00">
-            <span class="w-3 h-3 rounded-full bg-green-500"></span>4:00 PM
-        </button>
-        <button class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="05:00">
-            <span class="w-3 h-3 rounded-full bg-pink-500"></span>5:00 PM
-        </button>
-    </div>
-
-    <!-- Proceed button OUTSIDE the grid -->
-    <a id="proceedBtn"
-        data-base-href="{{ url_for('routes.LOGIN') }}"
-        href="{{ url_for('routes.LOGIN') }}"
-        class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
-        Proceed to Login
-    </a>
-
-    <!-- Notes -->
-    <h4 class="font-light text-[10px] mt-2">•Please provide your FULL NAME.</h4>
-    <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
-    <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
-    <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
-</div>
-
-
-    <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const appointmentButtons = document.querySelectorAll(".appointment-btn");
-    const proceedBtn = document.getElementById("proceedBtn");
-
-    appointmentButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            console.log("Button clicked:", button.dataset.time);
-
-            // highlight only the clicked button
-            appointmentButtons.forEach(btn => btn.classList.remove("bg-green-500", "text-white"));
-            button.classList.add("bg-green-500", "text-white");
-
-            // show the proceed button (only once, stays visible)
-        proceedBtn.classList.remove("hidden");
-        proceedBtn.style.display = "inline-block";
-
-        console.log("Proceed button is now visible ✅");
-
-
-            // update proceed button link with selected time
-            const baseHref = proceedBtn.dataset.baseHref || "#";
-            proceedBtn.href = `${baseHref}?time=${encodeURIComponent(button.dataset.time)}`;
-        });
-    });
-});
-    </script>
-<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
 </body>
 </html>
