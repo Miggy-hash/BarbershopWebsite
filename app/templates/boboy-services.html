@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+
+<body class="min-h-screen flex flex-col justify-center items-center bg-gallery">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
+<section class="w-full flex-1 flex justify-center items-center">
+
+            <div class="w-full h-auto flex flex-col md:flex-row justify-center items-start p-6 gap-6 z-10">
+
+            <!-- Services -->
+            <div class="flex flex-col gap-2 bg-black p-10 rounded-xl  border-2 border-white">
+                <h2 class="text-white text-lg ml-2 font-normal">Select a service for your appointment:</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"></div>
+
+              <!-- Beard Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Beard Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Beard Service</span>
+                </div>
+              </div>
+
+
+
+              <!-- Mens' Haircut -->
+               <a href="{{ url_for('routes.BCALENDAR') }}">
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Men's Haircut</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Men's Haircut</span>
+                </div>
+              </div>
+              </a>
+
+              <!-- Home Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/home.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Home Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Home Service</span>
+                </div>
+              </div>
+
+              <!-- Full Service -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Full Service</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Full Service</span>
+                </div>
+              </div>
+
+              <!-- Full Shave -->
+              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+                <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
+                    alt="Beard Service" 
+                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
+                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
+                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
+                  <span class="text-xl font-faustina font-bold mb-[-6px]">Full Shave</span>
+                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                </div>
+                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
+                            transition-all duration-700 ease-in-out
+                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
+                  <span class="text-2xl font-faustina font-bold">Full Shave</span>
+                </div>
+              </div>
+              </div>
+
+
+    <!-- Appointment Section (Right) -->
+    <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
+        <h2 class="text-lg font-normal mb-4">Selected appointment details:</h2>
+
+              <div class="flex justify-center">
+                <div class="relative h-[200px] w-[180px] bg-black rounded-[25px] border-4 border-white">
+                    <!-- Image (blurs on hover) -->
+                    <img
+                        src="{{ url_for('static', filename='images/boboy.jpg') }}"
+                        alt="Gallery Image"
+                        class="h-full w-full object-cover rounded-[20px] transition duration-500 group-hover:blur-sm"
+                    />
+                    <!-- Name label -->
+                        <div class="absolute bottom-[10px] left-[10px] text-white text-lg font-normal"
+                            style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                            Angelo Paballa
+                    </div>
+                </div>
+                </div>
+
+
+        <h4 class="font-light text-[10px] mt-5">•Please provide your FULL NAME.</h4>
+        <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
+        <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
+        <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
+    </div>
+
+</div>
+</div>
+
+           
+
+</section>
+</body>
+
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+     .font-lato {
+        font-family: "Lato", serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>

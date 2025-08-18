@@ -41,6 +41,7 @@
 
 
               <!-- Mens' Haircut -->
+               <a href="{{ url_for('routes.ECALENDAR') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
                     alt="Beard Service" 
@@ -56,6 +57,7 @@
                   <span class="text-2xl font-faustina font-bold">Men's Haircut</span>
                 </div>
               </div>
+              </a>
 
               <!-- Home Service -->
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
@@ -112,10 +114,7 @@
 
     <!-- Appointment Section (Right) -->
     <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
-        <h2 class="text-lg font-normal mb-4">Selected appointment time:</h2>
-        <h3 class="text-3xl text-center font-faustina font-semibold mb-4">
-            Wednesday <br> August 14, 2025
-        </h3>
+        <h2 class="text-lg font-normal mb-4">Selected appointment details:</h2>
 
               <div class="flex justify-center">
                 <div class="relative h-[200px] w-[180px] bg-black rounded-[25px] border-4 border-white">

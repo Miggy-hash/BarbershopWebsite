@@ -34,7 +34,7 @@
                     <!-- Hover overlay that reveals the button -->
                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
                                 transition duration-500 pointer-events-none font-montserrat z-10">
-                        <a href="{{ url_for('routes.SERVICES') }}">
+                        <a href="{{ url_for('routes.ESERVICES') }}">
                             <button class="pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg">
                                 Book Now
                             </button>
@@ -58,9 +58,11 @@
 
                         <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
                             transition duration-500 pointer-events-none z-10 font-montserrat">
+                            <a href="{{ url_for('routes.BSERVICES') }}">
                             <button class="pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg">
                             Book Now
                             </button>
+                            </a>
                         </div>
                         
                     <div class="absolute bottom-[20px] left-[20px] text-white text-2xl font-semibold transition-all duration-500 ease-in-out whitespace-nowrap
@@ -74,27 +76,9 @@
 
     <!-- Appointment Section (Right) -->
     <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
-        <h2 class="text-lg font-normal mb-4">Selected appointment time:</h2>
-        <h3 class="text-3xl text-center font-faustina font-semibold mb-4">
-            Wednesday <br> August 14, 2025
-        </h3>
-        <div class="w-full flex justify-center">
-            <button class="border border-white py-2 px-4 rounded flex items-center justify-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-red-400"></span>9:00 AM
-            </button>
-        </div>
+        <h2 class="text-lg font-normal mb-4">Selected appointment details:</h2>
+ 
 
-                      <!-- Mens' Haircut -->
-              <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
-                <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
-                    alt="Beard Service" 
-                    class="w-[45px] h-[45px] object-contain ml-3 ">
-                <div class="w-[2px] h-full bg-black mx-4 "></div>
-                <div class="relative flex flex-col leading-tight ">
-                  <span class="text-xl font-faustina text-black font-bold mb-[-6px]">Men's Haircut</span>
-                  <span class="text-base font-faustina text-black font-normal">₱ 250.00</span>
-                </div>
-              </div>
 
         <h4 class="font-light text-[10px] mt-5">•Please provide your FULL NAME.</h4>
         <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
