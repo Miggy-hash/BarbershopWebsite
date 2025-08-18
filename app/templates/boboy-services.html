@@ -22,6 +22,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"></div>
 
               <!-- Beard Service -->
+               <a href="{{ url_for('routes.select_service', service_name='beard') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
                     alt="Beard Service" 
@@ -37,11 +38,12 @@
                   <span class="text-2xl font-faustina font-bold">Beard Service</span>
                 </div>
               </div>
+              </a>
 
 
 
               <!-- Mens' Haircut -->
-               <a href="{{ url_for('routes.BCALENDAR') }}">
+               <a href="{{ url_for('routes.select_service', service_name='haircut') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
                     alt="Beard Service" 
@@ -60,6 +62,7 @@
               </a>
 
               <!-- Home Service -->
+               <a href="{{ url_for('routes.select_service', service_name='home') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/home.png') }}" 
                     alt="Beard Service" 
@@ -75,8 +78,10 @@
                   <span class="text-2xl font-faustina font-bold">Home Service</span>
                 </div>
               </div>
+              </a>
 
               <!-- Full Service -->
+               <a href="{{ url_for('routes.select_service', service_name='full') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
                     alt="Beard Service" 
@@ -92,8 +97,10 @@
                   <span class="text-2xl font-faustina font-bold">Full Service</span>
                 </div>
               </div>
+              </a>
 
               <!-- Full Shave -->
+               <a href="{{ url_for('routes.select_service', service_name='shave') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
                     alt="Beard Service" 
@@ -110,6 +117,7 @@
                 </div>
               </div>
               </div>
+            </a>
 
 
     <!-- Appointment Section (Right) -->

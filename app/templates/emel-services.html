@@ -22,6 +22,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"></div>
 
               <!-- Beard Service -->
+               <a href="{{ url_for('routes.select_service', service_name='beard') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
                     alt="Beard Service" 
@@ -29,7 +30,7 @@
                 <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
                 <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
                   <span class="text-xl font-faustina font-bold mb-[-6px]">Beard Service</span>
-                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                  <span class="text-base font-faustina font-normal">₱ 250</span>
                 </div>
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
@@ -37,11 +38,12 @@
                   <span class="text-2xl font-faustina font-bold">Beard Service</span>
                 </div>
               </div>
+              </a>
 
 
 
               <!-- Mens' Haircut -->
-               <a href="{{ url_for('routes.ECALENDAR') }}">
+               <a href="{{ url_for('routes.select_service', service_name='haircut') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
                     alt="Beard Service" 
@@ -49,7 +51,7 @@
                 <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
                 <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
                   <span class="text-xl font-faustina font-bold mb-[-6px]">Men's Haircut</span>
-                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                  <span class="text-base font-faustina font-normal">₱ 250</span>
                 </div>
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
@@ -60,6 +62,7 @@
               </a>
 
               <!-- Home Service -->
+               <a href="{{ url_for('routes.select_service', service_name='home') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/home.png') }}" 
                     alt="Beard Service" 
@@ -67,7 +70,7 @@
                 <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
                 <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
                   <span class="text-xl font-faustina font-bold mb-[-6px]">Home Service</span>
-                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                  <span class="text-base font-faustina font-normal">₱ 250</span>
                 </div>
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
@@ -75,8 +78,10 @@
                   <span class="text-2xl font-faustina font-bold">Home Service</span>
                 </div>
               </div>
+              </a>
 
               <!-- Full Service -->
+               <a href="{{ url_for('routes.select_service', service_name='full') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
                     alt="Beard Service" 
@@ -84,7 +89,7 @@
                 <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
                 <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
                   <span class="text-xl font-faustina font-bold mb-[-6px]">Full Service</span>
-                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                  <span class="text-base font-faustina font-normal">₱ 250</span>
                 </div>
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
@@ -92,8 +97,10 @@
                   <span class="text-2xl font-faustina font-bold">Full Service</span>
                 </div>
               </div>
+              </a>
 
               <!-- Full Shave -->
+               <a href="{{ url_for('routes.select_service', service_name='shave') }}">
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
                     alt="Beard Service" 
@@ -101,7 +108,7 @@
                 <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
                 <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
                   <span class="text-xl font-faustina font-bold mb-[-6px]">Full Shave</span>
-                  <span class="text-base font-faustina font-normal">₱ 250.00</span>
+                  <span class="text-base font-faustina font-normal">₱ 250</span>
                 </div>
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
@@ -110,6 +117,7 @@
                 </div>
               </div>
               </div>
+              </a>
 
 
     <!-- Appointment Section (Right) -->
