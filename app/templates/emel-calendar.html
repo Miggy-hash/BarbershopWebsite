@@ -84,7 +84,7 @@
 
      <!-- Appointment Section (Right) -->
     <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
-        <h2 class="text-lg font-normal mb-4">Selected appointment time:</h2>
+        <h2 class="text-lg font-normal mb-4">Schedule Information:</h2>
         
 
                 <div class="flex justify-center">
@@ -129,7 +129,18 @@
            
 
 </section>
-<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/Ecalendar.js') }}"></script>
+<script>
+    document.getElementById("proceedBtn-emel").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    const date = document.getElementById("selectedDateAppointment").innerText;
+    const time = document.getElementById("timeSlot").innerText;
+
+    // Store into session via GET query
+    window.location.href = `/receipt?date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`;
+});
+</script>
 
 </body>
 

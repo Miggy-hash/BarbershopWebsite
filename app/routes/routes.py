@@ -44,7 +44,18 @@ def BSERVICES():
 
 @routes_bp.route('/receipt')
 def RECEIPT():
-    return render_template('receipt.html')
+    date = request.args.get("date")
+    time = request.args.get("time")
+
+    return render_template('receipt.html',
+                           full_name=session["user"]["full_name"],
+                           cellphone=session["user"]["cellphone"],
+                           email=session["user"]["email"],
+                           service=session["selected_service"]["name"],
+                           barber=session["selected_barber"],
+                           date=date,
+                           time=time,
+                           )
 
 @routes_bp.route("/login", methods=["POST", "GET"])
 def LOGIN():
@@ -63,9 +74,10 @@ def LOGIN():
     # Redirect to barber page
     return redirect(url_for('routes.BARBER'))
 
-@routes_bp.route("/select_service/<service_name>")
-def select_service(service_name):
 
+# routing select services
+@routes_bp.route("/select_service/<barber>/<service_name>")
+def select_service(barber, service_name):
     services = {
         "beard": {"name": "Beard Service", "price": 250, "icon": "icons/beard.png"},
         "haircut": {"name": "Men's Haircut", "price": 250, "icon": "icons/erazor.png"},
@@ -76,5 +88,12 @@ def select_service(service_name):
 
     if service_name in services:
         session["selected_service"] = services[service_name]
+        session["selected_barber"] = barber  # keep track of which barber
 
-    return redirect(url_for("routes.ECALENDAR"))
+    # Decide which calendar to redirect to
+    if barber == "Emel Calomos":
+        return redirect(url_for("routes.ECALENDAR"))
+    elif barber == "Angelo Paballa":
+        return redirect(url_for("routes.BCALENDAR"))
+    else:
+        return redirect(url_for("routes.home"))

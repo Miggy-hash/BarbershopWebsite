@@ -15,27 +15,27 @@
         <div class="border-t border-b border-gray-300 py-4 mb-4">
             <div class="flex justify-between mb-2">
                 <span class="font-semibold">Full Name:</span>
-                <span id="fullName">John Doe</span>
+                <span id="fullName">{{ full_name }}</span>
             </div>
             <div class="flex justify-between mb-2">
                 <span class="font-semibold">Cellphone Number:</span>
-                <span id="cellNumber">+63 9123456789</span>
+                <span id="cellNumber">{{ cellphone }}</span>
             </div>
             <div class="flex justify-between mb-2">
                 <span class="font-semibold">Email Address:</span>
-                <span id="emailAddress">john@example.com</span>
+                <span id="emailAddress">{{ email }}</span>
             </div>
             <div class="flex justify-between mb-2">
                 <span class="font-semibold">Service:</span>
-                <span id="serviceType">Beard Service</span>
+                <span id="serviceType">{{ service }}</span>
             </div>
             <div class="flex justify-between mb-2">
                 <span class="font-semibold">Barber:</span>
-                <span id="barberName">Emel Calomos</span>
+                <span id="barberName">{{ barber }}</span>
             </div>
             <div class="flex flex-col items-center mb-2">
-                <span class="text-3xl font-semibold">9:00 AM</span>
-                <span id="barberName" class="text-xl font-normal">Tuesday, August 19, 2025</span>
+                <span class="text-3xl font-semibold">{{ time }}</span>
+                <span id="barberName" class="text-xl font-normal">{{ date }}5</span>
             </div>
         </div>
 
