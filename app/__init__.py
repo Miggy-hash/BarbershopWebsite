@@ -8,7 +8,10 @@ def create_app():
 
     # Import and register blueprints (routes)
     from app.routes.routes import routes_bp
+    from app.routes.admin_routes import admin_bp
+
     app.register_blueprint(routes_bp)
+    app.register_blueprint(admin_bp)
 
     @app.context_processor
     def inject_common():
