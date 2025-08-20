@@ -6,25 +6,34 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin" )
 VALID_USERS = {"emel", "boboy"}   # usernames
 ADMIN_PASSWORD = "slick123"       # shared password
 
+
 @admin_bp.route("/login", methods=["GET", "POST"])
 def ADMINLOGIN():
     if request.method =="POST":
         username = request.form.get("admin_username")
         password = request.form.get("admin_password")
 
-        print("DEBUG username:", username)
-        print("DEBUG password:", password)
-        
+        DASHBOARD_ROUTES = {
+            "emel": "admin.Edashboard_home",
+            "boboy": "admin.Bdashboard_home"
+        }
+
         if username in VALID_USERS and password == ADMIN_PASSWORD:
-            session["admin"] = username
-            return redirect(url_for("admin.dashboard_home"))
+            session["username"] = username
+            return redirect(url_for(DASHBOARD_ROUTES[username]))
         else:
             flash("Invalid username and password", "error")
 
     return render_template("admin/adminLogin.html")
 
-@admin_bp.route("/dashboard")
-def dashboard_home():
-    if "admin" not in session:
+@admin_bp.route("/edashboard")
+def Edashboard_home():
+    if "username" not in session:
         return redirect(url_for("admin.ADMINLOGIN"))
-    return render_template("admin/dashboard_home.html", username=session["admin"])
+    return render_template("admin/emel-dashboard_home.html", username=session["username"])
+
+@admin_bp.route("/bdashboard")
+def Bdashboard_home():
+    if "username" not in session:
+        return redirect(url_for("admin.ADMINLOGIN"))
+    return render_template("admin/boboy-dashboard_home.html", username=session["username"])
