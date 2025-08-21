@@ -112,7 +112,6 @@ function renderCalendar(month, year) {
       // Hide proceed button until time is chosen
       if (proceedBtn) proceedBtn.classList.add('hidden');
 
-      console.log('Selected date:', selectedDate);
     });
 
     calendarDays.appendChild(dayBox);

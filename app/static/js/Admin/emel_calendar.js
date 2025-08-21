@@ -5,16 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("nextMonthBtn");
 
   let currentDate = new Date();
+  let selectedCell = null;
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
+
 function updateCalendar() {
   const monthYearText = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   monthYearEl.textContent = monthYearText;
   dailyDateEl.textContent = `${monthYearText}`;
+  selectedCell = null;
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -35,22 +38,55 @@ function updateCalendar() {
     prevDayDiv.className = "h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-2 rounded";
     daysContainer.appendChild(prevDayDiv);
   }
+  
+    const appointmentsPerDay = {
+      "2025-08-21": 5,
+      "2025-08-25": 2
+    };
+
 
     for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.textContent = day;
-    dayDiv.className = "h-[90px] border border-black bg-white p-2 rounded hover:bg-gray-400 cursor-pointer";
+    dayDiv.className = "h-[90px] border border-black bg-gray-200 p-2 rounded hover:bg-gray-400 hover:text-black hover:border-black cursor-pointer";
 
         if (
       day === today.getDate() &&
       month === today.getMonth() &&
       year === today.getFullYear()
     ) {
-      dayDiv.classList.add("bg-blue-300"); 
+      dayDiv.classList.add("bg-green-200", "text-black"); 
        dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
     }
 
+
+    const dateKey = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+
+    if (appointmentsPerDay[dateKey]) {
+      const badge = document.createElement("div");
+      badge.className = "appointment-badge";
+
+      const number = document.createElement("span");
+      number.textContent = appointmentsPerDay[dateKey];
+
+      const line = document.createElement("div");
+      line.className = "appointment-line";
+
+      badge.appendChild(number);
+      badge.appendChild(line);
+
+      dayDiv.classList.add("relative");
+      dayDiv.appendChild(badge);
+    }
+
       dayDiv.addEventListener("click", () => {
+         if (selectedCell) {
+            selectedCell.classList.remove("ring-4", "ring-blue-500");
+            selectedCell.setAttribute("aria-selected", "false");
+          }
+          dayDiv.classList.add("ring-4", "ring-blue-500");
+          dayDiv.setAttribute("aria-selected", "true");
+            selectedCell = dayDiv;
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
       });
 
@@ -64,7 +100,6 @@ function updateCalendar() {
     nextDayDiv.className = "h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-2 rounded";
     daysContainer.appendChild(nextDayDiv);
   }
-  
 }
 
 

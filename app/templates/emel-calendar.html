@@ -66,11 +66,20 @@
 
     <!-- Proceed button OUTSIDE the grid -->
      <div class="flex justify-center">
-    <a id="proceedBtn-emel"
-        href="{{ url_for('routes.RECEIPT') }}"
-        class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
-        Confirm Appointment
-    </a>
+        <form id="confirmForm" action="{{ url_for('routes.confirm_booking') }}" method="POST" class="flex justify-center">
+            <input type="hidden" name="full_name" value="{{ session['user']['full_name'] }}">
+            <input type="hidden" name="cellphone" value="{{ session['user']['cellphone'] }}">
+            <input type="hidden" name="email" value="{{ session['user']['email'] }}">
+            <input type="hidden" name="service" value="{{ session['selected_service']['name'] }}">
+            <input type="hidden" name="barber" value="{{ session['selected_barber'] }}">
+            <input type="hidden" name="date" id="hiddenDate" value="">
+            <input type="hidden" name="time" id="hiddenTime" value="">
+        <button id="proceedBtn-emel"
+            type="submit"
+            class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
+            Confirm Appointment
+        </button>
+        </form>
     </div>
 
     <!-- Notes -->
@@ -117,12 +126,6 @@
 
               <h3 id="selectedDateAppointment" class="text-3xl text-center font-faustina font-semibold"> Wednesday <br> August 14, 2025</h3>
               <h4 id="timeSlot" class="text-4xl text-center font-faustina font-semibold mb-4">-Select Time-</h4>
-
-        
-        <h4 class="font-light text-[10px] mt-5">•Please provide your FULL NAME.</h4>
-        <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
-        <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
-        <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
     </div>
 </div>
 
@@ -132,14 +135,19 @@
 <script src="{{ url_for('static', filename='js/Ecalendar.js') }}"></script>
 <script>
     document.getElementById("proceedBtn-emel").addEventListener("click", function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
-    const date = document.getElementById("selectedDateAppointment").innerText;
-    const time = document.getElementById("timeSlot").innerText;
+        // Grab selected values from the calendar
+        const date = document.getElementById("selectedDateAppointment").innerText;
+        const time = document.getElementById("timeSlot").innerText;
 
-    // Store into session via GET query
-    window.location.href = `/receipt?date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`;
-});
+        // Set them into hidden inputs
+        document.getElementById("hiddenDate").value = date;
+        document.getElementById("hiddenTime").value = time;
+
+        // Submit the form
+        document.getElementById("confirmForm").submit();
+    });
 </script>
 
 </body>

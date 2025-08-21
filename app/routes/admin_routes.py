@@ -37,3 +37,8 @@ def Bdashboard_home():
     if "username" not in session:
         return redirect(url_for("admin.ADMINLOGIN"))
     return render_template("admin/boboy-dashboard_home.html", username=session["username"])
+
+@admin_bp.route('/logout')
+def logout():
+    session.clear()  # removes all session data
+    return redirect(url_for('admin.ADMINLOGIN')) 

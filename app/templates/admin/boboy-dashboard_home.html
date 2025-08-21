@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boboy - Appointment Management</title>
+    <title>Boboy Dashboard - Appointment Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -52,6 +52,22 @@
         .appointment-card:hover {
             box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
+        .appointment-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 20px; 
+            color: black;
+        }
+        .appointment-line {
+            border-radius: 55px;
+            width: 4px;
+            height: 50px;
+            background-color: rgb(192, 1, 1);
+        }
     </style>
 </head>
 <body class="bg-gray-800">
@@ -62,6 +78,9 @@
                 <div>
                     <h1 class="text-3xl font-bold">Boboy's Dashboard</h1>
                 </div>
+                <a href="{{ url_for('admin.logout') }}" class="btn btn-danger">
+                    Log out
+                </a>
             </div>
         </div>
     </header>
@@ -260,7 +279,7 @@
     </div>
 
     <script
-        src="{{ url_for('static', filename='js/Admin/boboy_calendar.js') }}"></script>
+        src="{{ url_for('static', filename='js/Admin/emel_calendar.js') }}"></script>
 
 </body>
 </html>

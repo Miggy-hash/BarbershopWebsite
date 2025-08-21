@@ -3,7 +3,6 @@
     aspect-ratio: 1 / 1; 
     padding: 10px;
     border-radius: 4px;
-    transition: background-color 0.3s, transform 0.2s;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,27 +10,31 @@
 }
 
 .day:hover {
-    background-color: #c2c2c2; /* Tailwind amber-400 */
-    color: white;
+    border-width: 2px;
+    border-color: black;
+    background-color: #ffffff; 
+    color: rgb(0, 0, 0);
     cursor: pointer;
-    transform: scale(1.05);
 }
 
 .selected {
-    background-color: #171717; /* Tailwind amber-500 */
-    color: white;
+    border-width: 2px;
+    border-color: black;
+    background-color: #ffffff; 
+    color: rgb(0, 0, 0);
 }
 
 .time {
-    background-color: #ffffff; /* Tailwind amber-500 */
+    background-color: #ffffff;
     color: rgb(0, 0, 0);
 }
 
 .today {
-    border: 2px solid #1a1a1b; /* Tailwind blue-500 */
+    background-color: #000000;
+    color: rgb(255, 255, 255); 
 }
 
 .date {
-    background-color: #ffffff; /* Tailwind amber-500 */
+    background-color: #ffffff; 
     color: #000000;
 }

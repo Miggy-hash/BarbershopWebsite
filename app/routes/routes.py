@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
+from app import db
+from app.models import Appointment
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -16,11 +18,17 @@ def BARBER():
         return redirect("/login")  # kick back to login
     return render_template('barber.html')
 
-@routes_bp.route('/emel-calendar')
+@routes_bp.route('/emel-calendar', methods=['GET', 'POST'])
 def ECALENDAR():
     if "user" not in session:
         return redirect("/login")
     selected_service = session.get("selected_service")
+
+    if request.method =="POST":
+        session["selected_date"] = request.form["date"]
+        session["selected_time"] = request.form["time"]
+        return redirect(url_for("routes.confirmbooking"))
+
     return render_template("emel-calendar.html", service=selected_service)
 
 @routes_bp.route('/boboy-calendar')
@@ -44,17 +52,14 @@ def BSERVICES():
 
 @routes_bp.route('/receipt')
 def RECEIPT():
-    date = request.args.get("date")
-    time = request.args.get("time")
-
     return render_template('receipt.html',
                            full_name=session["user"]["full_name"],
                            cellphone=session["user"]["cellphone"],
                            email=session["user"]["email"],
                            service=session["selected_service"]["name"],
                            barber=session["selected_barber"],
-                           date=date,
-                           time=time,
+                           date=session.get("selected_date"),
+                           time=session.get("selected_time"),
                            )
 
 @routes_bp.route("/login", methods=["POST", "GET"])
@@ -73,7 +78,6 @@ def LOGIN():
 
     # Redirect to barber page
     return redirect(url_for('routes.BARBER'))
-
 
 # routing select services
 @routes_bp.route("/select_service/<barber>/<service_name>")
@@ -97,3 +101,29 @@ def select_service(barber, service_name):
         return redirect(url_for("routes.BCALENDAR"))
     else:
         return redirect(url_for("routes.home"))
+    
+@routes_bp.route("/confirm", methods=["POST"])
+def confirm_booking():
+        full_name = request.form["full_name"]
+        cellphone = request.form["cellphone"]
+        email = request.form["email"]
+        service = request.form["service"]
+        barber = request.form["barber"]
+        date = request.form["date"]
+        time = request.form["time"]
+
+        new_appointment = Appointment(
+            full_name=full_name,
+            cellphone=cellphone,
+            email=email,
+            service=service,
+            barber=barber,
+            date=date,
+            time=time
+        )
+
+        db.session.add(new_appointment)
+        db.session.commit()
+
+        return redirect(url_for("routes.RECEIPT"))
+    
