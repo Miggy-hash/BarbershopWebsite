@@ -2,18 +2,34 @@ const calendarDays = document.getElementById('calendarDays');
 const monthYear = document.getElementById('monthYear');
 const prevMonthBtn = document.getElementById('prevMonth');
 const nextMonthBtn = document.getElementById('nextMonth');
-const proceedBtn = document.getElementById('proceedBtn-boboy');
+const proceedBtn = document.getElementById('proceedBtn-emel');
 const timeSlotHeading = document.getElementById("timeSlot");
+const hiddenDate = document.getElementById('hiddenDate');
+const hiddenTime = document.getElementById('hiddenTime');
+
 
 let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
 let selectedDate = null;
+let selectedTime = null;
 
 // Initial setup
 renderCalendar(currentMonth, currentYear);
 updateHeadings(today);
 initTimeSlotHandlers();
+
+const todayIso = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+selectedDate = todayIso;
+hiddenDate.value = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+const todayBox = calendarDays.querySelector(`.day[data-date="${todayIso}"]`);
+if (todayBox) {
+    todayBox.classList.add('selected');
+}
+
+updateHeadings(today);
+checkIfReadyToProceed();
 
 /* ----------------- HELPERS ----------------- */
 function formatTimeLabel(t) {
@@ -28,9 +44,9 @@ function formatTimeLabel(t) {
 
 function updateTimeSlotHeading(timeText) {
   if (timeText) {
-    timeSlotHeading.textContent = timeText;   // e.g. "9:00 AM"
+    timeSlotHeading.textContent = timeText;
   } else {
-    timeSlotHeading.textContent = "-Select Time-"; // default
+    timeSlotHeading.textContent = "-Select Time-";
   }
 }
 
@@ -39,11 +55,15 @@ function updateHeadings(date) {
   const timeslotHeading = document.getElementById('selectedDate');
   const appointmentHeading = document.getElementById('selectedDateAppointment');
 
-  if (timeslotHeading) {
-    timeslotHeading.textContent = date.toLocaleDateString('en-US', options);
-  }
-  if (appointmentHeading) {
-    appointmentHeading.textContent = date.toLocaleDateString('en-US', options);
+  if (timeslotHeading) timeslotHeading.textContent = date.toLocaleDateString('en-US', options);
+  if (appointmentHeading) appointmentHeading.textContent = date.toLocaleDateString('en-US', options);
+}
+
+function checkIfReadyToProceed() {
+  if (selectedDate && selectedTime) {
+    proceedBtn.classList.remove('hidden');
+  } else {
+    proceedBtn.classList.add('hidden');
   }
 }
 
@@ -53,17 +73,17 @@ function initTimeSlotHandlers() {
 
   appointmentBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Reset all highlights
       appointmentBtns.forEach(b => b.classList.remove('time'));
-      // Highlight clicked one
       btn.classList.add('time');
 
-      // Update the <h4 id="timeSlot">
-      const timeValue = btn.dataset.time || btn.textContent.trim();
-      updateTimeSlotHeading(formatTimeLabel(timeValue));
+      selectedTime = btn.dataset.time || btn.textContent.trim();
+      const formattedTime = formatTimeLabel(selectedTime);
+      updateTimeSlotHeading(formattedTime);
 
-      // Show proceed button
-      if (proceedBtn) proceedBtn.classList.remove('hidden');
+      // Store 12-hour formatted time in hidden input
+      hiddenTime.value = formattedTime;
+
+      checkIfReadyToProceed();
     });
   });
 }
@@ -77,42 +97,44 @@ function renderCalendar(month, year) {
   const monthName = new Date(year, month).toLocaleString('default', { month: 'long' });
   monthYear.textContent = monthName + ' ' + year;
 
-  // Empty boxes for previous month
   for (let i = 0; i < firstDay; i++) {
     const emptyBox = document.createElement('div');
     emptyBox.classList.add('day', 'invisible');
     calendarDays.appendChild(emptyBox);
   }
 
-  // Days of the month
   for (let day = 1; day <= lastDate; day++) {
     const dayBox = document.createElement('div');
     dayBox.textContent = day;
     dayBox.classList.add('day', 'text-center');
 
-    // Highlight today
     if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
       dayBox.classList.add('today');
     }
 
-    // Click listener
+    const isoMonth = String(month + 1).padStart(2, '0');
+    const isoDay = String(day).padStart(2, '0');
+    const isoDate = `${year}-${isoMonth}-${isoDay}`;
+    dayBox.dataset.date = isoDate;
+
     dayBox.addEventListener('click', () => {
-      // Only the clicked day stays highlighted.
       document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
       dayBox.classList.add('selected');
 
-      // Reset selected date
-      selectedDate = new Date(year, month, day);
-      updateHeadings(selectedDate);
+      selectedDate = isoDate;
 
-      // Reset time slot selection
-      document.querySelectorAll('.appointment-btn').forEach(b => b.classList.remove('selected'));
-      updateTimeSlotHeading(null); // back to "-Select Time-"
+      // Store worded date in hidden input
+      const wordedDate = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      hiddenDate.value = wordedDate;
 
-      // Hide proceed button until time is chosen
-      if (proceedBtn) proceedBtn.classList.add('hidden');
+      updateHeadings(new Date(year, month, day));
 
-      console.log('Selected date:', selectedDate);
+      document.querySelectorAll('.appointment-btn').forEach(b => b.classList.remove('time'));
+      selectedTime = null;
+      updateTimeSlotHeading(null);
+      hiddenTime.value = '';
+
+      checkIfReadyToProceed();
     });
 
     calendarDays.appendChild(dayBox);

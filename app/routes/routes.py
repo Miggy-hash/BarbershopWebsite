@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from app import db
 from app.models import Appointment
+from datetime import datetime
+from flask import jsonify
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -24,12 +26,27 @@ def ECALENDAR():
         return redirect("/login")
     selected_service = session.get("selected_service")
 
+    date_for_check = session.get("selected_date", datetime.today().strftime("%B %d, %Y"))
+
+    appointments = Appointment.query.filter_by(barber="Emel Calomos", date=date_for_check).all()
+    booked_times = [a.time for a in appointments]
+
     if request.method =="POST":
         session["selected_date"] = request.form["date"]
         session["selected_time"] = request.form["time"]
-        return redirect(url_for("routes.confirmbooking"))
+        return redirect(url_for("routes.confirm_booking"))
 
-    return render_template("emel-calendar.html", service=selected_service)
+    return render_template("emel-calendar.html",
+                            service=selected_service,
+                            booked_times=booked_times,
+                            selected_date=date_for_check
+                            )
+
+@routes_bp.route('/emel-calendar/times/<barber>/<date>')
+def get_booked_times(barber, date):
+    appointments = Appointment.query.filter_by(barber=barber, date=date).all()
+    booked_times = [a.time for a in appointments]  # should be 24-hour format
+    return jsonify(booked_times)
 
 @routes_bp.route('/boboy-calendar')
 def BCALENDAR():
@@ -52,6 +69,8 @@ def BSERVICES():
 
 @routes_bp.route('/receipt')
 def RECEIPT():
+    stored_time = session.get("selected_time", "00:00")
+    time_12h = datetime.strptime(stored_time, "%H:%M").strftime("%I:%M %p")
     return render_template('receipt.html',
                            full_name=session["user"]["full_name"],
                            cellphone=session["user"]["cellphone"],
@@ -59,7 +78,7 @@ def RECEIPT():
                            service=session["selected_service"]["name"],
                            barber=session["selected_barber"],
                            date=session.get("selected_date"),
-                           time=session.get("selected_time"),
+                           time=time_12h
                            )
 
 @routes_bp.route("/login", methods=["POST", "GET"])
@@ -124,6 +143,9 @@ def confirm_booking():
 
         db.session.add(new_appointment)
         db.session.commit()
+        
+        session["selected_date"] = date
+        session["selected_time"] = time
 
         return redirect(url_for("routes.RECEIPT"))
     

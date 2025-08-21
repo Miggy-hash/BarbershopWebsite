@@ -66,11 +66,20 @@
 
     <!-- Proceed button OUTSIDE the grid -->
      <div class="flex justify-center">
-    <a id="proceedBtn-boboy"
-        href="{{ url_for('routes.RECEIPT') }}"
-        class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
-        Confirm Appointment
-    </a>
+        <form id="confirmForm" action="{{ url_for('routes.confirm_booking') }}" method="POST" class="flex justify-center">
+            <input type="hidden" name="full_name" value="{{ session['user']['full_name'] }}">
+            <input type="hidden" name="cellphone" value="{{ session['user']['cellphone'] }}">
+            <input type="hidden" name="email" value="{{ session['user']['email'] }}">
+            <input type="hidden" name="service" value="{{ session['selected_service']['name'] }}">
+            <input type="hidden" name="barber" value="{{ session['selected_barber'] }}">
+            <input type="hidden" name="date" id="hiddenDate" value="">
+            <input type="hidden" name="time" id="hiddenTime" value="">
+        <button id="proceedBtn-emel"
+            type="submit"
+            class="hidden mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded text-center">
+            Confirm Appointment
+        </button>
+        </form>
     </div>
 
     <!-- Notes -->
@@ -98,14 +107,14 @@
                     <!-- Name label -->
                         <div class="absolute bottom-[10px] left-[10px] text-white text-lg font-normal"
                             style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
-                            Emel Calomos
+                            Angelo Paballa
                     </div>
                 </div>
                 </div>
 
-                                      <!-- Selected Service -->
+                                      <!-- Service Selected -->
               <div class="group relative w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden mt-2 mb-2">
-                <img src="{{ url_for('static', filename=service.icon) }}" 
+                <img src="{{ url_for('static', filename=service.icon) }}"
                     alt="{{ service.name }}"
                     class="w-[45px] h-[45px] object-contain ml-3 ">
                 <div class="w-[2px] h-full bg-black mx-4 "></div>
@@ -117,12 +126,6 @@
 
               <h3 id="selectedDateAppointment" class="text-3xl text-center font-faustina font-semibold"> Wednesday <br> August 14, 2025</h3>
               <h4 id="timeSlot" class="text-4xl text-center font-faustina font-semibold mb-4">-Select Time-</h4>
-
-        
-        <h4 class="font-light text-[10px] mt-5">•Please provide your FULL NAME.</h4>
-        <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
-        <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
-        <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
     </div>
 </div>
 
@@ -131,17 +134,6 @@
 </section>
 <script src="{{ url_for('static', filename='js/Bcalendar.js') }}"></script>
 
-<script>
-    document.getElementById("proceedBtn-boboy").addEventListener("click", function (event) {
-    event.preventDefault();
-
-    const date = document.getElementById("selectedDateAppointment").innerText;
-    const time = document.getElementById("timeSlot").innerText;
-
-    // Store into session via GET query
-    window.location.href = `/receipt?date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`;
-});
-</script>
 
 </body>
 

@@ -19,7 +19,7 @@
 
 .selected {
     border-width: 2px;
-    border-color: black;
+    border-color: rgb(36, 36, 36);
     background-color: #ffffff; 
     color: rgb(0, 0, 0);
 }
