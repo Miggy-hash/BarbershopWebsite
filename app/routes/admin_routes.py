@@ -102,7 +102,67 @@ def get_emel_appointments_count(year, month):
 def Bdashboard_home():
     if "username" not in session:
         return redirect(url_for("admin.ADMINLOGIN"))
-    return render_template("admin/boboy-dashboard_home.html", username=session["username"])
+    
+    today_dt = datetime.today()
+    date_for_check = today_dt.strftime("%B %d, %Y")
+
+    appointments = Appointment.query.filter_by(barber="Angelo Paballa", date=date_for_check).all()
+    booked = {a.time: {'full_name': a.full_name, 'service': a.service} for a in appointments}
+
+    display_date = f"{today_dt.strftime('%B')} {today_dt.day}, {today_dt.year}"
+
+    time_slots = [
+        {'24h': '09:00', 'label': '9:00 AM'},
+        {'24h': '10:00', 'label': '10:00 AM'},
+        {'24h': '11:00', 'label': '11:00 AM'},
+        {'24h': '13:00', 'label': '1:00 PM'},
+        {'24h': '14:00', 'label': '2:00 PM'},
+        {'24h': '15:00', 'label': '3:00 PM'},
+        {'24h': '16:00', 'label': '4:00 PM'},
+        {'24h': '17:00', 'label': '5:00 PM'},
+    ]
+
+    return render_template("admin/boboy-dashboard_home.html", 
+                           username=session["username"],
+                           booked=booked,
+                           time_slots=time_slots,
+                           display_date=display_date)
+
+@admin_bp.route('/boboy-appointments/<date>')
+def get_boboy_appointments(date):
+    try:
+        dt = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = dt.strftime("%B %d, %Y")
+    except ValueError:
+        return jsonify({})
+    appointments = Appointment.query.filter_by(barber="Angelo Paballa", date=formatted_date).all()
+    booked = {a.time: {'full_name': a.full_name, 'service': a.service} for a in appointments}
+    return jsonify(booked)
+
+@admin_bp.route('/boboy-appointments-count/<int:year>/<int:month>')
+def get_boboy_appointments_count(year, month):
+    try:
+        # First and last day of the month
+        first_day = datetime(year, month, 1)
+        last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
+
+        # Query appointments for Emel in the month
+        appointments = Appointment.query.filter(
+            Appointment.barber == "Angelo Paballa",
+            Appointment.date >= first_day.strftime("%B %d, %Y"),
+            Appointment.date < last_day.strftime("%B %d, %Y")
+        ).all()
+
+        # Count appointments per day
+        appointment_counts = {}
+        for a in appointments:
+            date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
+            appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+
+        return jsonify(appointment_counts)
+    except Exception as e:
+        print(f"Error fetching appointment counts: {e}")
+        return jsonify({})
 
 @admin_bp.route('/logout')
 def logout():

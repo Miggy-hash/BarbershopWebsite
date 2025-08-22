@@ -132,14 +132,12 @@
 <body class="bg-gray-800">
     <!-- Header -->
     <header class="calendar-header text-white shadow-lg">
-        <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4 py-6">
             <div class="flex justify-between items-center">
-                
-                <div class="flex flex-row m-4">
-                    <img src="{{ url_for('static', filename='images/SG-LOGO.jpg')}}" class="w-[50px] h-[50px] rounded-full md:w-[60px] md:h-[60px] lg:w-[90px] lg:h-[90px]">
-                    <h1 class="font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
+                <div>
+                    <h1 class="text-3xl font-bold">Emel's Dashboard</h1>
                 </div>
-                <a href="{{ url_for('admin.logout') }}" class="btn btn-danger text-xs md:text-lg lg:text-xl xl:text-base">
+                <a href="{{ url_for('admin.logout') }}" class="btn btn-danger">
                     Log out
                 </a>
             </div>
@@ -150,36 +148,37 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
             <!-- Calendar Section -->
             <div class="lg:col-span-2">
-                <div class=" rounded-xl shadow-lg p-3 bg-gray-900 border border-white">
-                    <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full mb-6 p-1 mt-2 rounded-[4px]">
-                        <button id="prevMonthBtn"
-                                class="justify-self-start px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition
-                                        ">
-                            <i class="fas fa-chevron-left h-[15px]"></i>
-                        </button>
-                        <span id="calendarMonthYear"
-                                class="justify-self-center text-center px-2 py-1 text-white font-semibold
-                                    text-base sm:text-normal md:text-lg lg:text-xl xl:text-2xl">
-                        </span>
-                        <button id="nextMonthBtn"
-                                class="justify-self-end px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
-                            <i class="fas fa-chevron-right h-[15px]"></i>
-                        </button>
+                
+                <div class=" rounded-xl shadow-lg p-6 bg-gray-900 border border-white">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">
+                            <i class="fas fa-calendar-alt mr-2 text-white"></i>Calendar View
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button id="prevMonthBtn" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="calendarMonthYear" class="px-4 py-1 text-white font-semibold"></span>
+                            <button id="nextMonthBtn" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
+                    </div>
+
                     <!-- Calendar Grid -->
                     <div class="grid grid-cols-7 gap-1 ">
                         <!-- Weekday Headers -->
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Sun</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Mon</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Tue</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Wed</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Thu</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Fri</div>
-                        <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Sat</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Sun</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Mon</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Tue</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Wed</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Thu</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Fri</div>
+                        <div class="text-center py-2 font-semibold text-black bg-gray-100">Sat</div>
                     </div>
 
                     <!-- Calendar Days -->
-                    <div id="calendarDays" class="grid grid-cols-7 mt-1 gap-1 ">
+                    <div id="calendarDays" class="grid grid-cols-7 mt-2 gap-1 ">
                     </div>
                 </div>
 

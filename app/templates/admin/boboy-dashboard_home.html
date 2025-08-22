@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,15 +60,71 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: 20px; 
+            font-size: 12px;
             color: black;
-        }
+            }
+
+            @media (min-width: 640px) {
+            .appointment-badge {
+                font-size: 14px; 
+            }
+            }
+
+            @media (min-width: 768px) {
+            .appointment-badge {
+                font-size: 16px;
+            }
+            }
+
+            @media (min-width: 1024px) {
+            .appointment-badge {
+                font-size: 18px;
+            }
+            }
+
+            @media (min-width: 1280px) {
+            .appointment-badge {
+                font-size: 20px;
+            }
+            }
         .appointment-line {
             border-radius: 55px;
-            width: 4px;
-            height: 50px;
-            background-color: rgb(192, 1, 1);
-        }
+            width: 3px;     /* default = thin on small screens */
+            height: 18px;   /* default height */
+            background-color: #ef4444;
+            }
+
+            /* sm: ≥640px */
+            @media (min-width: 640px) {
+            .appointment-line {
+                width: 3px;
+                height: 22px;
+            }
+            }
+
+            /* md: ≥768px */
+            @media (min-width: 768px) {
+            .appointment-line {
+                width: 4px;
+                height: 27px;
+            }
+            }
+
+            /* lg: ≥1024px */
+            @media (min-width: 1024px) {
+            .appointment-line {
+                width: 5px;
+                height: 35px;
+            }
+            }
+
+            /* xl: ≥1280px */
+            @media (min-width: 1280px) {
+            .appointment-line {
+                width: 6px;
+                height: 40px;
+            }
+            }
     </style>
 </head>
 <body class="bg-gray-800">
@@ -98,7 +155,7 @@
                             <button id="prevMonthBtn" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <span id="calendarMonthYear" class="px-4 py-1 text-white font-semibold">-Month-</span>
+                            <span id="calendarMonthYear" class="px-4 py-1 text-white font-semibold"></span>
                             <button id="nextMonthBtn" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
@@ -117,79 +174,35 @@
                         <div class="text-center py-2 font-semibold text-black bg-gray-100">Sat</div>
                     </div>
 
-                        <!-- Calendar Days -->
-                        <div id="calendarDays" class="grid grid-cols-7 mt-2 gap-1 ">
-
-                        </div>
+                    <!-- Calendar Days -->
+                    <div id="calendarDays" class="grid grid-cols-7 mt-2 gap-1 ">
+                    </div>
                 </div>
 
                 <!-- Daily Schedule View -->
                 <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">
-                        <i class="fas fa-clock mr-2 text-green-600"></i>Daily Schedule - <span id="dailyScheduleDate">December 10, 2024</span>
+                        <i class="fas fa-clock mr-2 text-green-600"></i>Daily Schedule - <span id="dailyScheduleDate">{{ display_date }}</span>
                     </h3>
                     
                     <div class="space-y-2">
-                        <!-- Time slots from 9:00 AM to 5:00 PM -->
-                        <div class="time-slot available flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">9:00 AM</span>
-                            <span class="text-sm text-green-600">Available</span>
-                        </div>
-                        
-                        <div class="time-slot booked flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">10:00 AM</span>
-                            <div class="text-right">
-                                <div class="text-sm font-semibold">John Doe</div>
-                                <div class="text-xs text-gray-600">Haircut + Beard Trim</div>
-                            </div>
-                        </div>
-                        
-                        <div class="time-slot booked flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">11:00 AM</span>
-                            <div class="text-right">
-                                <div class="text-sm font-semibold">Jane Smith</div>
-                                <div class="text-xs text-gray-600">Hair Coloring</div>
-                            </div>
-                        </div>
-                        
-                        <div class="time-slot booked flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">12:00 PM</span>
-                            <div class="text-right">
-                                <div class="text-sm font-semibold">Mike Johnson</div>
-                                <div class="text-xs text-gray-600">Full Service</div>
-                            </div>
-                        </div>
-                        
-                        <div class="time-slot available flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">1:00 PM</span>
-                            <span class="text-sm text-green-600">Available</span>
-                        </div>
-                        
-                        <div class="time-slot available flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">2:00 PM</span>
-                            <span class="text-sm text-green-600">Available</span>
-                        </div>
-                        
-                        <div class="time-slot booked flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">3:00 PM</span>
-                            <div class="text-right">
-                                <div class="text-sm font-semibold">Sarah Wilson</div>
-                                <div class="text-xs text-gray-600">Beard Trim</div>
-                            </div>
-                        </div>
-                        
-                        <div class="time-slot booked flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">4:00 PM</span>
-                            <div class="text-right">
-                                <div class="text-sm font-semibold">David Brown</div>
-                                <div class="text-xs text-gray-600">Haircut</div>
-                            </div>
-                        </div>
-                        
-                        <div class="time-slot available flex items-center justify-between p-3 rounded">
-                            <span class="font-medium">5:00 PM</span>
-                            <span class="text-sm text-green-600">Available</span>
-                        </div>
+                        {% for slot in time_slots %}
+                            {% set time_24 = slot['24h'] %}
+                            {% if time_24 in booked %}
+                                <div class="time-slot booked flex items-center justify-between p-3 rounded">
+                                    <span class="font-medium">{{ slot['label'] }}</span>
+                                    <div class="text-right">
+                                        <div class="text-sm font-semibold">{{ booked[time_24]['full_name'] }}</div>
+                                        <div class="text-xs text-gray-600">{{ booked[time_24]['service'] }}</div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="time-slot available flex items-center justify-between p-3 rounded">
+                                    <span class="font-medium">{{ slot['label'] }}</span>
+                                    <span class="text-sm text-green-600">Available</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -278,8 +291,6 @@
         </div>
     </div>
 
-    <script
-        src="{{ url_for('static', filename='js/Admin/emel_calendar.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/Admin/boboy_calendar.js') }}"></script>
 </body>
 </html>

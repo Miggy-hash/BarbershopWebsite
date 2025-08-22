@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = firstDay; i > 0; i--) {
       const prevDayDiv = document.createElement("div");
       prevDayDiv.textContent = lastDayOfPrevMonth - i + 1;
-      prevDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+      prevDayDiv.className = "h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-2 rounded";
       daysContainer.appendChild(prevDayDiv);
     }
 
@@ -94,10 +94,10 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let day = 1; day <= daysInMonth; day++) {
       const dayDiv = document.createElement("div");
       dayDiv.textContent = day;
-      dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+      dayDiv.className = "h-[90px] border border-black bg-gray-200 p-2 rounded hover:bg-gray-400 hover:text-black hover:border-black cursor-pointer";
 
       if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayDiv.classList.add("bg-gray-400", "text-black");
+        dayDiv.classList.add("bg-green-200", "text-black");
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
       }
 
@@ -119,10 +119,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       dayDiv.addEventListener("click", async () => {
         if (selectedCell) {
-          selectedCell.classList.remove("ring-4", "ring-red-500");
+          selectedCell.classList.remove("ring-4", "ring-blue-500");
           selectedCell.setAttribute("aria-selected", "false");
         }
-        dayDiv.classList.add("ring-4", "ring-red-500");
+        dayDiv.classList.add("ring-4", "ring-blue-500");
         dayDiv.setAttribute("aria-selected", "true");
         selectedCell = dayDiv;
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 1; i <= nextDays; i++) {
       const nextDayDiv = document.createElement("div");
       nextDayDiv.textContent = i;
-      nextDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+      nextDayDiv.className = "h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-2 rounded";
       daysContainer.appendChild(nextDayDiv);
     }
   }
