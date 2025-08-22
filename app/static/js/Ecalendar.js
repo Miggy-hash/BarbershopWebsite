@@ -20,7 +20,8 @@ initTimeSlotHandlers();
 
 const todayIso = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
 selectedDate = todayIso;
-hiddenDate.value = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+// Use '2-digit' for day to match stored DB format (e.g., "August 01, 2025")
+hiddenDate.value = today.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
 
 // Mark today as selected
 const todayBox = calendarDays.querySelector(`.day[data-date="${todayIso}"]`);
@@ -49,6 +50,7 @@ function updateTimeSlotHeading(timeText) {
 }
 
 function updateHeadings(date) {
+    // Use 'numeric' for display (no zero padding, readable)
     const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
     const timeslotHeading = document.getElementById('selectedDate');
     const appointmentHeading = document.getElementById('selectedDateAppointment');
@@ -141,7 +143,8 @@ function renderCalendar(month, year) {
 
             selectedDate = isoDate;
 
-            const wordedDate = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            // Use '2-digit' for stored date to match DB (e.g., "August 01, 2025")
+            const wordedDate = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
             hiddenDate.value = wordedDate;
 
             updateHeadings(new Date(year, month, day));

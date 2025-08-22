@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar</title>
+    <title>Boboy Calendar</title>
     <link href="{{ url_for('static', filename='css/calendar.css') }}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,28 +38,53 @@
     
     <!-- Time Slot Buttons -->
     <div class="grid grid-cols-2 gap-3">
-        <button id="9TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="09:00">
+        <button id="9TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '09:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="09:00"
+        {% if '09:00' in booked_times %}disabled{% endif %}
+        >
             9:00 AM
         </button>
-        <button id="10TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="10:00">
+        <button id="10TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '10:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="10:00"
+        {% if '10:00' in booked_times %}disabled{% endif %}>
            10:00 AM
         </button>
-        <button id="11TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="11:00">
+        <button id="11TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '11:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="11:00"
+        {% if '11:00' in booked_times %}disabled{% endif %}>
             11:00 AM
         </button>
-        <button id="1TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="13:00">
+        <button id="1TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '13:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="13:00"
+        {% if '13:00' in booked_times %}disabled{% endif %}>
            1:00 PM
         </button>
-        <button id="2TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="14:00">
+        <button id="2TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '14:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="14:00"
+        {% if '14:00' in booked_times %}disabled{% endif %}>
            2:00 PM
         </button>
-        <button id="3TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="15:00">
+        <button id="3TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '15:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="15:00"
+        {% if '15:00' in booked_times %}disabled{% endif %}>
            3:00 PM
         </button>
-        <button id="4TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="16:00">
+        <button id="4TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '16:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="16:00"
+        {% if '16:00' in booked_times %}disabled{% endif %}>
             4:00 PM
         </button>
-        <button id="5TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2" data-time="17:00">
+        <button id="5TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '17:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="17:00"
+        {% if '17:00' in booked_times %}disabled{% endif %}>
             5:00 PM
         </button>
     </div>
