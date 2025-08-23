@@ -6,16 +6,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const daysContainer = document.getElementById("calendarDays");
   const scheduleContainer = document.querySelector('.space-y-2');
   const appointmentDetails = document.getElementById("appointmentDetails");
+  const addAppointmentBtn = document.getElementById("addAppointmentBtn");
+  const removeAppointmentBtn = document.getElementById("removeAppointmentBtn");
+  const addModal = document.getElementById("addAppointmentModal");
+  const removeModal = document.getElementById("removeAppointmentModal");
+  const confirmModal = document.getElementById("confirmRemoveModal");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const addModalClose = document.getElementById("addModalClose");
+  const removeModalClose = document.getElementById("removeModalClose");
+  const confirmModalClose = document.getElementById("confirmModalClose");
+  const addAppointmentForm = document.getElementById("addAppointmentForm");
+  const removeAppointmentForm = document.getElementById("removeAppointmentForm");
+  const confirmRemoveBtn = document.getElementById("confirmRemoveBtn");
+  const cancelRemoveBtn = document.getElementById("cancelRemoveBtn");
+  const addDateSelect = document.getElementById("addDate");
+  const removeDateSelect = document.getElementById("removeDate");
   let currentDate = new Date();
   let selectedCell = null;
-  let activeSlot = null; // Track the currently active booked slot
+  let activeSlot = null;
+  let pendingDelete = null; // Store data for confirmation
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
 
-  // Fixed time slots (matching backend)
   const timeSlots = [
     { '24h': '09:00', 'label': '9:00 AM' },
     { '24h': '10:00', 'label': '10:00 AM' },
@@ -27,9 +42,205 @@ document.addEventListener("DOMContentLoaded", () => {
     { '24h': '17:00', 'label': '5:00 PM' },
   ];
 
+  // Populate date dropdowns
+  function populateDateDropdown(selectElement) {
+    selectElement.innerHTML = '';
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const formatted = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      const option = document.createElement('option');
+      option.value = formatted;
+      option.textContent = formatted;
+      selectElement.appendChild(option);
+    }
+  }
+
+  // Fetch booked times for a date and barber
+  async function fetchBookedTimes(date) {
+    const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      return await response.json();
+    } catch (err) {
+      console.error('Error fetching booked times:', err);
+      return {};
+    }
+  }
+
+  // Update time checkboxes for Add Appointment
+  async function updateAddTimeCheckboxes() {
+    const date = addDateSelect.value;
+    const barber = document.getElementById('barber').value;
+    const booked = await fetchBookedTimes(date);
+    const checkboxes = document.querySelectorAll('#addTimeCheckboxes input[name="time"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.disabled = booked[checkbox.value] ? true : false;
+      checkbox.checked = false; // Reset checks
+    });
+  }
+
+  // Update time checkboxes for Remove Appointment
+  async function updateRemoveTimeCheckboxes() {
+    const date = removeDateSelect.value;
+    const booked = await fetchBookedTimes(date);
+    const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.disabled = !booked[checkbox.value];
+      checkbox.checked = false; // Reset checks
+    });
+  }
+
+  // Show modal
+  function showModal(modal) {
+    modal.style.display = 'block';
+    modalOverlay.style.display = 'block';
+  }
+
+  // Hide modal
+  function hideModal(modal) {
+    modal.style.display = 'none';
+    if (!addModal.style.display === 'block' && !removeModal.style.display === 'block' && !confirmModal.style.display === 'block') {
+      modalOverlay.style.display = 'none';
+    }
+  }
+
+  // Handle modal closes
+  addModalClose.addEventListener('click', () => hideModal(addModal));
+  removeModalClose.addEventListener('click', () => hideModal(removeModal));
+  confirmModalClose.addEventListener('click', () => hideModal(confirmModal));
+  cancelRemoveBtn.addEventListener('click', () => hideModal(confirmModal));
+
+  // Prevent modal from closing on outside click
+  modalOverlay.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Open modals
+  addAppointmentBtn.addEventListener('click', () => {
+    populateDateDropdown(addDateSelect);
+    updateAddTimeCheckboxes();
+    showModal(addModal);
+  });
+  removeAppointmentBtn.addEventListener('click', () => {
+    populateDateDropdown(removeDateSelect);
+    updateRemoveTimeCheckboxes();
+    showModal(removeModal);
+  });
+
+  // Update time checkboxes on date change
+  addDateSelect.addEventListener('change', updateAddTimeCheckboxes);
+  removeDateSelect.addEventListener('change', updateRemoveTimeCheckboxes);
+
+  // Handle single selection for remove time checkboxes
+  document.querySelectorAll('#removeTimeCheckboxes input[name="time"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      document.querySelectorAll('#removeTimeCheckboxes input[name="time"]').forEach(cb => {
+        if (cb !== checkbox) cb.checked = false;
+      });
+    });
+  });
+
+  // Handle Add Appointment form submission
+  addAppointmentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(addAppointmentForm);
+    const times = formData.getAll('time');
+    const data = {
+      full_name: formData.get('full_name'),
+      cellphone: formData.get('cellphone'),
+      email: formData.get('email'),
+      barber: formData.get('barber'),
+      service: formData.get('service'),
+      date: formData.get('date'),
+      times: times
+    };
+
+    if (times.length === 0) {
+      alert('Please select at least one available time slot.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/admin/add-appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const result = await response.json();
+      if (result.success) {
+        alert('Appointment(s) added successfully!');
+        hideModal(addModal);
+        const isoDate = new Date(data.date).toISOString().split('T')[0];
+        await updateDailySchedule(isoDate);
+        await updateCalendar();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (err) {
+      console.error('Error adding appointment:', err);
+      alert('Failed to add appointment. Please try again.');
+    }
+  });
+
+  // Handle Remove Appointment form submission
+  removeAppointmentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(removeAppointmentForm);
+    const time = formData.get('time');
+    const data = {
+      barber: window.BARBER_NAME,
+      date: formData.get('date'),
+      time: time
+    };
+
+    if (!time) {
+      alert('Please select a booked time slot to remove.');
+      return;
+    }
+
+    pendingDelete = data;
+    showModal(confirmModal);
+  });
+
+  // Handle Confirm Remove
+  confirmRemoveBtn.addEventListener('click', async () => {
+    if (!pendingDelete) return;
+
+    try {
+      const response = await fetch('/admin/remove-appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingDelete),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const result = await response.json();
+      if (result.success) {
+        alert('Appointment removed successfully!');
+        hideModal(confirmModal);
+        hideModal(removeModal);
+        const isoDate = new Date(pendingDelete.date).toISOString().split('T')[0];
+        await updateDailySchedule(isoDate);
+        await updateCalendar();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (err) {
+      console.error('Error removing appointment:', err);
+      alert('Failed to remove appointment. Please try again.');
+    }
+    pendingDelete = null;
+  });
+
   async function updateDailySchedule(date) {
     try {
-      const response = await fetch(`/admin/boboy-appointments/${encodeURIComponent(date)}`);
+      const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
+      const response = await fetch(endpoint);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -38,7 +249,6 @@ document.addEventListener("DOMContentLoaded", () => {
       let html = '';
       timeSlots.forEach(slot => {
         if (booked[slot['24h']]) {
-          // Convert time to 12-hour format for display
           const [hours, minutes] = slot['24h'].split(':');
           const hourNum = parseInt(hours, 10);
           const ampm = hourNum >= 12 ? 'PM' : 'AM';
@@ -58,21 +268,18 @@ document.addEventListener("DOMContentLoaded", () => {
           html += `
             <div class="time-slot available flex items-center justify-between p-3 rounded">
               <span class="font-medium">${slot.label}</span>
-              <span class="text-sm text-green-600">Available</span>
+              <span class="text-sm text-black">Available</span>
             </div>
           `;
         }
       });
       scheduleContainer.innerHTML = html;
 
-      // Add click handlers to booked slots
       const bookedSlots = document.querySelectorAll('.time-slot.booked');
       bookedSlots.forEach(slot => {
         slot.addEventListener('click', () => {
-          console.log('Raw data-appointment:', slot.dataset.appointment);
           try {
             const appointment = JSON.parse(slot.dataset.appointment);
-            // Toggle visibility if clicking the same slot
             if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
               appointmentDetails.classList.add('hidden');
               activeSlot = null;
@@ -94,13 +301,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showAppointmentDetails(appointment) {
-    // Check if appointmentDetails exists
     if (!appointmentDetails) {
       console.error('appointmentDetails div not found');
       return;
     }
 
-    // Check DOM elements before updating
     const elements = {
       fullName: document.getElementById('detailsFullName'),
       cellphone: document.getElementById('detailsCellphone'),
@@ -111,14 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
       date: document.getElementById('detailsDate')
     };
 
-    // Log missing elements
     for (const [key, element] of Object.entries(elements)) {
       if (!element) {
         console.error(`Element with ID 'details${key.charAt(0).toUpperCase() + key.slice(1)}' not found`);
       }
     }
 
-    // Update only if elements exist
     if (elements.fullName) elements.fullName.textContent = appointment.full_name || 'N/A';
     if (elements.cellphone) elements.cellphone.textContent = appointment.cellphone || 'N/A';
     if (elements.email) elements.email.textContent = appointment.email || 'N/A';
@@ -133,13 +336,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (elements.date) elements.date.textContent = appointment.date || 'N/A';
 
-    // Show details div
     appointmentDetails.classList.remove('hidden');
   }
 
   async function fetchAppointmentCounts(year, month) {
     try {
-      const response = await fetch(`/admin/boboy-appointments-count/${year}/${month + 1}`);
+      const endpoint = `/admin/boboy-appointments-count/${year}/${month + 1}`;
+      const response = await fetch(endpoint);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -233,7 +436,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCalendar();
   });
 
-  // Initial setup
   const todayIso = currentDate.toISOString().split('T')[0];
   updateDailySchedule(todayIso);
   updateCalendar();

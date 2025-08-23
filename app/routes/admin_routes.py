@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 def sanitize_string(s):
     if s is None:
         return 'N/A'
-    return str(s)  # Let jsonify and tojson handle escaping
+    return str(s)
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-# Hardcoded credentials (for now)
+# Hardcoded credentials
 VALID_USERS = {"emel", "boboy"}
 ADMIN_PASSWORD = "slick123"
 
@@ -44,12 +44,10 @@ def Edashboard_home():
     if "username" not in session:
         return redirect(url_for("admin.ADMINLOGIN"))
 
-    # Default date (today in DB format with zero-pad)
     today_dt = datetime.today()
     date_for_check = today_dt.strftime("%B %d, %Y")
     logger.debug(f"Edashboard: Querying for date {date_for_check}")
 
-    # Query appointments for today
     try:
         appointments = Appointment.query.filter_by(barber="Emel Calomos", date=date_for_check).all()
         booked = {a.time: {
@@ -61,10 +59,8 @@ def Edashboard_home():
         logger.error(f"Edashboard: Error querying appointments: {e}")
         booked = {}
 
-    # Display date (non-padded day)
     display_date = f"{today_dt.strftime('%B')} {today_dt.day}, {today_dt.year}"
 
-    # Fixed time slots (matching user booking slots)
     time_slots = [
         {'24h': '09:00', 'label': '9:00 AM'},
         {'24h': '10:00', 'label': '10:00 AM'},
@@ -116,11 +112,9 @@ def get_emel_appointments(date):
 def get_emel_appointments_count(year, month):
     logger.debug(f"Fetching appointment counts for year: {year}, month: {month}")
     try:
-        # First and last day of the month
         first_day = datetime(year, month, 1)
         last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
-        # Query appointments for Emel in the month
         appointments = Appointment.query.filter(
             Appointment.barber == "Emel Calomos",
             Appointment.date >= first_day.strftime("%B %d, %Y"),
@@ -128,7 +122,6 @@ def get_emel_appointments_count(year, month):
         ).all()
         logger.debug(f"Found {len(appointments)} appointments for month {month}/{year}")
 
-        # Count appointments per day
         appointment_counts = {}
         for a in appointments:
             date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
@@ -137,6 +130,88 @@ def get_emel_appointments_count(year, month):
         return jsonify(appointment_counts)
     except Exception as e:
         logger.error(f"Error fetching appointment counts: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/add-appointment', methods=['POST'])
+def add_appointment():
+    logger.debug("Processing add appointment request")
+    try:
+        data = request.get_json()
+        full_name = data.get('full_name')
+        cellphone = data.get('cellphone')
+        email = data.get('email')
+        barber = data.get('barber')
+        service = data.get('service')
+        date = data.get('date')
+        times = data.get('times', [])
+
+        valid_services = ["Beard Service", "Regular Haircut", "Home Service", "Full Service", "Full Shave"]
+        valid_times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+        valid_barbers = ["Emel Calomos", "Angelo Paballa"]
+
+        if not all([full_name, cellphone, email, barber, service, date, times]):
+            return jsonify({'error': 'All fields are required'}), 400
+        if service not in valid_services:
+            return jsonify({'error': 'Invalid service'}), 400
+        if barber not in valid_barbers:
+            return jsonify({'error': 'Invalid barber'}), 400
+        if not all(time in valid_times for time in times):
+            return jsonify({'error': 'Invalid time slot(s)'}), 400
+
+        existing = Appointment.query.filter_by(barber=barber, date=date).filter(Appointment.time.in_(times)).all()
+        if existing:
+            return jsonify({'error': 'One or more selected time slots are already booked'}), 400
+
+        for time in times:
+            appointment = Appointment(
+                full_name=full_name,
+                cellphone=cellphone,
+                email=email,
+                barber=barber,
+                service=service,
+                date=date,
+                time=time
+            )
+            db.session.add(appointment)
+
+        db.session.commit()
+        logger.debug(f"Added {len(times)} appointment(s) for {barber} on {date}")
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding appointment: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/remove-appointment', methods=['POST'])
+def remove_appointment():
+    logger.debug("Processing remove appointment request")
+    try:
+        data = request.get_json()
+        barber = data.get('barber')
+        date = data.get('date')
+        time = data.get('time')
+
+        valid_times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+        valid_barbers = ["Emel Calomos", "Angelo Paballa"]
+
+        if not all([barber, date, time]):
+            return jsonify({'error': 'All fields are required'}), 400
+        if time not in valid_times:
+            return jsonify({'error': 'Invalid time slot'}), 400
+        if barber not in valid_barbers:
+            return jsonify({'error': 'Invalid barber'}), 400
+
+        appointment = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
+        if not appointment:
+            return jsonify({'error': 'No appointment found for the selected time slot'}), 404
+
+        db.session.delete(appointment)
+        db.session.commit()
+        logger.debug(f"Removed appointment for {barber} on {date} at {time}")
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error removing appointment: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @admin_bp.route("/bdashboard")
@@ -200,8 +275,8 @@ def get_boboy_appointments(date):
                 'barber': sanitize_string(a.barber),
                 'date': sanitize_string(a.date),
                 'time': sanitize_string(a.time)
-        } for a in appointments
-    }
+            } for a in appointments
+        }
         return jsonify(booked)
     except Exception as e:
         logger.error(f"Error querying Boboy appointments: {e}")
@@ -214,7 +289,6 @@ def get_boboy_appointments_count(year, month):
         first_day = datetime(year, month, 1)
         last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
-        # Query appointments for Boboy in the month
         appointments = Appointment.query.filter(
             Appointment.barber == "Angelo Paballa",
             Appointment.date >= first_day.strftime("%B %d, %Y"),
@@ -222,7 +296,6 @@ def get_boboy_appointments_count(year, month):
         ).all()
         logger.debug(f"Found {len(appointments)} appointments for month {month}/{year}")
 
-        # Count appointments per day
         appointment_counts = {}
         for a in appointments:
             date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
