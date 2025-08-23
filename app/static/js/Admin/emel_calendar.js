@@ -5,9 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtn = document.getElementById("nextMonthBtn");
   const daysContainer = document.getElementById("calendarDays");
   const scheduleContainer = document.querySelector('.space-y-2');
-
+  const appointmentDetails = document.getElementById("appointmentDetails");
   let currentDate = new Date();
   let selectedCell = null;
+  let activeSlot = null; // Track the currently active booked slot
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -29,13 +30,23 @@ document.addEventListener("DOMContentLoaded", () => {
   async function updateDailySchedule(date) {
     try {
       const response = await fetch(`/admin/emel-appointments/${encodeURIComponent(date)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       const booked = await response.json();
 
       let html = '';
       timeSlots.forEach(slot => {
         if (booked[slot['24h']]) {
+          // Convert time to 12-hour format for display
+          const [hours, minutes] = slot['24h'].split(':');
+          const hourNum = parseInt(hours, 10);
+          const ampm = hourNum >= 12 ? 'PM' : 'AM';
+          const displayHour = hourNum % 12 || 12;
+          const displayTime = `${displayHour}:${minutes} ${ampm}`;
+          
           html += `
-            <div class="time-slot booked flex items-center justify-between p-3 rounded">
+            <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='${JSON.stringify(booked[slot['24h']])}'>
               <span class="font-medium">${slot.label}</span>
               <div class="text-right">
                 <div class="text-sm font-semibold">${booked[slot['24h']].full_name}</div>
@@ -53,14 +64,85 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
       scheduleContainer.innerHTML = html;
+
+      // Add click handlers to booked slots
+      const bookedSlots = document.querySelectorAll('.time-slot.booked');
+      bookedSlots.forEach(slot => {
+        slot.addEventListener('click', () => {
+          console.log('Raw data-appointment:', slot.dataset.appointment);
+          try {
+            const appointment = JSON.parse(slot.dataset.appointment);
+            // Toggle visibility if clicking the same slot
+            if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
+              appointmentDetails.classList.add('hidden');
+              activeSlot = null;
+            } else {
+              showAppointmentDetails(appointment);
+              activeSlot = slot;
+            }
+          } catch (err) {
+            console.error('Failed to parse data-appointment:', err);
+            appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
+            appointmentDetails.classList.remove('hidden');
+            activeSlot = slot;
+          }
+        });
+      });
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
     }
   }
 
+  function showAppointmentDetails(appointment) {
+    // Check if appointmentDetails exists
+    if (!appointmentDetails) {
+      console.error('appointmentDetails div not found');
+      return;
+    }
+
+    // Check DOM elements before updating
+    const elements = {
+      fullName: document.getElementById('detailsFullName'),
+      cellphone: document.getElementById('detailsCellphone'),
+      email: document.getElementById('detailsEmail'),
+      barber: document.getElementById('detailsBarber'),
+      service: document.getElementById('detailsService'),
+      time: document.getElementById('detailsTime'),
+      date: document.getElementById('detailsDate')
+    };
+
+    // Log missing elements
+    for (const [key, element] of Object.entries(elements)) {
+      if (!element) {
+        console.error(`Element with ID 'details${key.charAt(0).toUpperCase() + key.slice(1)}' not found`);
+      }
+    }
+
+    // Update only if elements exist
+    if (elements.fullName) elements.fullName.textContent = appointment.full_name || 'N/A';
+    if (elements.cellphone) elements.cellphone.textContent = appointment.cellphone || 'N/A';
+    if (elements.email) elements.email.textContent = appointment.email || 'N/A';
+    if (elements.barber) elements.barber.textContent = appointment.barber || 'N/A';
+    if (elements.service) elements.service.textContent = appointment.service || 'N/A';
+    if (elements.time) {
+      const [hours, minutes] = (appointment.time || '00:00').split(':');
+      const hourNum = parseInt(hours, 10);
+      const ampm = hourNum >= 12 ? 'PM' : 'AM';
+      const displayHour = hourNum % 12 || 12;
+      elements.time.textContent = `${displayHour}:${minutes} ${ampm}`;
+    }
+    if (elements.date) elements.date.textContent = appointment.date || 'N/A';
+
+    // Show details div
+    appointmentDetails.classList.remove('hidden');
+  }
+
   async function fetchAppointmentCounts(year, month) {
     try {
       const response = await fetch(`/admin/emel-appointments-count/${year}/${month + 1}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       return await response.json();
     } catch (err) {
       console.error("Failed to fetch appointment counts:", err);
@@ -97,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
 
       if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayDiv.classList.add("bg-gray-400", "text-black");
+        dayDiv.classList.add("ring-4", "ring-red-500");
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
       }
 

@@ -155,7 +155,7 @@ def select_service(barber, service_name):
         return redirect("/login")  # Added check here for completeness
     services = {
         "beard": {"name": "Beard Service", "price": 250, "icon": "icons/beard.png"},
-        "haircut": {"name": "Men's Haircut", "price": 250, "icon": "icons/erazor.png"},
+        "haircut": {"name": "Regular Haircut", "price": 250, "icon": "icons/erazor.png"},
         "home": {"name": "Home Service", "price": 250, "icon": "icons/home.png"},
         "full": {"name": "Full Service", "price": 250, "icon": "icons/chair.png"},
         "shave": {"name": "Full Shave", "price": 250, "icon": "icons/razor.png"}

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,7 +25,7 @@
         }
         .time-slot {
             min-height: 40px;
-            border-left: 3px solid #e5e7eb;
+            border-left: 8px solid #e5e7eb;
             transition: all 0.2s ease;
         }
         .time-slot:hover {
@@ -36,13 +35,14 @@
         .time-slot.booked {
             border-left-color: #ef4444;
             background-color: #fef2f2;
+            cursor: pointer;
         }
         .time-slot.available {
             border-left-color: #10b981;
             background-color: #f0fdf4;
         }
         .calendar-header {
-            background: linear-gradient(135deg, #000020 0%, #1b1b1b 100%);
+            background: linear-gradient(135deg, #000020 0%, #171717 100%);
         }
         .appointment-card {
             background: white;
@@ -62,79 +62,73 @@
             gap: 4px;
             font-size: 12px;
             color: black;
-            }
-
-            @media (min-width: 640px) {
+        }
+        @media (min-width: 640px) {
             .appointment-badge {
                 font-size: 14px; 
             }
-            }
-
-            @media (min-width: 768px) {
+        }
+        @media (min-width: 768px) {
             .appointment-badge {
                 font-size: 16px;
             }
-            }
-
-            @media (min-width: 1024px) {
+        }
+        @media (min-width: 1024px) {
             .appointment-badge {
                 font-size: 18px;
             }
-            }
-
-            @media (min-width: 1280px) {
+        }
+        @media (min-width: 1280px) {
             .appointment-badge {
                 font-size: 20px;
             }
-            }
-
+        }
         .appointment-line {
             border-radius: 55px;
-            width: 3px;     /* default = thin on small screens */
-            height: 18px;   /* default height */
+            width: 3px;
+            height: 18px;
             background-color: #ef4444;
-            }
-
-            /* sm: ≥640px */
-            @media (min-width: 640px) {
+        }
+        @media (min-width: 640px) {
             .appointment-line {
                 width: 3px;
                 height: 22px;
             }
-            }
-
-            /* md: ≥768px */
-            @media (min-width: 768px) {
+        }
+        @media (min-width: 768px) {
             .appointment-line {
                 width: 4px;
                 height: 27px;
             }
-            }
-
-            /* lg: ≥1024px */
-            @media (min-width: 1024px) {
+        }
+        @media (min-width: 1024px) {
             .appointment-line {
                 width: 5px;
                 height: 35px;
             }
-            }
-
-            /* xl: ≥1280px */
-            @media (min-width: 1280px) {
+        }
+        @media (min-width: 1280px) {
             .appointment-line {
                 width: 6px;
                 height: 40px;
             }
-            }
-
+        }
+        .appointment-details {
+            background: white;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            padding: 16px;
+            width: 100%;
+            max-width: 300px;
+        }
     </style>
 </head>
-<body class="bg-gray-800">
+<body>
     <!-- Header -->
     <header class="calendar-header text-white shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
-                
                 <div class="flex flex-row m-4">
                     <img src="{{ url_for('static', filename='images/SG-LOGO.jpg')}}" class="w-[50px] h-[50px] rounded-full md:w-[60px] md:h-[60px] lg:w-[90px] lg:h-[90px]">
                     <h1 class="font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
@@ -146,28 +140,22 @@
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-8 ">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <!-- Calendar Section -->
             <div class="lg:col-span-2">
-                <div class=" rounded-xl shadow-lg p-3 bg-gray-900 border border-white">
+                <div class="rounded-xl shadow-lg p-3 bg-black border border-white">
                     <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full mb-6 p-1 mt-2 rounded-[4px]">
-                        <button id="prevMonthBtn"
-                                class="justify-self-start px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition
-                                        ">
+                        <button id="prevMonthBtn" class="justify-self-start px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
                             <i class="fas fa-chevron-left h-[15px]"></i>
                         </button>
-                        <span id="calendarMonthYear"
-                                class="justify-self-center text-center px-2 py-1 text-white font-semibold
-                                    text-base sm:text-normal md:text-lg lg:text-xl xl:text-2xl">
-                        </span>
-                        <button id="nextMonthBtn"
-                                class="justify-self-end px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
+                        <span id="calendarMonthYear" class="justify-self-center text-center px-2 py-1 text-white font-semibold text-base sm:text-normal md:text-lg lg:text-xl xl:text-2xl"></span>
+                        <button id="nextMonthBtn" class="justify-self-end px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition">
                             <i class="fas fa-chevron-right h-[15px]"></i>
                         </button>
-                        </div>
+                    </div>
                     <!-- Calendar Grid -->
-                    <div class="grid grid-cols-7 gap-1 ">
+                    <div class="grid grid-cols-7 gap-1">
                         <!-- Weekday Headers -->
                         <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Sun</div>
                         <div class="text-center rounded-[4px] py-1 font-semibold text-black bg-gray-100 h-[30px] sm:h-[30px] md:h-[50px] lg:h-[35px] text-sm sm:text-sm md:text-base lg:text-lg">Mon</div>
@@ -179,21 +167,25 @@
                     </div>
 
                     <!-- Calendar Days -->
-                    <div id="calendarDays" class="grid grid-cols-7 mt-1 gap-1 ">
-                    </div>
+                    <div id="calendarDays" class="grid grid-cols-7 mt-1 gap-1"></div>
                 </div>
+            </div>
 
+            <!-- Sidebar - Appointments Summary -->
+            <div class="lg:col-span-1">
                 <!-- Daily Schedule View -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">
-                        <i class="fas fa-clock mr-2 text-green-600"></i>Daily Schedule - <span id="dailyScheduleDate">{{ display_date }}</span>
+                <div class="bg-black rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-400">
+                        Daily Schedule 
                     </h3>
-                    
+                    <div class="mb-4">
+                    <span class="text-2xl font-bold text-white" id="dailyScheduleDate">{{ display_date }}</span>
+                    </div>
                     <div class="space-y-2">
                         {% for slot in time_slots %}
                             {% set time_24 = slot['24h'] %}
                             {% if time_24 in booked %}
-                                <div class="time-slot booked flex items-center justify-between p-3 rounded">
+                                <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='{{ booked[time_24] | tojson | safe }}'>
                                     <span class="font-medium">{{ slot['label'] }}</span>
                                     <div class="text-right">
                                         <div class="text-sm font-semibold">{{ booked[time_24]['full_name'] }}</div>
@@ -209,80 +201,19 @@
                         {% endfor %}
                     </div>
                 </div>
-                
-            </div>
-
-            <!-- Sidebar - Appointments Summary -->
-            <div class="lg:col-span-1">
-                <!-- Quick Stats -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">
-                        <i class="fas fa-chart-bar mr-2 text-purple-600"></i>Quick Stats
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Today's Appointments</span>
-                            <span class="font-bold text-2xl text-blue-600">4</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">This Week</span>
-                            <span class="font-bold text-2xl text-green-600">12</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Available Slots</span>
-                            <span class="font-bold text-2xl text-orange-600">3</span>
-                        </div>
+                <!-- Appointment Details -->
+                <div id="appointmentDetails" class="appointment-details hidden mt-4">
+                    <div class="text-lg font-bold text-gray-800 mb-2">Appointment Details</div>
+                    <div class="space-y-2">
+                        <p><strong>Full Name:</strong> <span id="detailsFullName"></span></p>
+                        <p><strong>Cellphone:</strong> <span id="detailsCellphone"></span></p>
+                        <p><strong>Email:</strong> <span id="detailsEmail"></span></p>
+                        <p><strong>Barber:</strong> <span id="detailsBarber"></span></p>
+                        <p><strong>Service:</strong> <span id="detailsService"></span></p>
+                        <p><strong>Time:</strong> <span id="detailsTime"></span></p>
+                        <p><strong>Date:</strong> <span id="detailsDate"></span></p>
                     </div>
                 </div>
-
-                <!-- Upcoming Appointments -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">
-                        <i class="fas fa-list-alt mr-2 text-indigo-600"></i>Upcoming
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="appointment-card p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">John Doe</h4>
-                                    <p class="text-sm text-gray-600">Haircut + Beard Trim</p>
-                                </div>
-                                <span class="text-sm font-medium text-blue-600">10:00 AM</span>
-                            </div>
-                        </div>
-                        
-                        <div class="appointment-card p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Jane Smith</h4>
-                                    <p class="text-sm text-gray-600">Hair Coloring</p>
-                                </div>
-                                <span class="text-sm font-medium text-blue-600">11:00 AM</span>
-                            </div>
-                        </div>
-                        
-                        <div class="appointment-card p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Mike Johnson</h4>
-                                    <p class="text-sm text-gray-600">Full Service</p>
-                                </div>
-                                <span class="text-sm font-medium text-blue-600">12:00 PM</span>
-                            </div>
-                        </div>
-                        
-                        <div class="appointment-card p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-semibold text-gray-800">Sarah Wilson</h4>
-                                    <p class="text-sm text-gray-600">Beard Trim</p>
-                                </div>
-                                <span class="text-sm font-medium text-blue-600">3:00 PM</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Action Buttons -->
                 <div class="mt-6 space-y-3">
                     <button class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
