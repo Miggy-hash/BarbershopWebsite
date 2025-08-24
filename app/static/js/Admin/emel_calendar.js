@@ -83,15 +83,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Update time checkboxes for Remove Appointment
-  async function updateRemoveTimeCheckboxes() {
-    const date = removeDateSelect.value;
-    const booked = await fetchBookedTimes(date);
-    const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
-    checkboxes.forEach(checkbox => {
-      checkbox.disabled = !booked[checkbox.value];
-      checkbox.checked = false; // Reset checks
-    });
-  }
+async function updateRemoveTimeCheckboxes() {
+  const date = removeDateSelect.value;
+  const booked = await fetchBookedTimes(date);
+  const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+
+  checkboxes.forEach(checkbox => {
+    checkbox.disabled = !!booked[checkbox.value];  // disable if booked
+    checkbox.checked = false; // Reset checks
+  });
+}
+
 
   // Show modal
   function showModal(modal) {
@@ -232,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (err) {
       console.error('Error removing appointment:', err);
-      alert('Failed to remove appointment. Please try again.');
+      alert('Time slot is empty, select existing time slot!');
     }
     pendingDelete = null;
   });
@@ -382,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
 
       if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayDiv.classList.add("ring-4", "ring-red-500");
+        dayDiv.classList.add("ring-4", "ring-red-600");
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
       }
 
@@ -404,10 +406,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       dayDiv.addEventListener("click", async () => {
         if (selectedCell) {
-          selectedCell.classList.remove("ring-4", "ring-red-500");
+          selectedCell.classList.remove("ring-4", "ring-red-600");
           selectedCell.setAttribute("aria-selected", "false");
         }
-        dayDiv.classList.add("ring-4", "ring-red-500");
+        dayDiv.classList.add("ring-4", "ring-red-600");
         dayDiv.setAttribute("aria-selected", "true");
         selectedCell = dayDiv;
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;

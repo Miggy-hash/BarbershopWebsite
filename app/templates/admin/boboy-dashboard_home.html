@@ -17,8 +17,7 @@
         .appointment-slot { transition: all 0.2s ease; cursor: pointer; }
         .appointment-slot:hover { background-color: #f3f4f6; transform: translateY(-1px); }
         .time-slot { min-height: 40px; border-left: 8px solid #e5e7eb; transition: all 0.2s ease; }
-        .time-slot:hover { border-left-color: #3b82f6; background-color: #f8fafc; }
-        .time-slot.booked { border-left-color: #ef4444; background-color: #fef2f2; cursor: pointer; }
+        .time-slot.booked { border-left-color: #242bf6; background-color: #fef2f2; cursor: pointer; }
         .time-slot.available { border-left-color: #bebebe; background-color: #999999; }
         .calendar-header { background: linear-gradient(135deg, #000000 0%, #000000 100%); }
         .appointment-card { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; }
@@ -28,7 +27,7 @@
         @media (min-width: 768px) { .appointment-badge { font-size: 16px; } }
         @media (min-width: 1024px) { .appointment-badge { font-size: 18px; } }
         @media (min-width: 1280px) { .appointment-badge { font-size: 20px; } }
-        .appointment-line { border-radius: 55px; width: 3px; height: 18px; background-color: #ef4444; }
+        .appointment-line { border-radius: 55px; width: 3px; height: 18px; background-color: #242bf6; }
         @media (min-width: 640px) { .appointment-line { width: 3px; height: 22px; } }
         @media (min-width: 768px) { .appointment-line { width: 4px; height: 27px; } }
         @media (min-width: 1024px) { .appointment-line { width: 5px; height: 35px; } }
@@ -38,7 +37,7 @@
         .name { color: white; font-size: 35px; font-weight: 700; }
         .time { color: white; font-size: 25px; font-weight: 400; }
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; background-color: rgb(0, 0, 0); border: 2px solid #ffffff; border-radius: 8px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-blur: sm; z-index: 40; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(7px); z-index: 40; }
         .modal-close { position: absolute; top: 10px; right: 10px; font-size: 20px; cursor: pointer; color: white; }
         .modal input, .modal select { background-color: #333; color: white; border: 1px solid #555; }
         .modal input::placeholder { color: #aaa; }
@@ -95,11 +94,17 @@
                 <div class="lg:col-span-1">
                     <!-- Daily Schedule View -->
                     <div class="bg-black border-2 border-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-base font-bold font-montserrat text-gray-400">
-                            Daily Schedule 
-                        </h3>
-                        <div class="mb-4">
-                            <span class="text-2xl font-montserrat font-bold text-white" id="dailyScheduleDate">{{ display_date }}</span>
+                        <div class="flex flex-row items-center justify-between">
+                            <div>   
+                                <h3 class="text-base font-bold font-montserrat text-gray-400">
+                                Daily Schedule 
+                                </h3>
+                                <div class="mb-4">
+                                <span class="text-2xl font-montserrat font-bold text-white" id="dailyScheduleDate">{{ display_date }}</span>
+                                </div>
+                            </div>
+                            <img src="{{ url_for('static', filename='images/Slick.jpg')}}" 
+                            class="w-[70px] h-[50px] md:w-[70px] md:h-[50px] lg:w-[70px] rounded-[6px] lg:h-[50px] mb-4">
                         </div>
                         <div class="space-y-2">
                             {% for slot in time_slots %}
@@ -138,10 +143,10 @@
                     </div>
                     <!-- Action Buttons -->
                     <div class="mt-6 space-y-3">
-                        <button id="addAppointmentBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">
+                        <button id="addAppointmentBtn" class="w-full bg-black text-white border-2 border-white py-3 rounded-lg hover:border-blue-400 transition">
                             Add Appointment
                         </button>
-                        <button id="removeAppointmentBtn" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition">
+                        <button id="removeAppointmentBtn" class="w-full bg-black text-white border-2 border-white hover:border-red-400 py-3 rounded-lg transition">
                             Remove Appointment
                         </button>
                     </div>
@@ -194,7 +199,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-montserrat">Submit</button>
+                    <button type="submit" class="w-full bg-black text-white border-2 border-blue-600 py-2 rounded-lg hover:border-blue-400 transition font-montserrat">Submit</button>
                 </form>
             </div>
             <!-- Remove Appointment Modal -->
@@ -217,7 +222,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-montserrat">Remove Appointment</button>
+                    <button type="submit" class="w-full bg-black text-white py-2 rounded-lg border-2 border-red-600 hover:border-red-400 transition font-montserrat">Remove Appointment</button>
                 </form>
             </div>
             <!-- Confirmation Modal -->

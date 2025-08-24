@@ -8,41 +8,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-    <body class="min-h-screen flex flex-col justify-center items-center bg-gallery">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <body class="min-h-screen flex flex-col justify-start items-center bg-gallery">
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
     <section class="w-full flex-1 flex justify-center items-center">
         <div class="bg-black backdrop-blur-lg p-8 rounded-lg border border-white-80 w-full max-w-md shadow-[4px_4px_10px_rgba(255,255,255,0.3),
-            -4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] 
-            transition duration-300">
-    <h2 class="text-4xl font-faustina font-extrabold text-center mb-8 text-white">Slick Grind <br> Barber</h2>
-    <form method="POST" action="{{ url_for('routes.LOGIN') }}" class="space-y-4">
-        <div>
-            <label for="full_name" class="block mb-1 text-sm font-montserrat text-white">Full Name</label>
-            <input type="text" id="full_name" name="full_name" required
-                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
-        </div>
+                -4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] 
+                transition duration-300">
+        <h2 class="text-4xl font-faustina font-extrabold text-center mb-2 text-white">Slick Grind <br> Barber</h2>
+        <form method="POST" action="{{ url_for('routes.LOGIN') }}" class="space-y-4">
+            <div>
+                <label for="full_name" class="block text-sm font-montserrat text-white">Full Name</label>
+                <input type="text" id="full_name" name="full_name" required
+                    class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
 
-        <div>
-            <label for="cellphone" class="block mb-1 text-sm font-montserrat text-white">Cellphone Number</label>
-            <input type="tel" id="cellphone" name="cellphone" pattern="[0-9]{11}" required
-                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
-        </div>
+            <div>
+                <label for="cellphone" class="block text-sm font-montserrat text-white">Cellphone Number</label>
+                <input type="tel" id="cellphone" name="cellphone" pattern="[0-9]{11}" required
+                    class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
 
-        <div>
-            <label for="email" class="block mb-1 text-sm font-montserrat text-white">Email Address</label>
-            <input type="email" id="email" name="email" required
-                class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
-        </div>
-        
-        <button
-            type="submit" 
-            id="confirmBtn"
-            class=" w-full text-center py-2 bg-black border border-white text-white rounded hover:bg-white hover:text-black hover:border-black disabled:bg-gray-300/50
-             disabled:border-white disabled:text-black  disabled:cursor-not-allowed"
-            disabled>
-            Confirm
-    </button>
-    </form>
+            <div>
+                <label for="email" class="block text-sm font-montserrat text-white">Email Address</label>
+                <input type="email" id="email" name="email" required
+                    class="w-full border border-white/30 bg-white/10 text-white placeholder-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
+            
+            <button
+                type="submit" 
+                id="confirmBtn"
+                class=" w-full text-center py-2 bg-black border border-white text-white rounded hover:bg-white hover:text-black hover:border-black disabled:bg-gray-300/50
+                disabled:border-white disabled:text-black  disabled:cursor-not-allowed"
+                disabled>
+                Confirm
+        </button>
+        </form>
 </div>
     </section>
 

@@ -83,15 +83,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Update time checkboxes for Remove Appointment
-  async function updateRemoveTimeCheckboxes() {
-    const date = removeDateSelect.value;
-    const booked = await fetchBookedTimes(date);
-    const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
-    checkboxes.forEach(checkbox => {
-      checkbox.disabled = !booked[checkbox.value];
-      checkbox.checked = false; // Reset checks
-    });
-  }
+async function updateRemoveTimeCheckboxes() {
+  const date = removeDateSelect.value;
+  const booked = await fetchBookedTimes(date);
+  const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+
+  checkboxes.forEach(checkbox => {
+    checkbox.disabled = !!booked[checkbox.value];  // disable if booked
+    checkbox.checked = false; // Reset checks
+  });
+}
 
   // Show modal
   function showModal(modal) {
@@ -232,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (err) {
       console.error('Error removing appointment:', err);
-      alert('Failed to remove appointment. Please try again.');
+      alert('Time slot is empty, select existing time slot!');
     }
     pendingDelete = null;
   });
