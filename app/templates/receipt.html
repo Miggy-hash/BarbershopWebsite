@@ -7,30 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Faustina:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-100 font-montserrat">
-
-    <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+<body class="min-h-screen flex flex-col justify-center  items-center bg-gallery">
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
+    <div class="w-[330px] sm:w-[330px] md:w-full lg:w-full  max-w-md bg-white shadow-xl rounded-lg mt-50 p-6 z-10">
         <h1 class="text-2xl font-bold text-center mb-4 font-faustina">Appointment Receipt</h1>
 
         <div class="border-t border-b border-gray-300 py-4 mb-4">
             <div class="flex justify-between mb-2">
-                <span class="font-semibold">Full Name:</span>
+                <span class="font-semibold text-sm sm:text-sm md:text-base lg:text-base">Full Name:</span>
                 <span id="fullName">{{ full_name }}</span>
             </div>
             <div class="flex justify-between mb-2">
-                <span class="font-semibold">Cellphone Number:</span>
+                <span class="font-semibold text-sm sm:text-sm md:text-base lg:text-base">Cellphone Number:</span>
                 <span id="cellNumber">{{ cellphone }}</span>
             </div>
             <div class="flex justify-between mb-2">
-                <span class="font-semibold">Email Address:</span>
-                <span id="emailAddress">{{ email }}</span>
+                <span class="font-semibold text-sm sm:text-sm md:text-base lg:text-base">Email Address:</span>
+                <span class="text-[14px] sm:text-[14px] md:text-base lg:text-base" id="emailAddress">{{ email }}</span>
             </div>
             <div class="flex justify-between mb-2">
-                <span class="font-semibold">Service:</span>
+                <span class="font-semibold text-sm sm:text-sm md:text-base lg:text-base">Service:</span>
                 <span id="serviceType">{{ service }}</span>
             </div>
             <div class="flex justify-between mb-2">
-                <span class="font-semibold">Barber:</span>
+                <span class="font-semibold text-sm sm:text-sm md:text-base lg:text-base">Barber:</span>
                 <span id="barberName">{{ barber }}</span>
             </div>
             <div class="flex flex-col items-center mb-2">
@@ -49,4 +49,23 @@
     </div>
 
 </body>
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+     .font-lato {
+        font-family: "Lato", serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>
 </html>

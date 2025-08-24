@@ -1,3 +1,56 @@
-<div class="absolute inset-0">
-    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Banner Image" class="w-full h-[870px] object-cover">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Section</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="relative h-screen">
+    <!-- Background Image and Gradient Layer -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.95), rgba(38, 38, 38, 0.8)), url('/static/images/banner.jpeg');"></div>
+    
+    <!-- Content Container -->
+    <div class="relative z-10 h-full flex items-center">
+        <!-- Left Side: Book Now Button -->
+        <div class="w-1/3 flex flex-col items-center justify-center mt-90 ml-40">
+            <div id="bookNowContainer"
+                    class="bg-gray border border-white rounded-[20px] px-10 py-7 hover:border-blue-600 mb-5">
+                <a href="{{ url_for('routes.LOGIN') }}" class="text-5xl text-white font-playfair text-center block transition-colors">
+                    Book Now
+                </a>
+            </div>
+
+            <h1 class="text-7xl text-white font-playfair font-bold">Slick Grind Barber</h1>
+            <p class="text-base text-center text-white font-montserrat">Located at 185, San Antonio Poblacion, Calabanga, Camarines Sur. Bojex Game Zone. At the back of Calabanga Integrated Terminal Exchange.</p>
+            <p class="text-sm text-white font-montserrat">
+                Established by Emel Calomos since 2019.
+            </p>
+            
+        </div>
+        
+        <!-- Right Side: Logo, Brand, and Info -->
+        <div class="w-1/3 pr-10 flex flex-col justify-end items-start">
+            <img src="/static/images/Slick.jpg" alt="Slick Grind Barber Logo" class="absolute top-5 right-5 w-25 h-15 rounded-[7px] opacity-50 object-cover pointer-events-none select-none overflow-hidden">
+        </div>
+    </div>
 </div>
+
+<style>
+    .font-montserrat {
+        font-family: "Montserrat", sans-serif;
+    }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-lato {
+        font-family: "Lato", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+</style>
+</body>
+</html>

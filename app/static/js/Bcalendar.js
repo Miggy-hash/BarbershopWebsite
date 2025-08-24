@@ -2,7 +2,7 @@ const calendarDays = document.getElementById('calendarDays');
 const monthYear = document.getElementById('monthYear');
 const prevMonthBtn = document.getElementById('prevMonth');
 const nextMonthBtn = document.getElementById('nextMonth');
-const proceedBtn = document.getElementById('proceedBtn-emel');
+const proceedBtn = document.getElementById('proceedBtn-boboy');
 const timeSlotHeading = document.getElementById("timeSlot");
 const hiddenDate = document.getElementById('hiddenDate');
 const hiddenTime = document.getElementById('hiddenTime');
@@ -87,7 +87,7 @@ function initTimeSlotHandlers() {
 
 /* ----------------- DYNAMIC BOOKED TIMES ----------------- */
 async function updateBookedTimeSlots(date) {
-    const barber = "Angelo Paballa"; // adjust if needed
+    const barber = "Emel Calomos"; // adjust if needed
     try {
         const response = await fetch(`/emel-calendar/times/${encodeURIComponent(barber)}/${encodeURIComponent(date)}`);
         const bookedTimes = await response.json(); // array of 24-hour strings

@@ -7,7 +7,7 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header class="navbar fixed top-0 left-0 w-full z-50">
+    <header class="navbar absolute top-0 left-0 w-full z-50">
         {% include '/sections/navbar.html' %}
     </header>
     <main class="pt-[75px]"> 
@@ -23,10 +23,7 @@
     <section class="services">
         {% include '/sections/services.html' %}
     </section>
-    <section>
-        {% include '/sections/appointment.html' %}
-    </section>
-        <section class="location">
+    <section class="location">
         {% include '/sections/location.html' %}
     </section>
     <section class="feedback">
