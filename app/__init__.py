@@ -2,12 +2,14 @@ import os
 from flask import Flask
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_basicauth import BasicAuth
 
 
 db = SQLAlchemy()
+socketio = SocketIO(cors_allowed_origins=["http://127.0.0.1:5000", "http://localhost:5000", "http://192.168.100.94:5000"])
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +23,7 @@ def create_app():
     app.config['SECRET_KEY'] = 'super-secret-key'  # Required by Flask-Admin
 
     db.init_app(app)
+    socketio.init_app(app)
 
     # ----------------- BLUEPRINT REGISTRATION -----------------
     from app.routes.routes import routes_bp

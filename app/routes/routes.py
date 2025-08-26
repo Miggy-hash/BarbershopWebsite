@@ -3,6 +3,9 @@ from app import db
 from app.models import Appointment
 from datetime import datetime
 from flask import jsonify
+from flask import request
+from flask_socketio import emit
+from app import socketio
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -187,6 +190,12 @@ def confirm_booking():
     date = request.form["date"]
     time = request.form["time"]
 
+    # STEP: Check if slot already exists
+    existing = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
+    if existing:
+        return jsonify({"success": False, "message": "This time slot has already been booked."}), 400
+
+    # Insert if not exists
     new_appointment = Appointment(
         full_name=full_name,
         cellphone=cellphone,
@@ -199,12 +208,20 @@ def confirm_booking():
 
     db.session.add(new_appointment)
     db.session.commit()
-    
+
     session["selected_date"] = date
     session["selected_time"] = time
-    session["booking_complete"] = True  # Critical fix: Set the flag here!
+    session["booking_complete"] = True
 
-    return redirect(url_for("routes.RECEIPT"))
+    socketio.emit("slot_booked", {
+        "date": date,
+        "time": time,
+        "barber": barber
+    })  # no broadcast needed
+
+    return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
+
+
 
 @routes_bp.route('/logout')
 def logout():

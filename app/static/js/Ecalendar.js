@@ -7,6 +7,14 @@ const timeSlotHeading = document.getElementById("timeSlot");
 const hiddenDate = document.getElementById('hiddenDate');
 const hiddenTime = document.getElementById('hiddenTime');
 
+const socket = io("http://192.168.100.94:5000", {
+    transports: ["websocket"], 
+});
+
+socket.on("connect", () => {
+    console.log("Connected to Socket.IO server:", socket.id);
+});
+
 let today = new Date();
 let currentMonth = today.getMonth();
 let currentYear = today.getFullYear();
@@ -183,3 +191,59 @@ nextMonthBtn.addEventListener('click', () => {
     }
     renderCalendar(currentMonth, currentYear);
 });
+
+socket.on("slot_booked", (data) => {
+    const formatDate = new Date(data.date).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+    if (data.barber === "Emel Calomos" && formatDate === hiddenDate.value) {
+        const button = document.querySelector(`[data-time='${data.time}']`);
+        if (button) {
+            button.disabled = true;
+            button.classList.add("bg-gray-400", "cursor-not-allowed", "text-white");
+            button.title = "Already booked";
+        }
+    }
+});
+const form = document.getElementById("confirmForm");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault(); // prevent normal form submit
+
+    const formData = new FormData(form);
+
+    try {
+        const res = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // Success → redirect to receipt page
+            window.location.href = data.redirect;
+        } else {
+            // Error → show alert
+            showAlert(data.message);
+        }
+    } catch (err) {
+        showAlert("Something went wrong. Try again.");
+        console.error(err);
+    }
+});
+
+// Simple alert function (can style it)
+function showAlert(message) {
+    let alertBox = document.getElementById("alertBox");
+    if (!alertBox) {
+        alertBox = document.createElement("div");
+        alertBox.id = "alertBox";
+        alertBox.className = "fixed top-5 left-1/2 -translate-x-1/2 bg-red-500 text-white p-4 rounded shadow-lg z-50";
+        document.body.appendChild(alertBox);
+    }
+    alertBox.textContent = message;
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        alertBox.remove();
+    }, 3000);
+}

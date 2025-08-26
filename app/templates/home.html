@@ -7,6 +7,7 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
+    
     <header class="navbar fixed top-0 left-0 w-full z-50">
         {% include '/sections/navbar.html' %}
     </header>
@@ -35,3 +36,11 @@
     </main>
 </body>
 </html>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  const socket = io("http://localhost:5000");
+
+  socket.on("connect", () => {
+    console.log("✅ Connected to server via WebSocket");
+  });
+</script>

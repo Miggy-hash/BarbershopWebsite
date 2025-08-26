@@ -87,9 +87,9 @@ function initTimeSlotHandlers() {
 
 /* ----------------- DYNAMIC BOOKED TIMES ----------------- */
 async function updateBookedTimeSlots(date) {
-    const barber = "Emel Calomos"; // adjust if needed
+    const barber = "Angelo Paballa"; // adjust if needed
     try {
-        const response = await fetch(`/emel-calendar/times/${encodeURIComponent(barber)}/${encodeURIComponent(date)}`);
+        const response = await fetch(`/boboy-calendar/times/${encodeURIComponent(barber)}/${encodeURIComponent(date)}`);
         const bookedTimes = await response.json(); // array of 24-hour strings
 
         document.querySelectorAll('.appointment-btn').forEach(btn => {
