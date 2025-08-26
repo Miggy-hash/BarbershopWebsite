@@ -4,81 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Location</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/sections/footer.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Faustina:ital,wght@0,300..800;1,300..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 {# Footer section for the barbershop site - included in base templates #}
-<footer class="bg-gray-900 text-gray-200 border-t border-white relative z-10">
-	<div class="w-full max-w-auto mx-auto px-42 py-12">
-		<div class="grid grid-cols-1 md:grid-cols-4">
-			<!-- Brand / About -->
-			<div class=" flex flex-col  items-center text-center">
-				<a href="/" class="flex items-center gap-3">
-					<img src="{{ url_for('static', filename='images/Slick.jpg') }}" alt="logo" class="h-12 w-16 object-cover rounded-sm border-1 border-white">
-					<span class="text-2xl font-faustina font-bold text-white">Slick Grind Barber</span>
-				</a>
-				<p class="text-sm mt-2 text-gray-300">Visit our shop and rediscover your confidence.</p>
-				<div class="flex items-center space-y-4 gap-3">
-					<img src="{{ url_for('static', filename='icons/phone.png') }}" alt="phone" class="h-6 w-4">
-                    <div class="flex flex-col leading-tight">
-                        <a href="tel:+1234567890" class="text-sm text-gray-300 hover:text-white">+63-909-555-3904</a>
-                        <a href="tel:+1234567890" class="text-sm text-gray-300 hover:text-white">+63-907-555-7690</a>
-                    </div>
-				</div>
-				<div class="flex items-center space-y-4 gap-3">
-					<img src="{{ url_for('static', filename='icons/gmail-logo.png') }}" alt="email" class="h-5 w-5">
-					<a href="mailto:info@barbershop.example" class="text-sm text-gray-300 hover:text-white">info@barbershop.example</a>
-				</div>
-			</div>
-
-			<!-- Services -->
-			<div class="flex flex-col items-center text-center">
-				<h3 class="text-white font-semibold mb-3">Services</h3>
-				<ul class="space-y-2 text-sm text-gray-300">
-					<li><a href="#services" class="hover:text-white">Home Service</a></li>
-					<li><a href="#services" class="hover:text-white">Full Service</a></li>
-					<li><a href="#services" class="hover:text-white">Haircut</a></li>
-					<li><a href="#appointment" class="hover:text-white">Beard Service</a></li>
-					<li><a href="#appointment" class="hover:text-white">Full Shave</a></li>
-				</ul>
-			</div>
-
-			<!-- Gallery / Links -->
-			<div class="flex flex-col items-center text-center">
-				<h3 class="text-white font-semibold mb-3">Explore</h3>
-				<ul class="space-y-2 text-sm text-gray-300">
-					<li><a href="/gallery" class="hover:text-white">Gallery</a></li>
-					<li><a href="/about" class="hover:text-white">Team</a></li>
-					<li><a href="/services" class="hover:text-white">Services</a></li>
-					<li><a href="/contact" class="hover:text-white">Appointment</a></li>
-					<li><a href="/contact" class="hover:text-white">Feedback</a></li>
-					<li><a href="/contact" class="hover:text-white">Location</a></li>
-				</ul>
-			</div>
-
-			<!-- Social / Hours -->
-			<div class="flex flex-col items-center text-center">
-				<h3 class="text-white font-semibold mb-3">Connect</h3>
-				<div class="flex items-center gap-3 mb-4">
-					<a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-						<img src="{{ url_for('static', filename='icons/facebook.png') }}" alt="facebook" class="bg-white rounded-full h-6 w-6">
-					</a>
-					<a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-						<img src="{{ url_for('static', filename='icons/instagram.png') }}" alt="instagram" class="bg-white rounded-full h-6.5 w-6.5">
-					</a>
-				</div>
-
-				<h4 class="text-gray-300 text-sm font-medium">Hours</h4>
-				<p class="text-sm text-gray-400">Monday to Saturday: 9:00 AM to 5:00 AM</p>
-				<p class="text-sm text-gray-400">Sunday: Closed</p>
-			</div>
-		</div>
-
-		<div class="border-t border-gray-800 mt-8 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-			{# Use current_year if passed into template, else try Flask config YEAR, else use Jinja now() to compute current year #}
-			<p class="text-sm text-gray-400">© {{ current_year if current_year is defined else (config.get('YEAR') if config is defined and config and config.get('YEAR') else currecnt_year) }} BarberShop. All rights reserved.</p>
-			<div class="text-sm text-gray-400">Designed with care - MDO · <a href="/privacy" class="hover:text-white">Privacy</a> · <a href="/terms" class="hover:text-white">Terms</a></div>
-		</div>
-	</div>
+<footer class="relative z-20 border-t border-white">
+  <div class="content">
+    <img src="{{ url_for('static', filename='images/logo.jpg') }}" class="logo">
+    <p class="text-3xl font-bold font-faustina mt-3">Slick Grind Barber</p>
+    <p class="text-xl font-faustina">Visit our shop and rediscover your confidence.</p>
+    <p>Monday to Saturday: 9:00 AM to 5:00 PM</p>
+    <p>Sunday: Closed</p>
+    <ul class="sm">
+      <li><a href="#"><img src="{{ url_for('static', filename='icons/facebook (3).png') }}" class="socials"></a></li>
+      <li><a href="#"><img src="{{ url_for('static', filename='icons/phone (2).png') }}" class="phone"></a></li>
+      <li><a href="#"><img src="{{ url_for('static', filename='icons/gmail.png') }}" class="socials"></a></li>
+      <li><a href="#"><img src="{{ url_for('static', filename='icons/maps (2).png') }}" class="socials"></a></li>
+      <li><a href="#"><img src="{{ url_for('static', filename='icons/instagram (2).png') }}" class="socials"></a></li>
+    </ul>
+    <ul class="links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Services</a></li>
+      <li><a href="#">Portfolio</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+  <p class="copyright">
+    &copy; <span id="year"></span> Slick Grind Barber | All Rights Reserved | MDO
+  </p>
+  
+<script src="{{ url_for('static', filename='js/sections/footer.js') }}"></script>
 </footer>

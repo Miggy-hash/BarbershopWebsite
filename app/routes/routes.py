@@ -74,7 +74,22 @@ def ECALENDAR():
     return response
 
 @routes_bp.route('/emel-calendar/times/<barber>/<date>')
-def get_booked_times(barber, date):
+def Eget_booked_times(barber, date):
+    try:
+        # Convert incoming YYYY-MM-DD to stored format "%B %d, %Y" (with zero-padded day)
+        dt = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = dt.strftime("%B %d, %Y")
+    except ValueError:
+        # Invalid date: return empty list
+        return jsonify([])
+
+    # Query using formatted date
+    appointments = Appointment.query.filter_by(barber=barber, date=formatted_date).all()
+    booked_times = [a.time for a in appointments]  # 24-hour format
+    return jsonify(booked_times)
+
+@routes_bp.route('/boboy-calendar/times/<barber>/<date>')
+def Bget_booked_times(barber, date):
     try:
         # Convert incoming YYYY-MM-DD to stored format "%B %d, %Y" (with zero-padded day)
         dt = datetime.strptime(date, "%Y-%m-%d")
@@ -139,7 +154,13 @@ def BSERVICES():
 @routes_bp.route('/receipt')
 def RECEIPT():
     stored_time = session.get("selected_time", "00:00")
-    time_12h = datetime.strptime(stored_time, "%H:%M").strftime("%I:%M %p")
+    dt = datetime.strptime(stored_time, "%H:%M")
+
+    try:
+        time_12h = dt.strftime("%-I:%M %p")  # No leading zero (Unix-like)
+    except ValueError:
+        time_12h = dt.strftime("%I:%M %p").lstrip("0")
+
     return render_template('receipt.html',
                            full_name=session["user"]["full_name"],
                            cellphone=session["user"]["cellphone"],
