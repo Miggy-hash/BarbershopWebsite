@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedCell = null;
   let activeSlot = null;
   let pendingDelete = null;
+  let isCalendarUpdating = false;
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -55,89 +56,59 @@ function parseDateToISO(dateStr) {
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
+    // Check if date is in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        try {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+            if (date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day) {
+                return dateStr; // Already in ISO format
+            }
+        } catch (err) {
+            return null;
+        }
+    }
+    // Handle Month DD, YYYY format
     const [monthName, day, year] = dateStr.split(' ');
     const month = monthNames.indexOf(monthName);
     if (month === -1 || !day || !year) {
-        console.error('Invalid date format:', dateStr);
         return null;
     }
     const cleanDay = parseInt(day.replace(',', '')); // Remove comma
-    const date = new Date(year, month, cleanDay);
-    if (isNaN(date.getTime())) {
-        console.error('Invalid parsed date:', dateStr);
-        return null;
-    }
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+    const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(cleanDay).padStart(2, '0')}`;
+    return isoDate;
 }
 
-socket.on('connect', () => {
-    console.log('Connected to Socket.IO server:', socket.id);
-});
-
 socket.on('slot_booked', (data) => {
-    console.log('Received slot_booked event:', data);
     if (data.barber !== 'Emel Calomos') {
-        console.log('Ignoring event: not for Emel Calomos');
         return;
     }
-
-    // Normalize dates for comparison
     const eventDate = data.date.trim();
     const selectedDate = dailyDateEl.textContent.trim();
-    console.log('Selected date:', selectedDate, 'Event date:', eventDate);
-
-    // Parse eventDate to ISO format
     const isoDate = parseDateToISO(eventDate);
     if (!isoDate) {
-        console.error('Skipping schedule update due to invalid date');
         return;
     }
-    console.log('Parsed ISO date:', isoDate);
-
-    // Update daily schedule if the appointment is for the selected date
     if (eventDate === selectedDate) {
-        console.log('Updating daily schedule for:', eventDate);
-        updateDailySchedule(isoDate);
-    } else {
-        console.log('Date mismatch, skipping schedule update');
+        updateDailySchedule(eventDate);
     }
-
-    // Update calendar badge
-    console.log('Updating calendar');
     updateCalendar();
 });
 
 socket.on('slot_deleted', (data) => {
-    console.log('Received slot_deleted event:', data);
     if (data.barber !== 'Emel Calomos') {
-        console.log('Ignoring event: not for Emel Calomos');
         return;
     }
-
-    // Normalize dates for comparison
     const eventDate = data.date.trim();
     const selectedDate = dailyDateEl.textContent.trim();
-    console.log('Selected date:', selectedDate, 'Event date:', eventDate);
-
-    // Parse eventDate to ISO format
     const isoDate = parseDateToISO(eventDate);
     if (!isoDate) {
-        console.error('Skipping schedule update due to invalid date');
         return;
     }
-    console.log('Parsed ISO date:', isoDate);
-
-    // Update daily schedule if the deleted appointment is for the selected date
     if (eventDate === selectedDate) {
-        console.log('Updating daily schedule for:', eventDate);
-        updateDailySchedule(isoDate);
-    } else {
-        console.log('Date mismatch, skipping schedule update');
+        updateDailySchedule(eventDate);
     }
-
-    // Update calendar badge
-    console.log('Updating calendar');
-    updateCalendar();
+    // Remove redundant updateCalendar call here, handled by confirmRemoveBtn
 });
 
 // ... (rest of the code unchanged)
@@ -158,40 +129,61 @@ socket.on('slot_deleted', (data) => {
   }
 
   // Fetch booked times for a date and barber
-  async function fetchBookedTimes(date) {
-    const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
-    try {
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      return await response.json();
-    } catch (err) {
-      console.error('Error fetching booked times:', err);
-      return {};
+async function fetchBookedTimes(date) {
+    const isoDate = parseDateToISO(date); // Convert to YYYY-MM-DD
+    if (!isoDate) {
+        return {};
     }
-  }
+    const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(isoDate)}`;
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        return data;
+    } catch (err) {
+        return {};
+    }
+}
 
   // Update time checkboxes for Add Appointment
-  async function updateAddTimeCheckboxes() {
+async function updateAddTimeCheckboxes() {
     const date = addDateSelect.value;
+    const isoDate = parseDateToISO(date); // Convert to YYYY-MM-DD
+    if (!isoDate) {
+        return;
+    }
     const barber = document.getElementById('barber').value;
-    const booked = await fetchBookedTimes(date);
+    const booked = await fetchBookedTimes(isoDate); // Use ISO date
     const checkboxes = document.querySelectorAll('#addTimeCheckboxes input[name="time"]');
     checkboxes.forEach(checkbox => {
-      checkbox.disabled = booked[checkbox.value] ? true : false;
-      checkbox.checked = false; // Reset checks
+        const isBooked = booked[checkbox.value] !== undefined && booked[checkbox.value] !== null;
+        checkbox.disabled = isBooked; // Disable if booked
+        checkbox.checked = false;
     });
-  }
+}
 
   // Update time checkboxes for Remove Appointment
-  async function updateRemoveTimeCheckboxes() {
+async function updateRemoveTimeCheckboxes() {
     const date = removeDateSelect.value;
     const booked = await fetchBookedTimes(date);
     const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
     checkboxes.forEach(checkbox => {
-      checkbox.disabled = !booked[checkbox.value]; // Enable only if booked
-      checkbox.checked = false; // Reset checks
+        const isBooked = booked[checkbox.value] !== undefined && booked[checkbox.value] !== null;
+        checkbox.disabled = !isBooked;
+        checkbox.checked = false;
     });
-  }
+}
+function setupRemoveTimeInputs() {
+    const inputs = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+    inputs.forEach(input => {
+        input.addEventListener('mousedown', (e) => {
+        });
+        input.addEventListener('click', (e) => {
+        });
+        input.addEventListener('change', (e) => {
+        });
+    });
+}
 
   // Show modal
   function showModal(modal) {
@@ -200,12 +192,13 @@ socket.on('slot_deleted', (data) => {
   }
 
   // Hide modal
-  function hideModal(modal) {
+function hideModal(modal) {
     modal.style.display = 'none';
-    if (!addModal.style.display === 'block' && !removeModal.style.display === 'block' && !confirmModal.style.display === 'block') {
-      modalOverlay.style.display = 'none';
-    }
-  }
+    modalOverlay.style.display = 'none'; // Always hide overlay
+    // Remove blur from content
+    const content = document.querySelector('main') || document.body;
+    content.classList.remove('blur', 'blur-sm', 'blur-md', 'blur-lg'); // Remove Tailwind blur classes
+}
 
   // Handle modal closes
   addModalClose.addEventListener('click', () => hideModal(addModal));
@@ -243,126 +236,155 @@ socket.on('slot_deleted', (data) => {
     });
   });
 
+  let isSubmitting = false;
+
   // Handle Add Appointment form submission
-  addAppointmentForm.addEventListener('submit', async (e) => {
+addAppointmentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (isSubmitting) {
+        return;
+    }
+    isSubmitting = true;
     const formData = new FormData(addAppointmentForm);
     const times = formData.getAll('time');
     const data = {
-      full_name: formData.get('full_name'),
-      cellphone: formData.get('cellphone'),
-      email: formData.get('email'),
-      barber: formData.get('barber'),
-      service: formData.get('service'),
-      date: formData.get('date'),
-      times: times
+        full_name: formData.get('full_name'),
+        cellphone: formData.get('cellphone'),
+        email: formData.get('email'),
+        barber: formData.get('barber'),
+        service: formData.get('service'),
+        date: formData.get('date'),
+        times: times
     };
 
     if (times.length === 0) {
-      alert('Please select at least one available time slot.');
-      return;
+        alert('Please select at least one available time slot.');
+        isSubmitting = false;
+        return;
     }
 
     try {
-      const response = await fetch('/admin/add-appointment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+        const response = await fetch('/admin/add-appointment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const result = await response.json();
-      if (result.success) {
-        alert('Appointment(s) added successfully!');
-        hideModal(addModal);
-        const isoDate = new Date(data.date).toISOString().split('T')[0];
-        await updateDailySchedule(isoDate);
-        await updateCalendar();
-        socketio.emit("slot_booked", {
-            full_name: data.full_name,
-            cellphone: data.cellphone,
-            email: data.email,
-            service: data.service,
-            barber: data.barber,
-            date: data.date,
-            time: times[0] // Assuming single time slot for simplicity
-        }, broadcast=True); // Emit to update other clients
-      } else {
-        alert(`Error: ${result.error}`);
-      }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        if (result.success) {
+            alert('Appointment(s) added successfully!');
+            hideModal(addModal);
+            // Update to the selected date
+            const newDateStr = data.date; // e.g., "August 28, 2025"
+            const [monthName, day, year] = newDateStr.split(' ');
+            const monthIndex = monthNames.indexOf(monthName);
+            currentDate.setFullYear(parseInt(year));
+            currentDate.setMonth(monthIndex);
+            currentDate.setDate(parseInt(day.replace(',', '')));
+            dailyDateEl.textContent = newDateStr;
+            const isoDate = parseDateToISO(newDateStr);
+            try {
+                await updateDailySchedule(newDateStr);
+            } catch (err) {
+            }
+            try {
+                await updateCalendar();
+            } catch (err) {
+            }
+            socket.emit("slot_booked", {
+                full_name: data.full_name,
+                cellphone: data.cellphone,
+                email: data.email,
+                service: data.service,
+                barber: data.barber,
+                date: data.date,
+                time: times[0]
+            });
+        } else {
+            alert(`Error: ${result.error}`);
+        }
     } catch (err) {
-      console.error('Error adding appointment:', err);
-      alert('Failed to add appointment. Please try again.');
+        alert('Failed to add appointment. Please try again.');
+    } finally {
+        isSubmitting = false;
     }
-  });
+}, { once: true });
 
   // Handle Remove Appointment form submission
-  removeAppointmentForm.addEventListener('submit', async (e) => {
+removeAppointmentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(removeAppointmentForm);
     const time = formData.get('time');
-    const data = {
-      barber: window.BARBER_NAME,
-      date: formData.get('date'),
-      time: time
-    };
-
+    const date = formData.get('date');
     if (!time) {
-      alert('Please select a booked time slot to remove.');
-      return;
+        alert('Please select a booked time slot to remove.');
+        return;
     }
-
+    const data = {
+        barber: window.BARBER_NAME,
+        date,
+        time
+    };
     pendingDelete = data;
     showModal(confirmModal);
-  });
+});
 
   // Handle Confirm Remove
-  confirmRemoveBtn.addEventListener('click', async () => {
+confirmRemoveBtn.addEventListener('click', async () => {
     if (!pendingDelete) return;
 
     try {
-      const response = await fetch('/admin/remove-appointment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pendingDelete),
-      });
+        const response = await fetch('/admin/remove-appointment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pendingDelete),
+        });
 
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const result = await response.json();
-      if (result.success) {
-        alert('Appointment removed successfully!');
-        hideModal(confirmModal);
-        hideModal(removeModal);
-        const isoDate = new Date(pendingDelete.date).toISOString().split('T')[0];
-        await updateDailySchedule(isoDate);
-        await updateCalendar();
-      } else {
-        alert(`Error: ${result.error}`);
-      }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+        if (result.success) {
+            alert('Appointment removed successfully!');
+            hideModal(confirmModal);
+            hideModal(removeAppointmentModal);
+            // Update to the removed date
+            const removedDateStr = pendingDelete.date; // e.g., "April 31, 2025"
+            const [monthName, day, year] = removedDateStr.split(' ');
+            const monthIndex = monthNames.indexOf(monthName);
+            currentDate.setFullYear(parseInt(year));
+            currentDate.setMonth(monthIndex);
+            currentDate.setDate(parseInt(day.replace(',', '')));
+            dailyDateEl.textContent = removedDateStr;
+            const isoDate = parseDateToISO(removedDateStr);
+            await updateDailySchedule(removedDateStr);
+            if (!isCalendarUpdating) {
+                isCalendarUpdating = true;
+                await updateCalendar();
+                isCalendarUpdating = false;
+            }
+        } else {
+            alert(`Error: ${result.error}`);
+        }
     } catch (err) {
-      console.error('Error removing appointment:', err);
-      alert('Time slot is empty, select existing time slot!');
+        alert('Time slot is empty, select existing time slot!');
     }
     pendingDelete = null;
-  });
+});
 
-  async function updateDailySchedule(date) {
-    console.log('Starting updateDailySchedule for date:', date); // Debug log
+async function updateDailySchedule(date) {
     try {
-        const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
-        console.log('Fetching from endpoint:', endpoint); // Debug log
+        const isoDate = parseDateToISO(date);
+        if (!isoDate) {
+            return;
+        }
+        const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(isoDate)}`;
         const response = await fetch(endpoint);
-        console.log('Fetch response status:', response.status); // Debug log
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const booked = await response.json();
-        console.log('Fetched booked data:', booked); // Debug log
 
-        // Verify scheduleContainer
-        console.log('scheduleContainer:', scheduleContainer); // Debug log
         if (!scheduleContainer) {
-            console.error('scheduleContainer is null or undefined');
             return;
         }
 
@@ -393,17 +415,13 @@ socket.on('slot_deleted', (data) => {
                 `;
             }
         });
-        console.log('Generated HTML:', html); // Debug log
         scheduleContainer.innerHTML = html;
-        console.log('Updated scheduleContainer.innerHTML'); // Debug log
 
         const bookedSlots = document.querySelectorAll('.time-slot.booked');
-        console.log('Found booked slots:', bookedSlots.length); // Debug log
         bookedSlots.forEach(slot => {
             slot.addEventListener('click', () => {
                 try {
                     const appointment = JSON.parse(slot.dataset.appointment);
-                    console.log('Clicked booked slot, appointment:', appointment); // Debug log
                     if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
                         appointmentDetails.classList.add('hidden');
                         activeSlot = null;
@@ -412,7 +430,6 @@ socket.on('slot_deleted', (data) => {
                         activeSlot = slot;
                     }
                 } catch (err) {
-                    console.error('Failed to parse data-appointment:', err);
                     appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
                     appointmentDetails.classList.remove('hidden');
                     activeSlot = slot;
@@ -420,13 +437,11 @@ socket.on('slot_deleted', (data) => {
             });
         });
     } catch (err) {
-        console.error('Failed to update daily schedule:', err);
     }
 }
 
   function showAppointmentDetails(appointment) {
     if (!appointmentDetails) {
-      console.error('appointmentDetails div not found');
       return;
     }
 
@@ -442,7 +457,6 @@ socket.on('slot_deleted', (data) => {
 
     for (const [key, element] of Object.entries(elements)) {
       if (!element) {
-        console.error(`Element with ID 'details${key.charAt(0).toUpperCase() + key.slice(1)}' not found`);
       }
     }
 
@@ -472,83 +486,83 @@ socket.on('slot_deleted', (data) => {
       }
       return await response.json();
     } catch (err) {
-      console.error("Failed to fetch appointment counts:", err);
       return {};
     }
   }
 
-  async function updateCalendar() {
+async function updateCalendar() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const monthYearText = `${monthNames[month]} ${year}`;
     monthYearEl.textContent = monthYearText;
+
+    daysContainer.innerHTML = ""; // Clear existing content
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDay = new Date(year, month, daysInMonth).getDay();
     const today = new Date();
 
-    daysContainer.innerHTML = "";
-
     const lastDayOfPrevMonth = new Date(year, month, 0).getDate();
     for (let i = firstDay; i > 0; i--) {
-      const prevDayDiv = document.createElement("div");
-      prevDayDiv.textContent = lastDayOfPrevMonth - i + 1;
-      prevDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
-      daysContainer.appendChild(prevDayDiv);
+        const prevDayDiv = document.createElement("div");
+        prevDayDiv.textContent = lastDayOfPrevMonth - i + 1;
+        prevDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+        daysContainer.appendChild(prevDayDiv);
     }
 
     const appointmentsPerDay = await fetchAppointmentCounts(year, month);
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayDiv = document.createElement("div");
-      dayDiv.textContent = day;
-      dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+        const dayDiv = document.createElement("div");
+        dayDiv.textContent = day;
+        dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
 
-      if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayDiv.classList.add("ring-4", "ring-red-600");
-        dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
-      }
-
-      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      dayDiv.dataset.date = dateKey;
-
-      if (appointmentsPerDay[dateKey]) {
-        const badge = document.createElement("div");
-        badge.className = "appointment-badge";
-        const number = document.createElement("span");
-        number.textContent = appointmentsPerDay[dateKey];
-        const line = document.createElement("div");
-        line.className = "appointment-line";
-        badge.appendChild(number);
-        badge.appendChild(line);
-        dayDiv.classList.add("relative");
-        dayDiv.appendChild(badge);
-      }
-
-      dayDiv.addEventListener("click", async () => {
-        if (selectedCell) {
-          selectedCell.classList.remove("ring-4", "ring-red-600");
-          selectedCell.setAttribute("aria-selected", "false");
+        const isSelected = day === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear();
+        if (isSelected) {
+            dayDiv.classList.add("bg-blue-200");
+            dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
         }
-        dayDiv.classList.add("ring-4", "ring-red-600");
-        dayDiv.setAttribute("aria-selected", "true");
-        selectedCell = dayDiv;
-        dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
-        await updateDailySchedule(dateKey);
-      });
 
-      daysContainer.appendChild(dayDiv);
+        const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        dayDiv.dataset.date = dateKey;
+
+        if (appointmentsPerDay[dateKey]) {
+            const badge = document.createElement("div");
+            badge.className = "appointment-badge";
+            const number = document.createElement("span");
+            number.textContent = appointmentsPerDay[dateKey];
+            const line = document.createElement("div");
+            line.className = "appointment-line";
+            badge.appendChild(number);
+            badge.appendChild(line);
+            dayDiv.classList.add("relative");
+            dayDiv.appendChild(badge);
+        }
+
+        dayDiv.addEventListener("click", async () => {
+            if (selectedCell) {
+                selectedCell.classList.remove("ring-4", "ring-red-600");
+                selectedCell.setAttribute("aria-selected", "false");
+            }
+            dayDiv.classList.add("ring-4", "ring-red-600");
+            dayDiv.setAttribute("aria-selected", "true");
+            selectedCell = dayDiv;
+            dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
+            await updateDailySchedule(dateKey);
+        });
+
+        daysContainer.appendChild(dayDiv);
     }
 
     const nextDays = 6 - lastDay;
     for (let i = 1; i <= nextDays; i++) {
-      const nextDayDiv = document.createElement("div");
-      nextDayDiv.textContent = i;
-      nextDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
-      daysContainer.appendChild(nextDayDiv);
+        const nextDayDiv = document.createElement("div");
+        nextDayDiv.textContent = i;
+        nextDayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-gray-600 bg-gray-900 text-gray-500 p-1 rounded text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
+        daysContainer.appendChild(nextDayDiv);
     }
-  }
+}
 
   prevBtn.addEventListener("click", () => {
     currentDate.setMonth(currentDate.getMonth() - 1);

@@ -19,27 +19,6 @@
             <div class="flex flex-col gap-2 bg-black p-7 sm:p-7 md:p-10 lg:p-10 rounded-xl border-2 border-white w-[330px] sm:w-[330px] md:w-auto lg:w-auto">
                 <h2 class="text-white text-xs sm:text-xs md:text-normal lg:text-base ml-2 font-montserrat">Select a service for your appointment:</h2>
 
-              <!-- Beard Service -->
-               <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='beard') }}">
-              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
-                <img src="{{ url_for('static', filename ='icons/beard.png') }}" 
-                    alt="Beard Service" 
-                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
-                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
-                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
-                  <span class="text-xl font-faustina font-bold mb-[-6px]">Beard Service</span>
-                  <span class="text-base font-faustina font-normal">₱ 250</span>
-                </div>
-                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
-                            transition-all duration-700 ease-in-out
-                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
-                  <span class="text-2xl font-faustina font-bold">Beard Service</span>
-                </div>
-              </div>
-              </a>
-
-
-
               <!-- Mens' Haircut -->
                <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='haircut') }}">
               <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
@@ -92,30 +71,12 @@
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
                             group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
-                  <span class="text-2xl font-faustina font-bold">Full Service</span>
+                  <span class=" text-2xl font-faustina font-bold">Full Service</span>
                 </div>
               </div>
               </a>
 
-              <!-- Full Shave -->
-               <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='shave') }}">
-              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
-                <img src="{{ url_for('static', filename ='icons/razor.png') }}" 
-                    alt="Beard Service" 
-                    class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
-                <div class="w-[2px] h-full bg-black mx-4 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0"></div>
-                <div class="relative flex flex-col leading-tight transition-all duration-700 ease-in-out group-hover:-translate-x-16 group-hover:opacity-0">
-                  <span class="text-xl font-faustina font-bold mb-[-6px]">Full Shave</span>
-                  <span class="text-base font-faustina font-normal">₱ 250</span>
-                </div>
-                <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
-                            transition-all duration-700 ease-in-out
-                            group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
-                  <span class="text-2xl font-faustina font-bold">Full Shave</span>
-                </div>
               </div>
-              </div>
-              </a>
 
 
     <!-- Appointment Section (Right) -->
@@ -146,7 +107,7 @@
     </div>
 
 </div>
-</div>
+
 
            
 

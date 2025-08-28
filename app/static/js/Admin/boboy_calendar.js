@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDate = new Date();
   let selectedCell = null;
   let activeSlot = null;
-  let pendingDelete = null; // Store data for confirmation
+  let pendingDelete = null;
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -41,6 +41,84 @@ document.addEventListener("DOMContentLoaded", () => {
     { '24h': '16:00', 'label': '4:00 PM' },
     { '24h': '17:00', 'label': '5:00 PM' },
   ];
+
+  // Initialize Socket.IO
+  const socket = io('http://127.0.0.1:5000', {
+    transports: ['websocket']
+}); // Adjust URL if needed
+
+// ... (other code unchanged)
+
+// Helper function to parse "Month DD, YYYY" to ISO format
+function parseDateToISO(dateStr) {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const [monthName, day, year] = dateStr.split(' ');
+    const month = monthNames.indexOf(monthName);
+    if (month === -1 || !day || !year) {
+        return null;
+    }
+    const cleanDay = parseInt(day.replace(',', '')); // Remove comma
+    // Manually format to YYYY-MM-DD to avoid timezone issues
+    const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(cleanDay).padStart(2, '0')}`;
+    return isoDate;
+}
+
+
+
+socket.on('slot_booked', (data) => {
+    if (data.barber !== 'Angelo Paballa') {
+        return;
+    }
+
+    // Normalize dates for comparison
+    const eventDate = data.date.trim();
+    const selectedDate = dailyDateEl.textContent.trim();
+
+    // Parse eventDate to ISO format
+    const isoDate = parseDateToISO(eventDate);
+    if (!isoDate) {
+        return;
+    }
+
+    // Update daily schedule if the appointment is for the selected date
+    if (eventDate === selectedDate) {
+        updateDailySchedule(isoDate);
+    } else {
+    }
+
+    // Update calendar badge
+    updateCalendar();
+});
+
+socket.on('slot_deleted', (data) => {
+    if (data.barber !== 'Angelo Paballa') {
+        return;
+    }
+
+    // Normalize dates for comparison
+    const eventDate = data.date.trim();
+    const selectedDate = dailyDateEl.textContent.trim();
+
+    // Parse eventDate to ISO format
+    const isoDate = parseDateToISO(eventDate);
+    if (!isoDate) {
+        return;
+    }
+
+    // Update daily schedule if the deleted appointment is for the selected date
+    if (eventDate === selectedDate) {
+        updateDailySchedule(isoDate);
+    } else {
+    }
+
+    // Update calendar badge
+    updateCalendar();
+});
+
+// ... (rest of the code unchanged)
 
   // Populate date dropdowns
   function populateDateDropdown(selectElement) {
@@ -65,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       return await response.json();
     } catch (err) {
-      console.error('Error fetching booked times:', err);
       return {};
     }
   }
@@ -84,14 +161,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Update time checkboxes for Remove Appointment
 async function updateRemoveTimeCheckboxes() {
-  const date = removeDateSelect.value;
-  const booked = await fetchBookedTimes(date);
-  const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
-
-  checkboxes.forEach(checkbox => {
-    checkbox.disabled = !!booked[checkbox.value];  // disable if booked
-    checkbox.checked = false; // Reset checks
-  });
+    const date = removeDateSelect.value;
+    const booked = await fetchBookedTimes(date);
+    const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+    checkboxes.forEach(checkbox => {
+        const isBooked = booked[checkbox.value];
+        checkbox.disabled = !isBooked; // Enable only if booked
+        checkbox.checked = false; // Reset checks
+    });
 }
 
   // Show modal
@@ -115,9 +192,14 @@ async function updateRemoveTimeCheckboxes() {
   cancelRemoveBtn.addEventListener('click', () => hideModal(confirmModal));
 
   // Prevent modal from closing on outside click
-  modalOverlay.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
+modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+        // Only close if clicking the overlay itself, not the modal content
+        hideModal(addModal);
+        hideModal(removeModal);
+        hideModal(confirmModal);
+    }
+});
 
   // Open modals
   addAppointmentBtn.addEventListener('click', () => {
@@ -179,34 +261,41 @@ async function updateRemoveTimeCheckboxes() {
         const isoDate = new Date(data.date).toISOString().split('T')[0];
         await updateDailySchedule(isoDate);
         await updateCalendar();
+        socketio.emit("slot_booked", {
+            full_name: data.full_name,
+            cellphone: data.cellphone,
+            email: data.email,
+            service: data.service,
+            barber: data.barber,
+            date: data.date,
+            time: times[0] // Assuming single time slot for simplicity
+        }, broadcast=True); // Emit to update other clients
       } else {
         alert(`Error: ${result.error}`);
       }
     } catch (err) {
-      console.error('Error adding appointment:', err);
       alert('Failed to add appointment. Please try again.');
     }
   });
 
   // Handle Remove Appointment form submission
-  removeAppointmentForm.addEventListener('submit', async (e) => {
+removeAppointmentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(removeAppointmentForm);
     const time = formData.get('time');
-    const data = {
-      barber: window.BARBER_NAME,
-      date: formData.get('date'),
-      time: time
-    };
-
+    const date = formData.get('date');
     if (!time) {
-      alert('Please select a booked time slot to remove.');
-      return;
+        alert('Please select a booked time slot to remove.');
+        return;
     }
-
+    const data = {
+        barber: window.BARBER_NAME,
+        date,
+        time
+    };
     pendingDelete = data;
     showModal(confirmModal);
-  });
+});
 
   // Handle Confirm Remove
   confirmRemoveBtn.addEventListener('click', async () => {
@@ -232,7 +321,6 @@ async function updateRemoveTimeCheckboxes() {
         alert(`Error: ${result.error}`);
       }
     } catch (err) {
-      console.error('Error removing appointment:', err);
       alert('Time slot is empty, select existing time slot!');
     }
     pendingDelete = null;
@@ -240,70 +328,71 @@ async function updateRemoveTimeCheckboxes() {
 
   async function updateDailySchedule(date) {
     try {
-      const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const booked = await response.json();
-
-      let html = '';
-      timeSlots.forEach(slot => {
-        if (booked[slot['24h']]) {
-          const [hours, minutes] = slot['24h'].split(':');
-          const hourNum = parseInt(hours, 10);
-          const ampm = hourNum >= 12 ? 'PM' : 'AM';
-          const displayHour = hourNum % 12 || 12;
-          const displayTime = `${displayHour}:${minutes} ${ampm}`;
-          
-          html += `
-            <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='${JSON.stringify(booked[slot['24h']])}'>
-              <span class="font-medium">${slot.label}</span>
-              <div class="text-right">
-                <div class="text-sm font-semibold">${booked[slot['24h']].full_name}</div>
-                <div class="text-xs text-gray-600">${booked[slot['24h']].service}</div>
-              </div>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="time-slot available flex items-center justify-between p-3 rounded">
-              <span class="font-medium">${slot.label}</span>
-              <span class="text-sm text-black">Available</span>
-            </div>
-          `;
+        const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      });
-      scheduleContainer.innerHTML = html;
+        const booked = await response.json();
 
-      const bookedSlots = document.querySelectorAll('.time-slot.booked');
-      bookedSlots.forEach(slot => {
-        slot.addEventListener('click', () => {
-          try {
-            const appointment = JSON.parse(slot.dataset.appointment);
-            if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
-              appointmentDetails.classList.add('hidden');
-              activeSlot = null;
+        // Verify scheduleContainer
+        if (!scheduleContainer) {
+            return;
+        }
+
+        let html = '';
+        timeSlots.forEach(slot => {
+            if (booked[slot['24h']]) {
+                const [hours, minutes] = slot['24h'].split(':');
+                const hourNum = parseInt(hours, 10);
+                const ampm = hourNum >= 12 ? 'PM' : 'AM';
+                const displayHour = hourNum % 12 || 12;
+                const displayTime = `${displayHour}:${minutes} ${ampm}`;
+                
+                html += `
+                    <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='${JSON.stringify(booked[slot['24h']])}'>
+                        <span class="font-medium">${slot.label}</span>
+                        <div class="text-right">
+                            <div class="text-sm font-semibold">${booked[slot['24h']].full_name}</div>
+                            <div class="text-xs text-gray-600">${booked[slot['24h']].service}</div>
+                        </div>
+                    </div>
+                `;
             } else {
-              showAppointmentDetails(appointment);
-              activeSlot = slot;
+                html += `
+                    <div class="time-slot available flex items-center justify-between p-3 rounded">
+                        <span class="font-medium">${slot.label}</span>
+                        <span class="text-sm text-black">Available</span>
+                    </div>
+                `;
             }
-          } catch (err) {
-            console.error('Failed to parse data-appointment:', err);
-            appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
-            appointmentDetails.classList.remove('hidden');
-            activeSlot = slot;
-          }
         });
-      });
+        scheduleContainer.innerHTML = html;
+        const bookedSlots = document.querySelectorAll('.time-slot.booked');
+        bookedSlots.forEach(slot => {
+            slot.addEventListener('click', () => {
+                try {
+                    const appointment = JSON.parse(slot.dataset.appointment);
+                    if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
+                        appointmentDetails.classList.add('hidden');
+                        activeSlot = null;
+                    } else {
+                        showAppointmentDetails(appointment);
+                        activeSlot = slot;
+                    }
+                } catch (err) {
+                    appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
+                    appointmentDetails.classList.remove('hidden');
+                    activeSlot = slot;
+                }
+            });
+        });
     } catch (err) {
-      console.error("Failed to fetch appointments:", err);
     }
-  }
+}
 
   function showAppointmentDetails(appointment) {
     if (!appointmentDetails) {
-      console.error('appointmentDetails div not found');
       return;
     }
 
@@ -319,7 +408,6 @@ async function updateRemoveTimeCheckboxes() {
 
     for (const [key, element] of Object.entries(elements)) {
       if (!element) {
-        console.error(`Element with ID 'details${key.charAt(0).toUpperCase() + key.slice(1)}' not found`);
       }
     }
 
@@ -349,7 +437,6 @@ async function updateRemoveTimeCheckboxes() {
       }
       return await response.json();
     } catch (err) {
-      console.error("Failed to fetch appointment counts:", err);
       return {};
     }
   }
@@ -383,7 +470,7 @@ async function updateRemoveTimeCheckboxes() {
       dayDiv.className = "h-[50px] w-[auto] sm:h-[65px] md:h-[60px] lg:h-[90px] border border-black bg-gray-200 p-1 rounded cursor-pointer text-sm sm:text-sm md:text-base lg:text-lg xl:text-xl";
 
       if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-        dayDiv.classList.add("ring-4", "ring-red-500");
+        dayDiv.classList.add("ring-4", "ring-red-600");
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
       }
 
@@ -405,10 +492,10 @@ async function updateRemoveTimeCheckboxes() {
 
       dayDiv.addEventListener("click", async () => {
         if (selectedCell) {
-          selectedCell.classList.remove("ring-4", "ring-red-500");
+          selectedCell.classList.remove("ring-4", "ring-red-600");
           selectedCell.setAttribute("aria-selected", "false");
         }
-        dayDiv.classList.add("ring-4", "ring-red-500");
+        dayDiv.classList.add("ring-4", "ring-red-600");
         dayDiv.setAttribute("aria-selected", "true");
         selectedCell = dayDiv;
         dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;

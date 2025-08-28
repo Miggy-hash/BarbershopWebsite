@@ -272,7 +272,7 @@ def Bdashboard_home():
 
 @admin_bp.route('/boboy-appointments/<date>')
 def get_boboy_appointments(date):
-    logger.debug(f"Fetching Boboy appointments for date: {date}")
+    logger.debug(f"Fetching appointments for date: {date}")
     try:
         dt = datetime.strptime(date, "%Y-%m-%d")
         formatted_date = dt.strftime("%B %d, %Y")
@@ -296,12 +296,12 @@ def get_boboy_appointments(date):
         }
         return jsonify(booked)
     except Exception as e:
-        logger.error(f"Error querying Boboy appointments: {e}")
+        logger.error(f"Error querying appointments: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @admin_bp.route('/boboy-appointments-count/<int:year>/<int:month>')
 def get_boboy_appointments_count(year, month):
-    logger.debug(f"Fetching Boboy appointment counts for year: {year}, month: {month}")
+    logger.debug(f"Fetching appointment counts for year: {year}, month: {month}")
     try:
         first_day = datetime(year, month, 1)
         last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
@@ -320,7 +320,7 @@ def get_boboy_appointments_count(year, month):
 
         return jsonify(appointment_counts)
     except Exception as e:
-        logger.error(f"Error fetching Boboy appointment counts: {e}")
+        logger.error(f"Error fetching appointment counts: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @admin_bp.route('/logout')
