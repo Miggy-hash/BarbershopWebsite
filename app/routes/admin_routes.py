@@ -3,6 +3,8 @@ from app import db
 from app.models import Appointment
 from datetime import datetime
 import logging
+from flask_socketio import emit
+from app import socketio
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -205,9 +207,24 @@ def remove_appointment():
         if not appointment:
             return jsonify({'error': 'No appointment found for the selected time slot'}), 404
 
+        # Store appointment details for emitting
+        appointment_data = {
+            "full_name": sanitize_string(appointment.full_name),
+            "cellphone": sanitize_string(appointment.cellphone),
+            "email": sanitize_string(appointment.email),
+            "service": sanitize_string(appointment.service),
+            "barber": barber,
+            "date": date,
+            "time": time
+        }
+
         db.session.delete(appointment)
         db.session.commit()
         logger.debug(f"Removed appointment for {barber} on {date} at {time}")
+
+        # Emit deletion event to all clients
+        socketio.emit("slot_deleted", appointment_data)  # Removed broadcast=True
+
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()

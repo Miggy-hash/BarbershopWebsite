@@ -6,6 +6,10 @@ from flask import jsonify
 from flask import request
 from flask_socketio import emit
 from app import socketio
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -199,49 +203,63 @@ def select_service(barber, service_name):
     
 @routes_bp.route("/confirm", methods=["POST"])
 def confirm_booking():
-    if session.get("booking_complete"):
-        session.clear()
-        return redirect("/login")
+    try:
+        if session.get("booking_complete"):
+            session.clear()
+            return redirect("/login")
 
-    full_name = request.form["full_name"]
-    cellphone = request.form["cellphone"]
-    email = request.form["email"]
-    service = request.form["service"]
-    barber = request.form["barber"]
-    date = request.form["date"]
-    time = request.form["time"]
+        full_name = request.form["full_name"]
+        cellphone = request.form["cellphone"]
+        email = request.form["email"]
+        service = request.form["service"]
+        barber = request.form["barber"]
+        date = request.form["date"]
+        time = request.form["time"]
 
-    # STEP: Check if slot already exists
-    existing = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
-    if existing:
-        return jsonify({"success": False, "message": "This time slot has already been booked."}), 400
+        logger.debug(f"Confirm booking: {full_name}, {cellphone}, {email}, {service}, {barber}, {date}, {time}")
 
-    # Insert if not exists
-    new_appointment = Appointment(
-        full_name=full_name,
-        cellphone=cellphone,
-        email=email,
-        service=service,
-        barber=barber,
-        date=date,
-        time=time
-    )
+        # Check if slot already exists
+        existing = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
+        if existing:
+            logger.warning(f"Slot already booked: {barber}, {date}, {time}")
+            return jsonify({"success": False, "message": "This time slot has already been booked."}), 400
 
-    db.session.add(new_appointment)
-    db.session.commit()
+        # Insert new appointment
+        new_appointment = Appointment(
+            full_name=full_name,
+            cellphone=cellphone,
+            email=email,
+            service=service,
+            barber=barber,
+            date=date,
+            time=time
+        )
 
-    session["selected_date"] = date
-    session["selected_time"] = time
-    session["booking_complete"] = True
+        db.session.add(new_appointment)
+        db.session.commit()
+        logger.debug(f"Appointment saved: {new_appointment.id}")
 
-    socketio.emit("slot_booked", {
-        "date": date,
-        "time": time,
-        "barber": barber
-    })  # no broadcast needed
+        session["selected_date"] = date
+        session["selected_time"] = time
+        session["booking_complete"] = True
 
-    return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
+        # Emit to all clients with full appointment details
+        socketio.emit("slot_booked", {
+            "full_name": full_name,
+            "cellphone": cellphone,
+            "email": email,
+            "service": service,
+            "barber": barber,
+            "date": date,
+            "time": time
+        })  # Remove broadcast=True, default behavior is to emit to all clients in namespace
+        logger.debug("Emitted slot_booked event")
 
+        return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in confirm_booking: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 
 
 @routes_bp.route('/logout')

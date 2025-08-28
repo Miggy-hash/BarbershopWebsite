@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDate = new Date();
   let selectedCell = null;
   let activeSlot = null;
-  let pendingDelete = null; // Store data for confirmation
+  let pendingDelete = null;
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -41,6 +41,106 @@ document.addEventListener("DOMContentLoaded", () => {
     { '24h': '16:00', 'label': '4:00 PM' },
     { '24h': '17:00', 'label': '5:00 PM' },
   ];
+
+  // Initialize Socket.IO
+  const socket = io('http://127.0.0.1:5000', {
+    transports: ['websocket']
+}); // Adjust URL if needed
+
+// ... (other code unchanged)
+
+// Helper function to parse "Month DD, YYYY" to ISO format
+function parseDateToISO(dateStr) {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const [monthName, day, year] = dateStr.split(' ');
+    const month = monthNames.indexOf(monthName);
+    if (month === -1 || !day || !year) {
+        console.error('Invalid date format:', dateStr);
+        return null;
+    }
+    const cleanDay = parseInt(day.replace(',', '')); // Remove comma
+    const date = new Date(year, month, cleanDay);
+    if (isNaN(date.getTime())) {
+        console.error('Invalid parsed date:', dateStr);
+        return null;
+    }
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+}
+
+socket.on('connect', () => {
+    console.log('Connected to Socket.IO server:', socket.id);
+});
+
+socket.on('slot_booked', (data) => {
+    console.log('Received slot_booked event:', data);
+    if (data.barber !== 'Emel Calomos') {
+        console.log('Ignoring event: not for Emel Calomos');
+        return;
+    }
+
+    // Normalize dates for comparison
+    const eventDate = data.date.trim();
+    const selectedDate = dailyDateEl.textContent.trim();
+    console.log('Selected date:', selectedDate, 'Event date:', eventDate);
+
+    // Parse eventDate to ISO format
+    const isoDate = parseDateToISO(eventDate);
+    if (!isoDate) {
+        console.error('Skipping schedule update due to invalid date');
+        return;
+    }
+    console.log('Parsed ISO date:', isoDate);
+
+    // Update daily schedule if the appointment is for the selected date
+    if (eventDate === selectedDate) {
+        console.log('Updating daily schedule for:', eventDate);
+        updateDailySchedule(isoDate);
+    } else {
+        console.log('Date mismatch, skipping schedule update');
+    }
+
+    // Update calendar badge
+    console.log('Updating calendar');
+    updateCalendar();
+});
+
+socket.on('slot_deleted', (data) => {
+    console.log('Received slot_deleted event:', data);
+    if (data.barber !== 'Emel Calomos') {
+        console.log('Ignoring event: not for Emel Calomos');
+        return;
+    }
+
+    // Normalize dates for comparison
+    const eventDate = data.date.trim();
+    const selectedDate = dailyDateEl.textContent.trim();
+    console.log('Selected date:', selectedDate, 'Event date:', eventDate);
+
+    // Parse eventDate to ISO format
+    const isoDate = parseDateToISO(eventDate);
+    if (!isoDate) {
+        console.error('Skipping schedule update due to invalid date');
+        return;
+    }
+    console.log('Parsed ISO date:', isoDate);
+
+    // Update daily schedule if the deleted appointment is for the selected date
+    if (eventDate === selectedDate) {
+        console.log('Updating daily schedule for:', eventDate);
+        updateDailySchedule(isoDate);
+    } else {
+        console.log('Date mismatch, skipping schedule update');
+    }
+
+    // Update calendar badge
+    console.log('Updating calendar');
+    updateCalendar();
+});
+
+// ... (rest of the code unchanged)
 
   // Populate date dropdowns
   function populateDateDropdown(selectElement) {
@@ -83,17 +183,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Update time checkboxes for Remove Appointment
-async function updateRemoveTimeCheckboxes() {
-  const date = removeDateSelect.value;
-  const booked = await fetchBookedTimes(date);
-  const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
-
-  checkboxes.forEach(checkbox => {
-    checkbox.disabled = !!booked[checkbox.value];  // disable if booked
-    checkbox.checked = false; // Reset checks
-  });
-}
-
+  async function updateRemoveTimeCheckboxes() {
+    const date = removeDateSelect.value;
+    const booked = await fetchBookedTimes(date);
+    const checkboxes = document.querySelectorAll('#removeTimeCheckboxes input[name="time"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.disabled = !booked[checkbox.value]; // Enable only if booked
+      checkbox.checked = false; // Reset checks
+    });
+  }
 
   // Show modal
   function showModal(modal) {
@@ -180,6 +278,15 @@ async function updateRemoveTimeCheckboxes() {
         const isoDate = new Date(data.date).toISOString().split('T')[0];
         await updateDailySchedule(isoDate);
         await updateCalendar();
+        socketio.emit("slot_booked", {
+            full_name: data.full_name,
+            cellphone: data.cellphone,
+            email: data.email,
+            service: data.service,
+            barber: data.barber,
+            date: data.date,
+            time: times[0] // Assuming single time slot for simplicity
+        }, broadcast=True); // Emit to update other clients
       } else {
         alert(`Error: ${result.error}`);
       }
@@ -240,67 +347,82 @@ async function updateRemoveTimeCheckboxes() {
   });
 
   async function updateDailySchedule(date) {
+    console.log('Starting updateDailySchedule for date:', date); // Debug log
     try {
-      const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const booked = await response.json();
-
-      let html = '';
-      timeSlots.forEach(slot => {
-        if (booked[slot['24h']]) {
-          const [hours, minutes] = slot['24h'].split(':');
-          const hourNum = parseInt(hours, 10);
-          const ampm = hourNum >= 12 ? 'PM' : 'AM';
-          const displayHour = hourNum % 12 || 12;
-          const displayTime = `${displayHour}:${minutes} ${ampm}`;
-          
-          html += `
-            <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='${JSON.stringify(booked[slot['24h']])}'>
-              <span class="font-medium">${slot.label}</span>
-              <div class="text-right">
-                <div class="text-sm font-semibold">${booked[slot['24h']].full_name}</div>
-                <div class="text-xs text-gray-600">${booked[slot['24h']].service}</div>
-              </div>
-            </div>
-          `;
-        } else {
-          html += `
-            <div class="time-slot available flex items-center justify-between p-3 rounded">
-              <span class="font-medium">${slot.label}</span>
-              <span class="text-sm text-black">Available</span>
-            </div>
-          `;
+        const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(date)}`;
+        console.log('Fetching from endpoint:', endpoint); // Debug log
+        const response = await fetch(endpoint);
+        console.log('Fetch response status:', response.status); // Debug log
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      });
-      scheduleContainer.innerHTML = html;
+        const booked = await response.json();
+        console.log('Fetched booked data:', booked); // Debug log
 
-      const bookedSlots = document.querySelectorAll('.time-slot.booked');
-      bookedSlots.forEach(slot => {
-        slot.addEventListener('click', () => {
-          try {
-            const appointment = JSON.parse(slot.dataset.appointment);
-            if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
-              appointmentDetails.classList.add('hidden');
-              activeSlot = null;
+        // Verify scheduleContainer
+        console.log('scheduleContainer:', scheduleContainer); // Debug log
+        if (!scheduleContainer) {
+            console.error('scheduleContainer is null or undefined');
+            return;
+        }
+
+        let html = '';
+        timeSlots.forEach(slot => {
+            if (booked[slot['24h']]) {
+                const [hours, minutes] = slot['24h'].split(':');
+                const hourNum = parseInt(hours, 10);
+                const ampm = hourNum >= 12 ? 'PM' : 'AM';
+                const displayHour = hourNum % 12 || 12;
+                const displayTime = `${displayHour}:${minutes} ${ampm}`;
+                
+                html += `
+                    <div class="time-slot booked flex items-center justify-between p-3 rounded" data-appointment='${JSON.stringify(booked[slot['24h']])}'>
+                        <span class="font-medium">${slot.label}</span>
+                        <div class="text-right">
+                            <div class="text-sm font-semibold">${booked[slot['24h']].full_name}</div>
+                            <div class="text-xs text-gray-600">${booked[slot['24h']].service}</div>
+                        </div>
+                    </div>
+                `;
             } else {
-              showAppointmentDetails(appointment);
-              activeSlot = slot;
+                html += `
+                    <div class="time-slot available flex items-center justify-between p-3 rounded">
+                        <span class="font-medium">${slot.label}</span>
+                        <span class="text-sm text-black">Available</span>
+                    </div>
+                `;
             }
-          } catch (err) {
-            console.error('Failed to parse data-appointment:', err);
-            appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
-            appointmentDetails.classList.remove('hidden');
-            activeSlot = slot;
-          }
         });
-      });
+        console.log('Generated HTML:', html); // Debug log
+        scheduleContainer.innerHTML = html;
+        console.log('Updated scheduleContainer.innerHTML'); // Debug log
+
+        const bookedSlots = document.querySelectorAll('.time-slot.booked');
+        console.log('Found booked slots:', bookedSlots.length); // Debug log
+        bookedSlots.forEach(slot => {
+            slot.addEventListener('click', () => {
+                try {
+                    const appointment = JSON.parse(slot.dataset.appointment);
+                    console.log('Clicked booked slot, appointment:', appointment); // Debug log
+                    if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
+                        appointmentDetails.classList.add('hidden');
+                        activeSlot = null;
+                    } else {
+                        showAppointmentDetails(appointment);
+                        activeSlot = slot;
+                    }
+                } catch (err) {
+                    console.error('Failed to parse data-appointment:', err);
+                    appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
+                    appointmentDetails.classList.remove('hidden');
+                    activeSlot = slot;
+                }
+            });
+        });
     } catch (err) {
-      console.error("Failed to fetch appointments:", err);
+        console.error('Failed to update daily schedule:', err);
     }
-  }
+}
 
   function showAppointmentDetails(appointment) {
     if (!appointmentDetails) {
