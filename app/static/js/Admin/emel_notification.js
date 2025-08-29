@@ -5,42 +5,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const showMoreBtn = document.getElementById('showMoreBtn');
     const unreadCountSpan = document.getElementById('unreadCount');
     let offset = 0;
-    const limit = 6; // Initial load
+    const limit = 6;
     let loadedNotifications = [];
 
-    // Initialize Socket.IO with room
-    const socket = io('http://127.0.0.1:5000', {
+    const socket = io('http://127.0.0.1:5000', { // Update to 'http://192.168.100.94:5000' if needed
         transports: ['websocket']
     });
-    socket.emit('join', 'emel_calomos'); // Join barber's room
+    socket.emit('join', 'emel_calomos');
 
-    // Toggle dropdown
     notificationBtn.addEventListener('click', async () => {
+        console.log('Notification button clicked');
         notificationDropdown.classList.toggle('show');
         if (notificationDropdown.classList.contains('show')) {
-            // Clear existing notifications
             loadedNotifications = [];
             offset = 0;
             notificationList.innerHTML = '';
             await fetchNotifications(limit, offset);
-            // Mark all as read
             await markNotificationsRead();
         }
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
             notificationDropdown.classList.remove('show');
         }
     });
 
-    // Fetch notifications
     async function fetchNotifications(limit, offset) {
         try {
             const response = await fetch(`/admin/emel-notifications/${limit}/${offset}`);
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const data = await response.json();
+            console.log('Fetched notifications:', data);
             updateNotifications(data.notifications, data.unread_count);
         } catch (err) {
             console.error('Error fetching notifications:', err);
@@ -48,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Update notification list and badge
     function updateNotifications(notifications, unreadCount) {
         loadedNotifications = [...loadedNotifications, ...notifications];
         if (loadedNotifications.length === 0) {
@@ -72,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUnreadBadge(unreadCount);
     }
 
-    // Format time to 12-hour
     function formatTime(time) {
         const [hours, minutes] = time.split(':');
         const hourNum = parseInt(hours, 10);
@@ -81,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${displayHour}:${minutes} ${ampm}`;
     }
 
-    // Update unread badge
     function updateUnreadBadge(count) {
+        console.log('Updating unread badge with count:', count);
         if (count > 0) {
             unreadCountSpan.textContent = count;
             unreadCountSpan.classList.remove('hidden');
@@ -91,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Mark notifications as read
     async function markNotificationsRead() {
         try {
             const response = await fetch('/admin/emel-mark-notifications-read', {
@@ -99,31 +92,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' }
             });
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            updateUnreadBadge(0); // Clear badge
-            // Update loaded notifications to read
+            console.log('Notifications marked as read');
             loadedNotifications.forEach(n => n.is_read = true);
             notificationList.querySelectorAll('.notification-item').forEach(item => {
                 item.classList.remove('unread');
             });
+            updateUnreadBadge(0);
         } catch (err) {
             console.error('Error marking notifications read:', err);
         }
     }
 
-    // Handle Show More
     showMoreBtn.addEventListener('click', async () => {
         offset += limit;
-        await fetchNotifications(10, offset); // Load next 10
+        await fetchNotifications(limit, offset);
     });
 
-    // Handle new appointment
     socket.on('new_appointment', (data) => {
         if (data.barber !== 'Emel Calomos') return;
-        loadedNotifications.unshift(data); // Add to top
-        if (loadedNotifications.length > 10) loadedNotifications.pop(); // Keep max 10
+        console.log('New appointment received:', data);
+        loadedNotifications.unshift(data);
+        if (loadedNotifications.length > 10) loadedNotifications.pop();
         updateNotifications(loadedNotifications, parseInt(unreadCountSpan.textContent || 0) + 1);
     });
 
-    // Initial fetch
     fetchNotifications(limit, 0);
 });

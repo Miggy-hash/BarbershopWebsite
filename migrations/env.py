@@ -1,8 +1,8 @@
 import logging
 from logging.config import fileConfig
-
+from app import db
 from flask import current_app
-
+from app.models import Appointment, User
 from alembic import context
 
 # this is the Alembic Config object, which provides

@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from app import db
-from app.models import Appointment
+from app import db, socketio
+from app.models import Appointment, User
 from datetime import datetime
-import logging
 from flask_socketio import emit
-from app import socketio
 from datetime import datetime, timedelta
+from flask_login import login_required, current_user, login_user, logout_user
+from werkzeug.security import check_password_hash
+import logging
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -25,20 +26,26 @@ ADMIN_PASSWORD = "slick123"
 
 @admin_bp.route("/login", methods=["GET", "POST"])
 def ADMINLOGIN():
-    if request.method == "POST":
-        username = request.form.get("admin_username")
-        password = request.form.get("admin_password")
-
+    if current_user.is_authenticated:
         DASHBOARD_ROUTES = {
             "emel": "admin.Edashboard_home",
             "boboy": "admin.Bdashboard_home"
         }
+        return redirect(url_for(DASHBOARD_ROUTES[current_user.username]))
 
-        if username in VALID_USERS and password == ADMIN_PASSWORD:
-            session["username"] = username
+    if request.method == "POST":
+        username = request.form.get("admin_username")
+        password = request.form.get("admin_password")
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            DASHBOARD_ROUTES = {
+                "emel": "admin.Edashboard_home",
+                "boboy": "admin.Bdashboard_home"
+            }
             return redirect(url_for(DASHBOARD_ROUTES[username]))
         else:
-            flash("Invalid username and password", "error")
+            flash("Invalid username or password", "error")
 
     return render_template("admin/adminLogin.html")
 
@@ -325,47 +332,58 @@ def get_boboy_appointments_count(year, month):
         logger.error(f"Error fetching appointment counts: {e}")
         return jsonify({'error': 'Internal server error'}), 500
     
-@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>')
-def get_emel_notifications(limit, offset):
+@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>', methods=['GET'])
+@login_required
+def get_notifications(limit, offset):
     logger.debug(f"Fetching notifications for Emel Calomos: limit={limit}, offset={offset}")
     try:
         # Clean up appointments older than 7 days
         cleanup_old_appointments()
 
         cutoff_date = datetime.utcnow() - timedelta(days=7)
-        # Fetch notifications
         appointments = Appointment.query.filter(
             Appointment.barber == "Emel Calomos",
             Appointment.created_at >= cutoff_date
-        ).order_by(Appointment.created_at.desc()).limit(limit).offset(offset).all()
+        ).order_by(Appointment.created_at.desc()).offset(offset).limit(limit).all()
+        logger.debug(f"Found {len(appointments)} appointments")
 
-        notifications = [{
-            'id': a.id,
-            'full_name': sanitize_string(a.full_name),
-            'service': sanitize_string(a.service),
-            'date': sanitize_string(a.date),
-            'time': sanitize_string(a.time),
-            'created_at': a.created_at.isoformat() if a.created_at else datetime.utcnow().isoformat(),
-            'is_read': a.is_read
-        } for a in appointments]
-
-        # Get unread count (ensure correct filter syntax)
         unread_count = Appointment.query.filter(
             Appointment.barber == "Emel Calomos",
             Appointment.is_read == False,
             Appointment.created_at >= cutoff_date
         ).count()
+        logger.debug(f"Unread count: {unread_count}")
 
-        return jsonify({
-            'notifications': notifications,
-            'unread_count': unread_count
-        })
-    except AttributeError as e:
-        logger.error(f"Attribute error, possibly missing created_at/is_read columns: {e}")
-        return jsonify({'error': 'Database schema error. Please apply migrations.'}), 500
+        notifications = [{
+            'id': appt.id,
+            'full_name': appt.full_name,
+            'service': appt.service,
+            'date': appt.date,
+            'time': appt.time,
+            'created_at': appt.created_at.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'is_read': appt.is_read
+        } for appt in appointments]
+
+        return jsonify({'notifications': notifications, 'unread_count': unread_count})
     except Exception as e:
         logger.error(f"Error fetching notifications: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        return jsonify({'error': 'Failed to fetch notifications'}), 500
+
+@admin_bp.route('/emel-mark-notifications-read', methods=['POST'])
+@login_required
+def mark_notifications_read():
+    logger.debug("Marking notifications as read for Emel Calomos")
+    try:
+        appointments = Appointment.query.filter_by(barber='Emel Calomos', is_read=False).all()
+        logger.info(f"Found {len(appointments)} unread appointments for Emel Calomos")
+        for appt in appointments:
+            appt.is_read = True
+        db.session.commit()
+        logger.info("Notifications marked as read")
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Error marking notifications read: {e}")
+        return jsonify({'error': 'Failed to mark notifications read'}), 500
 
 def cleanup_old_appointments():
     try:
@@ -376,8 +394,10 @@ def cleanup_old_appointments():
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error cleaning up old appointments: {e}")
+
     
 @admin_bp.route('/logout')
+@login_required
 def logout():
-    session.clear()
+    logout_user()
     return redirect(url_for('admin.ADMINLOGIN'))

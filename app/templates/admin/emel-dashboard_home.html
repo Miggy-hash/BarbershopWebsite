@@ -94,7 +94,7 @@
 <body class="body">
     <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
     <!-- Header -->
-    <header class="calendar-header relative text-white shadow-lg z-10">
+    <header class="calendar-header relative text-white shadow-lg z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex flex-row m-4">
@@ -102,7 +102,7 @@
                     <h1 class="font-playfair font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="relative">
+                    <div class="relative z-50">
                         <button id="notificationBtn" class="text-white text-xs md:text-lg lg:text-xl xl:text-base relative">
                             <i class="fas fa-bell"></i>
                             <span id="unreadCount" class="notification-badge hidden">0</span>
@@ -303,6 +303,6 @@
         window.APPOINTMENT_ENDPOINT = 'emel-appointments';
     </script>
     <script src="{{ url_for('static', filename='js/Admin/emel_calendar.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Admin/emel_notificiation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Admin/emel_notification.js') }}"></script>
 </body>
 </html>
