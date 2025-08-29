@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 class Appointment(db.Model):
     __tablename__ = "appointments"
@@ -11,6 +12,8 @@ class Appointment(db.Model):
     barber = db.Column(db.String(100), nullable=False)
     date = db.Column(db.String(50), nullable=False)
     time = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f"<Appointment {self.full_name} - {self.date} {self.time}>"

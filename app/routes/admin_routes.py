@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 from flask_socketio import emit
 from app import socketio
+from datetime import datetime, timedelta
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -276,6 +277,7 @@ def get_boboy_appointments(date):
     try:
         dt = datetime.strptime(date, "%Y-%m-%d")
         formatted_date = dt.strftime("%B %d, %Y")
+        logger.debug(f"Formatted date for DB query: {formatted_date}")
     except ValueError as e:
         logger.error(f"Invalid date format: {date}, Error: {e}")
         return jsonify({'error': 'Invalid date format'}), 400
@@ -322,7 +324,59 @@ def get_boboy_appointments_count(year, month):
     except Exception as e:
         logger.error(f"Error fetching appointment counts: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+    
+@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>')
+def get_emel_notifications(limit, offset):
+    logger.debug(f"Fetching notifications for Emel Calomos: limit={limit}, offset={offset}")
+    try:
+        # Clean up appointments older than 7 days
+        cleanup_old_appointments()
 
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        # Fetch notifications
+        appointments = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.created_at >= cutoff_date
+        ).order_by(Appointment.created_at.desc()).limit(limit).offset(offset).all()
+
+        notifications = [{
+            'id': a.id,
+            'full_name': sanitize_string(a.full_name),
+            'service': sanitize_string(a.service),
+            'date': sanitize_string(a.date),
+            'time': sanitize_string(a.time),
+            'created_at': a.created_at.isoformat() if a.created_at else datetime.utcnow().isoformat(),
+            'is_read': a.is_read
+        } for a in appointments]
+
+        # Get unread count (ensure correct filter syntax)
+        unread_count = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.is_read == False,
+            Appointment.created_at >= cutoff_date
+        ).count()
+
+        return jsonify({
+            'notifications': notifications,
+            'unread_count': unread_count
+        })
+    except AttributeError as e:
+        logger.error(f"Attribute error, possibly missing created_at/is_read columns: {e}")
+        return jsonify({'error': 'Database schema error. Please apply migrations.'}), 500
+    except Exception as e:
+        logger.error(f"Error fetching notifications: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+def cleanup_old_appointments():
+    try:
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        Appointment.query.filter(Appointment.created_at < cutoff_date).delete()
+        db.session.commit()
+        logger.debug("Cleaned up old appointments")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error cleaning up old appointments: {e}")
+    
 @admin_bp.route('/logout')
 def logout():
     session.clear()

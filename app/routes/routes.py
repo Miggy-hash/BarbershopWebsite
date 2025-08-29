@@ -232,7 +232,9 @@ def confirm_booking():
             service=service,
             barber=barber,
             date=date,
-            time=time
+            time=time,
+            created_at=datetime.utcnow(),
+            is_read=False
         )
 
         db.session.add(new_appointment)
@@ -244,6 +246,7 @@ def confirm_booking():
         session["booking_complete"] = True
 
         # Emit to all clients with full appointment details
+        room = barber.lower().replace(" ", "_")
         socketio.emit("slot_booked", {
             "full_name": full_name,
             "cellphone": cellphone,
@@ -251,9 +254,11 @@ def confirm_booking():
             "service": service,
             "barber": barber,
             "date": date,
-            "time": time
-        })  # Remove broadcast=True, default behavior is to emit to all clients in namespace
-        logger.debug("Emitted slot_booked event")
+            "time": time,
+            "created_at": new_appointment.created_at.isoformat(),
+            "is_read": new_appointment.is_read
+        }, room=room)
+        logger.debug(f"Emitted new_appointment to room: {room}")
 
         return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
     except Exception as e:

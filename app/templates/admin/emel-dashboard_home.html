@@ -6,6 +6,7 @@
     <title>Emel Dashboard - Appointment Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
     <style>
@@ -37,26 +38,85 @@
         .body { background-image: url("/static/images/background.jpg"); background-size: cover; background-position: center; }
         .name { color: white; font-size: 35px; font-weight: 700; }
         .time { color: white; font-size: 25px; font-weight: 400; }
-        .modal { display: none; position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%); z-index: 50; background-color: rgb(0, 0, 0); border: 2px solid #ffffff; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; background-color: rgb(0, 0, 0); border: 2px solid #ffffff; padding: 20px; max-width: 500px; width: 90%; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(7px); z-index: 40; }
         .modal-close { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: white; }
         .modal input, .modal select { background-color: #181818; color: white; border-radius: 5px; border: 1px solid #ffffff; }
         .modal input::placeholder { color: #aaa; }
+        .notification-dropdown { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            right: 0; 
+            width: 300px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            background-color: #000; 
+            border: 2px solid #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3); 
+            z-index: 50; 
+            padding: 10px;
+        }
+        .notification-dropdown.show { display: block; }
+        .notification-item { 
+            padding: 10px; 
+            border-bottom: 1px solid #333; 
+            color: #fff; 
+            font-family: 'Montserrat', sans-serif;
+        }
+        .notification-item.unread { background-color: #1e3a8a; } /* Light blue for unread */
+        .notification-item:last-child { border-bottom: none; }
+        .show-more-btn { 
+            display: block; 
+            text-align: center; 
+            padding: 10px; 
+            color: #3b82f6; 
+            cursor: pointer; 
+        }
+        .show-more-btn:hover { color: #60a5fa; }
+        .notification-badge { 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+            background-color: #dc2626; 
+            color: white; 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px;
+        }
     </style>
 </head>
 <body class="body">
     <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
     <!-- Header -->
-    <header class="calendar-header relative text-white shadow-lg z-20">
+    <header class="calendar-header relative text-white shadow-lg z-10">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex flex-row m-4">
                     <img src="{{ url_for('static', filename='images/SG-LOGO.jpg')}}" class="w-[50px] h-[50px] rounded-full md:w-[60px] md:h-[60px] lg:w-[90px] lg:h-[90px]">
                     <h1 class="font-playfair font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
                 </div>
-                <a href="{{ url_for('admin.logout') }}" class="btn btn-danger text-xs md:text-lg lg:text-xl xl:text-base">
-                    Log out
-                </a>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button id="notificationBtn" class="text-white text-xs md:text-lg lg:text-xl xl:text-base relative">
+                            <i class="fas fa-bell"></i>
+                            <span id="unreadCount" class="notification-badge hidden">0</span>
+                        </button>
+                        <div id="notificationDropdown" class="notification-dropdown">
+                            <h3 class="text-lg font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
+                            <div id="notificationList" class="space-y-2"></div>
+                            <div id="showMoreBtn" class="show-more-btn">Show More</div>
+                        </div>
+                    </div>
+                        <a href="{{ url_for('admin.logout') }}" class="btn btn-danger text-xs md:text-lg lg:text-xl xl:text-base">
+                            Log out
+                        </a>
+                </div>
             </div>
         </div>
     </header>
@@ -135,11 +195,11 @@
                                 <p><span class="name font-faustina" id="detailsFullName"></span></p>
                                 <p><span class="time font-montserrat" id="detailsTime"></span></p>
                             </div>
-                            <p><strong class="font-montserrat">Barber:</strong> <span class="font-faustina text-xl" id="detailsBarber"></span></p>
-                            <p><strong class="font-montserrat">Service:</strong> <span class="font-faustina text-xl" id="detailsService"></span></p>
-                            <p><strong class="font-montserrat">Cellphone:</strong> <span class="font-faustina text-xl" id="detailsCellphone"></span></p>
-                            <p><strong class="font-montserrat">Email:</strong> <span class="font-faustina text-xl" id="detailsEmail"></span></p>
-                            <p><strong class="font-montserrat">Date:</strong> <span class="font-faustina text-xl" id="detailsDate"></span></p>
+                            <p><strong class="font-montserrat">Barber:</strong> <span class="font-montserrat text-lg" id="detailsBarber"></span></p>
+                            <p><strong class="font-montserrat">Service:</strong> <span class="font-montserrat text-lg" id="detailsService"></span></p>
+                            <p><strong class="font-montserrat">Cellphone:</strong> <span class="font-montserrat text-lg" id="detailsCellphone"></span></p>
+                            <p><strong class="font-montserrat">Email:</strong> <span class="font-montserrat text-lg" id="detailsEmail"></span></p>
+                            <p><strong class="font-montserrat">Date:</strong> <span class="font-montserrat text-lg" id="detailsDate"></span></p>
                         </div>
                     </div>
                     <!-- Action Buttons -->
@@ -156,43 +216,43 @@
             <!-- Add Appointment Modal -->
             <div id="addAppointmentModal" class="modal rounded-[20px]">
                 <span id="addModalClose" class="modal-close">&times;</span>
-                <h2 class="text-2xl font-bold font-montserrat text-white mb-4">Add Appointment</h2>
+                <h2 class="lg:text-2xl text-lg font-bold font-montserrat text-white mb-4">Add Appointment</h2>
                 <form id="addAppointmentForm" class="space-y-4">
                     <div>
-                        <label for="fullName" class="block font-montserrat text-white">Full Name</label>
-                        <input type="text" id="fullName" name="full_name" required class="w-full p-2 rounded " placeholder="Enter full name">
+                        <label for="fullName" class="block text-sm font-montserrat text-white">Full Name</label>
+                        <input type="text" id="fullName" name="full_name" required class="w-full h-[35px] lg:h-[40px] lg:text-base text-sm p-2 rounded " placeholder="Enter full name">
                     </div>
                     <div>
-                        <label for="cellphone" class="block font-montserrat text-white">Cellphone</label>
-                        <input type="text" id="cellphone" name="cellphone" required class="w-full p-2 rounded" placeholder="Enter cellphone number">
+                        <label for="cellphone" class="block text-sm font-montserrat text-white">Cellphone</label>
+                        <input type="text" id="cellphone" name="cellphone" required class="w-full h-[35px] lg:h-[40px] lg:text-base text-sm p-2 rounded" placeholder="Enter cellphone number">
                     </div>
                     <div>
-                        <label for="email" class="block font-montserrat text-white">Email</label>
-                        <input type="email" id="email" name="email" required class="w-full p-2 rounded" placeholder="Enter email address">
+                        <label for="email" class="block text-sm font-montserrat text-white">Email</label>
+                        <input type="email" id="email" name="email" required class="w-full h-[35px] lg:h-[40px] lg:text-base text-sm p-2 rounded" placeholder="Enter email address">
                     </div>
                     <div>
-                        <label class="block font-montserrat text-white">Barber</label>
-                        <p id="barberName" class="font-bold text-2xl text-gray-400">Emel Calomos</p>
+                        <label class="block text-sm font-montserrat text-white">Barber</label>
+                        <p id="barberName" class="font-bold lg:text-2xl text-lg text-gray-400">Emel Calomos</p>
                         <input type="hidden" id="barber" name="barber" value="Emel Calomos">
                     </div>
                     <div>
-                        <label for="service" class="block font-montserrat text-white">Service</label>
-                        <select id="service" name="service" required class="w-full p-2 rounded">
+                        <label for="service" class="block text-sm font-montserrat text-white">Service</label>
+                        <select id="service" name="service" required class="w-full h-[35px] lg:h-[40px] lg:text-base text-sm p-2 rounded">
                             <option value="Home Service">Home Service</option>
                             <option value="Regular Haircut">Regular Haircut</option>
                             <option value="Full Service">Full Service</option>
                         </select>
                     </div>
                     <div>
-                        <label for="addDate" class="block font-montserrat text-white">Date</label>
-                        <select id="addDate" name="date" required class="w-full p-2 rounded "></select>
+                        <label for="addDate" class="block text-sm font-montserrat text-white">Date</label>
+                        <select id="addDate" name="date" required class="w-full h-[35px] lg:h-[40px] lg:text-base text-sm p-2 rounded "></select>
                     </div>
                     <div>
                         <label class="block font-montserrat text-white">Time</label>
                         <div id="addTimeCheckboxes" class="grid grid-cols-2 gap-2">
                             {% for slot in time_slots %}
-                                <label class="flex items-center text-lg font-montserrat text-white">
-                                    <input type="checkbox" name="time" value="{{ slot['24h'] }}" class="ml-[55px] mr-3 w-[18px] h-[18px]">
+                                <label class="flex items-center lg:text-lg text-sm font-montserrat text-white">
+                                    <input type="checkbox" name="time" value="{{ slot['24h'] }}" class="lg:ml-[55px] ml-[25px] mr-3 lg:w-[18px] lg:h-[18px]">
                                     {{ slot['label'] }}
                                 </label>
                             {% endfor %}
@@ -204,18 +264,18 @@
             <!-- Remove Appointment Modal -->
             <div id="removeAppointmentModal" class="modal rounded-[25px]">
                 <span id="removeModalClose" class="modal-close">&times;</span>
-                <h2 class="text-2xl font-bold font-montserrat text-white mb-4">Remove Appointment</h2>
+                <h2 class="lg:text-2xl text-lg font-bold font-montserrat text-white mb-4">Remove Appointment</h2>
                 <form id="removeAppointmentForm" class="space-y-4">
                     <div>
-                        <label for="removeDate" class="block font-montserrat text-white">Date</label>
+                        <label for="removeDate" class="block text-sm font-montserrat text-white">Date</label>
                         <select id="removeDate" name="date" required class="w-full font-montserrat p-2 gap-1.5 rounded-[10px]"></select>
                     </div>
                     <div>
-                        <label class="block font-montserrat text-white">Time</label>
+                        <label class="block text-sm font-montserrat text-white">Time</label>
                         <div id="removeTimeCheckboxes" class="grid grid-cols-2 gap-2">
                             {% for slot in time_slots %}
                                 <label class="flex items-center font-montserrat text-lg text-white">
-                                    <input type="radio" name="time" value="{{ slot['24h'] }}" class="ml-[55px] mr-2 w-[18px] h-[18px]">
+                                    <input type="radio" name="time" value="{{ slot['24h'] }}" class="lg:ml-[55px] ml-[20px] mr-3 lg:w-[18px] lg:h-[18px]">
                                     {{ slot['label'] }}
                                 </label>
                             {% endfor %}
@@ -243,5 +303,6 @@
         window.APPOINTMENT_ENDPOINT = 'emel-appointments';
     </script>
     <script src="{{ url_for('static', filename='js/Admin/emel_calendar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Admin/emel_notificiation.js') }}"></script>
 </body>
 </html>

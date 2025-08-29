@@ -6,10 +6,12 @@ from flask_socketio import SocketIO
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_basicauth import BasicAuth
+from flask_migrate import Migrate
 
 
 db = SQLAlchemy()
 socketio = SocketIO(cors_allowed_origins=["http://127.0.0.1:5000", "http://localhost:5000", "http://192.168.100.94:5000"])
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -24,13 +26,15 @@ def create_app():
 
     db.init_app(app)
     socketio.init_app(app)
+    migrate.init_app(app, db)
 
     # ----------------- BLUEPRINT REGISTRATION -----------------
     from app.routes.routes import routes_bp
     from app.routes.admin_routes import admin_bp
 
-    app.register_blueprint(routes_bp)
+    app.register_blueprint(routes_bp)   
     app.register_blueprint(admin_bp)
+    from . import models
 
     # ----------------- FLASK-ADMIN SETUP -----------------
     from . import models  # Import your models.py
@@ -56,4 +60,4 @@ def create_app():
     return app
 
 from . import models
-__all__ = ["create_app", "db"]
+__all__ = ["create_app", "db", "migrate"]
