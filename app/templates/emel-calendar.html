@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emel Calendar</title>
+    <link href="{{ url_for('static', filename='css/calendar.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex flex-col justify-center items-center bg-gallery">
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
+<section class="w-full flex-1 flex justify-center items-center">
+<div class="w-full h-auto flex flex-col md:flex-row justify-center items-start p-6 gap-6 z-10">
+
+    <div class="bg-black p-4 sm:p-6 rounded-lg shadow-lg w-auto border-2 border-white">
+        <div class="flex justify-between items-center mb-4">
+            <button id="prevMonth" class="px-2 sm:px-3 py-1 bg-white text-black rounded hover:bg-gray-300">&lt;</button>
+            <h2 id="monthYear" class="text-lg text-white font-semibold"></h2>
+            <button id="nextMonth" class="px-2 sm:px-3 py-1 bg-white text-black rounded hover:bg-gray-300">&gt;</button>
+        </div>
+    <div class="">
+        <div class="grid grid-cols-7 text-center text-[14px] md:text-[16] lg:text-[16px] font-lato font-bold h-10">
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Sun</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Mon</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Tue</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Wed</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Thu</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Fri</div>
+            <div class="flex items-center justify-center text-white bg-gray border border-white ">Sat</div>
+        </div>
+        <div id="calendarDays" class="grid grid-cols-7 bg-gray border-white border-2 "></div>
+    </div>
+    </div>
+
+<div class="bg-black text-white md:w-[450px] min-h-[400px] self-start p-6 rounded-xl shadow-md border-2 border-white">
+     <div class="flex flex-row items-center justify-between">
+        <div>
+        <h2 class="text-sm font-normal mb-4">Select appointment time:</h2>
+        <h3 id="selectedDate" class="text-xl font-semibold mb-4"></h3>
+        </div>
+        <img src="{{ url_for('static', filename='images/Slick.jpg')}}" 
+                            class="w-[70px] h-[50px] md:w-[70px] md:h-[50px] lg:w-[70px] rounded-[6px] lg:h-[50px] mb-4">
+    </div>
+    
+    <!-- Time Slot Buttons -->
+    <div class="grid grid-cols-2 gap-3">
+        <button id="9TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '09:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="09:00"
+        {% if '09:00' in booked_times %}disabled{% endif %}
+        >
+            9:00 AM
+        </button>
+        <button id="10TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '10:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="10:00"
+        {% if '10:00' in booked_times %}disabled{% endif %}>
+           10:00 AM
+        </button>
+        <button id="11TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '11:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="11:00"
+        {% if '11:00' in booked_times %}disabled{% endif %}>
+            11:00 AM
+        </button>
+        <button id="1TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '13:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="13:00"
+        {% if '13:00' in booked_times %}disabled{% endif %}>
+           1:00 PM
+        </button>
+        <button id="2TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '14:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="14:00"
+        {% if '14:00' in booked_times %}disabled{% endif %}>
+           2:00 PM
+        </button>
+        <button id="3TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '15:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="15:00"
+        {% if '15:00' in booked_times %}disabled{% endif %}>
+           3:00 PM
+        </button>
+        <button id="4TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '16:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="16:00"
+        {% if '16:00' in booked_times %}disabled{% endif %}>
+            4:00 PM
+        </button>
+        <button id="5TimeSlot" class="appointment-btn border border-white py-2 px-4 rounded flex items-center justify-center gap-2
+        {% if '17:00' in booked_times %}bg-gray-400 cursor-not-allowed{% endif %}"
+        data-time="17:00"
+        {% if '17:00' in booked_times %}disabled{% endif %}>
+            5:00 PM
+        </button>
+    </div>
+
+    <!-- Proceed button OUTSIDE the grid -->
+     <div class="flex justify-center">
+        <form id="confirmForm" action="{{ url_for('routes.confirm_booking') }}" method="POST" class="flex justify-center">
+            <input type="hidden" name="full_name" value="{{ session['user']['full_name'] }}">
+            <input type="hidden" name="cellphone" value="{{ session['user']['cellphone'] }}">
+            <input type="hidden" name="email" value="{{ session['user']['email'] }}">
+            <input type="hidden" name="service" value="{{ session['selected_service']['name'] }}">
+            <input type="hidden" name="barber" value="{{ session['selected_barber'] }}">
+            <input type="hidden" name="date" id="hiddenDate" value="">
+            <input type="hidden" name="time" id="hiddenTime" value="">
+        <button id="proceedBtn-emel"
+            type="submit"
+            class="hidden mt-4 w-full bg-black text-white border border-blue-600 hover:border-blue-400 py-2 px-4 rounded text-center">
+            Confirm Appointment
+        </button>
+        </form>
+    </div>
+
+    <!-- Notes -->
+    <h4 class="font-light text-[10px] mt-2">•Please provide your FULL NAME.</h4>
+    <h4 class="font-light text-[10px]">•See to it that you're 100% sure before booking an appointment.</h4>
+    <h4 class="font-light text-[10px]">•15 minutes late will be canceled to accommodate next client/walk-in.</h4>
+    <h4 class="font-light text-[10px]">•You can book your 6pm,7pm off hour appointment by messaging us on our FB page.</h4>
+</div>
+
+
+
+     <!-- Appointment Section (Right) -->
+    <div class="bg-black text-white md:w-auto md:h-auto p-5 rounded-xl shadow-md border-2 border-white">
+        <h2 class="text-lg font-normal mb-4">Schedule Information:</h2>
+        
+
+                <div class="flex justify-center">
+                <div class="relative h-[200px] w-[180px] bg-black rounded-[25px] border-4 border-white">
+                    <!-- Image (blurs on hover) -->
+                    <img
+                        src="{{ url_for('static', filename='images/emel.jpg') }}"
+                        alt="Gallery Image"
+                        class="h-full w-full object-cover rounded-[20px] transition duration-500 group-hover:blur-sm"
+                    />
+                    <!-- Name label -->
+                        <div class="absolute bottom-[10px] left-[10px] text-white text-lg font-normal"
+                            style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                            Emel Calomos
+                    </div>
+                </div>
+                </div>
+
+                                      <!-- Service Selected -->
+              <div class="group relative w-[280px] sm:w-[280px] md:w-[350px] lg:w-[350px] h-[85px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden mt-2 mb-2">
+                <img src="{{ url_for('static', filename=service.icon) }}"
+                    alt="{{ service.name }}"
+                    class="w-[45px] h-[45px] object-contain ml-3 ">
+                <div class="w-[2px] h-full bg-black mx-4 "></div>
+                <div class="relative flex flex-col leading-tight ">
+                  <span class="text-xl font-faustina text-black font-bold mb-[-6px]">{{ service.name }}</span>
+                  <span class="text-base font-faustina text-black font-normal">₱ {{ service.price }}</span>
+                </div>
+              </div>
+
+              <h3 id="selectedDateAppointment" class="text-2xl text-center font-faustina font-semibold"> Wednesday <br> August 14, 2025</h3>
+              <h4 id="timeSlot" class="text-3xl text-center font-faustina font-semibold mb-4">-Select Time-</h4>
+    </div>
+</div>
+
+           
+
+</section>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/Ecalendar.js') }}"></script>
+
+
+</body>
+
+<style>
+ .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
+    .font-faustina {
+        font-family: "Faustina", serif;
+    }
+    .font-playfair {
+        font-family: "Playfair Display", serif;
+    }
+     .font-lato {
+        font-family: "Lato", serif;
+    }
+    .bg-gallery {
+    background-image: url("/static/images/background.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>
+</html>

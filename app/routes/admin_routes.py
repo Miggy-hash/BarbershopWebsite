@@ -1,0 +1,453 @@
+import logging
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from flask_login import login_required, current_user, login_user, logout_user
+from werkzeug.security import check_password_hash
+from app import db, socketio
+from app.models import Appointment, User
+from datetime import datetime, timedelta
+from flask_socketio import join_room
+# Configure logging
+
+
+# Function to sanitize strings for JSON
+def sanitize_string(s):
+    if s is None:
+        return 'N/A'
+    return str(s)
+
+admin_bp = Blueprint('admin', __name__, template_folder='templates/admin', static_folder='static')
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+@socketio.on('join')
+def on_join(data):
+    room = data  # Assuming client sends string room name
+    join_room(room)
+    logger.info(f"Socket {request.sid} joined room: {room}")
+
+@admin_bp.route('/test-slot-booked', methods=['GET'])
+@login_required
+def test_slot_booked():
+    appointment_data = {
+        "id": 999,
+        "full_name": "Test User",
+        "cellphone": "1234567890",
+        "email": "test@example.com",
+        "service": "Regular Haircut",
+        "barber": "Emel Calomos",
+        "date": "2025-09-02",
+        "time": "10:00",
+        "created_at": datetime.utcnow().isoformat(),
+        "is_read": False
+    }
+    logger.debug(f"Test emitting slot_booked: {appointment_data}")
+    socketio.emit("slot_booked", appointment_data, room="emel_calomos")
+    logger.info("Test slot_booked emitted")
+    return jsonify({"success": True, "message": "Test slot_booked emitted"})
+
+def cleanup_old_appointments():
+    try:
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        Appointment.query.filter(Appointment.created_at < cutoff_date).delete()
+        db.session.commit()
+        logger.debug("Cleaned up old appointments")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error cleaning up old appointments: {e}")
+
+@admin_bp.route("/login", methods=["GET", "POST"])
+def ADMINLOGIN():
+    if current_user.is_authenticated:
+        logger.info(f"User already authenticated: {current_user.username}")
+        DASHBOARD_ROUTES = {
+            "emel": "admin.Edashboard_home",
+            "boboy": "admin.Bdashboard_home"
+        }
+        return redirect(url_for(DASHBOARD_ROUTES[current_user.username]))
+
+    logger.info(f"Request headers: {request.headers}")
+    if request.method == "POST":
+        username = request.form.get("admin_username")
+        password = request.form.get("admin_password")
+        logger.info(f"Login attempt for username: {username}")
+        user = User.query.filter_by(username=username).first()
+        if user:
+            logger.info(f"User found: {user.username}, ID: {user.id}")
+            if check_password_hash(user.password, password):
+                logger.info("Password verification successful")
+                login_user(user, remember=True)
+                session.clear()  # Clear existing session data
+                session['_user_id'] = str(user.id)
+                session.permanent = True
+                session.modified = True
+                logger.info(f"User logged in: {user.username}, Session: {session}")
+                logger.info(f"Session cookie should be set: myapp_session")
+                DASHBOARD_ROUTES = {
+                    "emel": "admin.Edashboard_home",
+                    "boboy": "admin.Bdashboard_home"
+                }
+                target = DASHBOARD_ROUTES.get(username, 'admin.Edashboard_home')
+                logger.info(f"Redirecting to: {target}")
+                return redirect(url_for(target))
+            else:
+                logger.info("Password verification failed")
+                flash("Invalid username or password", "error")
+        else:
+            logger.info(f"User not found: {username}")
+            flash("Invalid username or password", "error")
+
+    logger.info("Rendering admin login page")
+    return render_template("admin/adminLogin.html")
+
+@admin_bp.route("/edashboard")
+@login_required
+def Edashboard_home():
+    logger.info(f"Current user: {current_user.username if current_user.is_authenticated else 'None'}")
+    logger.info(f"Session contents: {session}")
+    logger.info(f"Request cookies: {request.cookies}")
+    logger.info(f"Request headers: {request.headers}")
+    if not current_user.is_authenticated:
+        logger.info("User not authenticated, redirecting to login")
+        return redirect(url_for("admin.login"))
+
+    today_dt = datetime.today()
+    date_for_check = today_dt.strftime("%B %d, %Y")
+    logger.debug(f"Edashboard: Querying for date {date_for_check}")
+
+    try:
+        appointments = Appointment.query.filter_by(barber="Emel Calomos", date=date_for_check).all()
+        booked = {a.time: {
+            'full_name': sanitize_string(a.full_name),
+            'service': sanitize_string(a.service),
+            'cellphone': sanitize_string(a.cellphone),
+            'email': sanitize_string(a.email),
+            'barber': sanitize_string(a.barber),
+            'date': sanitize_string(a.date),
+            'time': sanitize_string(a.time)
+        } for a in appointments}
+        logger.debug(f"Edashboard: Found {len(appointments)} appointments")
+    except Exception as e:
+        logger.error(f"Edashboard: Error querying appointments: {e}")
+        booked = {}
+
+    display_date = today_dt.strftime("%B %d, %Y")
+
+    time_slots = [
+        {'24h': '09:00', 'label': '9:00 AM'},
+        {'24h': '10:00', 'label': '10:00 AM'},
+        {'24h': '11:00', 'label': '11:00 AM'},
+        {'24h': '13:00', 'label': '1:00 PM'},
+        {'24h': '14:00', 'label': '2:00 PM'},
+        {'24h': '15:00', 'label': '3:00 PM'},
+        {'24h': '16:00', 'label': '4:00 PM'},
+        {'24h': '17:00', 'label': '5:00 PM'},
+    ]
+
+    return render_template("admin/emel-dashboard_home.html",
+                           username=current_user.username,
+                           booked=booked,
+                           time_slots=time_slots,
+                           display_date=display_date)
+
+@admin_bp.route('/emel-appointments/<date>')
+def get_emel_appointments(date):
+    logger.debug(f"Fetching appointments for date: {date}")
+    try:
+        dt = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = dt.strftime("%B %d, %Y")
+        logger.debug(f"Formatted date for DB query: {formatted_date}")
+    except ValueError as e:
+        logger.error(f"Invalid date format: {date}, Error: {e}")
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    try:
+        appointments = Appointment.query.filter_by(barber="Emel Calomos", date=formatted_date).all()
+        logger.debug(f"Found {len(appointments)} appointments for {formatted_date}")
+        booked = {
+            a.time: {
+                'full_name': sanitize_string(a.full_name),
+                'service': sanitize_string(a.service),
+                'cellphone': sanitize_string(a.cellphone),
+                'email': sanitize_string(a.email),
+                'barber': sanitize_string(a.barber),
+                'date': sanitize_string(a.date),
+                'time': sanitize_string(a.time)
+            } for a in appointments
+        }
+        return jsonify(booked)
+    except Exception as e:
+        logger.error(f"Error querying appointments: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/emel-appointments-count/<int:year>/<int:month>')
+def get_emel_appointments_count(year, month):
+    logger.debug(f"Fetching appointment counts for year: {year}, month: {month}")
+    try:
+        first_day = datetime(year, month, 1)
+        last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
+
+        # Fetch all appointments for the barber (small DB, efficient enough)
+        appointments = Appointment.query.filter(Appointment.barber == "Emel Calomos").all()
+        logger.debug(f"Found {len(appointments)} total appointments for Emel Calomos")
+
+        appointment_counts = {}
+        for a in appointments:
+            try:
+                dt = datetime.strptime(a.date, "%B %d, %Y")
+                if first_day <= dt < last_day:
+                    date_key = dt.strftime("%Y-%m-%d")
+                    appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+            except ValueError as e:
+                logger.warning(f"Invalid date format for appointment {a.id}: {a.date} - {e}")
+
+        return jsonify(appointment_counts)
+    except Exception as e:
+        logger.error(f"Error fetching appointment counts: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/add-appointment', methods=['POST'])
+def add_appointment():
+    logger.debug("Processing add appointment request")
+    try:
+        data = request.get_json()
+        full_name = data.get('full_name')
+        cellphone = data.get('cellphone')
+        email = data.get('email')
+        barber = data.get('barber')
+        service = data.get('service')
+        date = data.get('date')
+        times = data.get('times', [])
+
+        valid_services = ["Beard Service", "Regular Haircut", "Home Service", "Full Service", "Full Shave"]
+        valid_times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+        valid_barbers = ["Emel Calomos", "Angelo Paballa"]
+
+        if not all([full_name, cellphone, email, barber, service, date, times]):
+            return jsonify({'error': 'All fields are required'}), 400
+        if service not in valid_services:
+            return jsonify({'error': 'Invalid service'}), 400
+        if barber not in valid_barbers:
+            return jsonify({'error': 'Invalid barber'}), 400
+        if not all(time in valid_times for time in times):
+            return jsonify({'error': 'Invalid time slot(s)'}), 400
+
+        existing = Appointment.query.filter_by(barber=barber, date=date).filter(Appointment.time.in_(times)).all()
+        if existing:
+            return jsonify({'error': 'One or more selected time slots are already booked'}), 400
+
+        for time in times:
+            appointment = Appointment(
+                full_name=full_name,
+                cellphone=cellphone,
+                email=email,
+                barber=barber,
+                service=service,
+                date=date,
+                time=time
+            )
+            db.session.add(appointment)
+
+        db.session.commit()
+        logger.debug(f"Added {len(times)} appointment(s) for {barber} on {date}")
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding appointment: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/remove-appointment', methods=['POST'])
+@login_required
+def remove_appointment():
+    try:
+        if current_user.username != 'emel':
+            logger.warning(f"Unauthorized attempt to remove appointment by {current_user.username}")
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data in remove-appointment request")
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        barber = data.get('barber')
+        date = data.get('date')
+        time = data.get('time')
+
+        logger.debug(f"Remove appointment request: barber={barber}, date={date}, time={time}")
+
+        if not all([barber, date, time]):
+            logger.error("Missing required fields in remove-appointment request")
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+        appointment = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
+        if not appointment:
+            logger.warning(f"No appointment found for barber={barber}, date={date}, time={time}")
+            return jsonify({"success": False, "message": "Time slot is empty, select existing time slot!"}), 404
+
+        appointment_id = appointment.id
+        db.session.delete(appointment)
+        db.session.commit()
+        logger.info(f"Appointment deleted: id={appointment_id}, barber={barber}, date={date}, time={time}")
+
+        socketio.emit('slot_deleted', {'id': appointment_id, 'barber': barber, 'date': date, 'time': time}, room=barber.lower().replace(" ", "_"))
+        logger.info(f"Emitted slot_deleted to room={barber.lower().replace(' ', '_')}: id={appointment_id}")
+
+        return jsonify({"success": True, "message": "Appointment deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in remove_appointment: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+
+@admin_bp.route("/bdashboard")
+def Bdashboard_home():
+    if "username" not in session:
+        return redirect(url_for("admin.ADMINLOGIN"))
+    
+    today_dt = datetime.today()
+    date_for_check = today_dt.strftime("%B %d, %Y")
+    logger.debug(f"Bdashboard: Querying for date {date_for_check}")
+
+    try:
+        appointments = Appointment.query.filter_by(barber="Angelo Paballa", date=date_for_check).all()
+        booked = {a.time: {
+            'full_name': sanitize_string(a.full_name),
+            'service': sanitize_string(a.service)
+        } for a in appointments}
+        logger.debug(f"Bdashboard: Found {len(appointments)} appointments")
+    except Exception as e:
+        logger.error(f"Bdashboard: Error querying appointments: {e}")
+        booked = {}
+
+    display_date = f"{today_dt.strftime('%B')} {today_dt.day}, {today_dt.year}"
+
+    time_slots = [
+        {'24h': '09:00', 'label': '9:00 AM'},
+        {'24h': '10:00', 'label': '10:00 AM'},
+        {'24h': '11:00', 'label': '11:00 AM'},
+        {'24h': '13:00', 'label': '1:00 PM'},
+        {'24h': '14:00', 'label': '2:00 PM'},
+        {'24h': '15:00', 'label': '3:00 PM'},
+        {'24h': '16:00', 'label': '4:00 PM'},
+        {'24h': '17:00', 'label': '5:00 PM'},
+    ]
+
+    return render_template("admin/boboy-dashboard_home.html", 
+                           username=session["username"],
+                           booked=booked,
+                           time_slots=time_slots,
+                           display_date=display_date)
+
+@admin_bp.route('/boboy-appointments/<date>')
+def get_boboy_appointments(date):
+    logger.debug(f"Fetching appointments for date: {date}")
+    try:
+        dt = datetime.strptime(date, "%Y-%m-%d")
+        formatted_date = dt.strftime("%B %d, %Y")
+        logger.debug(f"Formatted date for DB query: {formatted_date}")
+    except ValueError as e:
+        logger.error(f"Invalid date format: {date}, Error: {e}")
+        return jsonify({'error': 'Invalid date format'}), 400
+
+    try:
+        appointments = Appointment.query.filter_by(barber="Angelo Paballa", date=formatted_date).all()
+        logger.debug(f"Found {len(appointments)} appointments for {formatted_date}")
+        booked = {
+            a.time: {
+                'full_name': sanitize_string(a.full_name),
+                'service': sanitize_string(a.service),
+                'cellphone': sanitize_string(a.cellphone),
+                'email': sanitize_string(a.email),
+                'barber': sanitize_string(a.barber),
+                'date': sanitize_string(a.date),
+                'time': sanitize_string(a.time)
+            } for a in appointments
+        }
+        return jsonify(booked)
+    except Exception as e:
+        logger.error(f"Error querying appointments: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@admin_bp.route('/boboy-appointments-count/<int:year>/<int:month>')
+def get_boboy_appointments_count(year, month):
+    logger.debug(f"Fetching appointment counts for year: {year}, month: {month}")
+    try:
+        first_day = datetime(year, month, 1)
+        last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
+
+        appointments = Appointment.query.filter(
+            Appointment.barber == "Angelo Paballa",
+            Appointment.date >= first_day.strftime("%B %d, %Y"),
+            Appointment.date < last_day.strftime("%B %d, %Y")
+        ).all()
+        logger.debug(f"Found {len(appointments)} appointments for month {month}/{year}")
+
+        appointment_counts = {}
+        for a in appointments:
+            date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
+            appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+
+        return jsonify(appointment_counts)
+    except Exception as e:
+        logger.error(f"Error fetching appointment counts: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+    
+@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>', methods=['GET'])
+@login_required
+def get_notifications(limit, offset):
+    logger.debug(f"Fetching notifications for Emel Calomos: limit={limit}, offset={offset}")
+    try:
+        # Clean up appointments older than 7 days
+        cleanup_old_appointments()
+
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        appointments = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.created_at >= cutoff_date
+        ).order_by(Appointment.created_at.desc()).offset(offset).limit(limit).all()
+        logger.debug(f"Found {len(appointments)} appointments")
+
+        unread_count = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.is_read == False,
+            Appointment.created_at >= cutoff_date
+        ).count()
+        logger.debug(f"Unread count: {unread_count}")
+
+        notifications = [{
+            'id': appt.id,
+            'full_name': appt.full_name,
+            'service': appt.service,
+            'date': appt.date,
+            'time': appt.time,
+            'created_at': appt.created_at.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'is_read': appt.is_read
+        } for appt in appointments]
+
+        return jsonify({'notifications': notifications, 'unread_count': unread_count})
+    except Exception as e:
+        logger.error(f"Error fetching notifications: {e}")
+        return jsonify({'error': 'Failed to fetch notifications'}), 500
+
+@admin_bp.route('/emel-mark-notifications-read', methods=['POST'])
+@login_required
+def mark_notifications_read():
+    logger.debug("Marking notifications as read for Emel Calomos")
+    try:
+        appointments = Appointment.query.filter_by(barber='Emel Calomos', is_read=False).all()
+        logger.info(f"Found {len(appointments)} unread appointments for Emel Calomos")
+        for appt in appointments:
+            appt.is_read = True
+        db.session.commit()
+        logger.info("Notifications marked as read")
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Error marking notifications read: {e}")
+        return jsonify({'error': 'Failed to mark notifications read'}), 500
+
+    
+@admin_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('admin.ADMINLOGIN'))

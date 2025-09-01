@@ -1,6 +1,7 @@
 // tailwind.config.js
-module.exports = {
+export default {
   content: [
+    "./src/**/*.{vue,js,ts}", 
     "./templates/**/*.html", // adjust to your actual paths
     "./static/**/*.js"
   ],

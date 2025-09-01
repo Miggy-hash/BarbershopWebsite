@@ -1,67 +1,111 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lato:wght@300&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Faustina:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
-    <div class="bg-white w-full h-[100px] flex flex-col items-center justify-center border-t-2 border-b-2 border-black">
-        <h1 class="font-playfair font-semibold text-[35px] text-black">ARTIST</h1>
-        <p class="font-lato font-light text-[18px] text-gray-600 -mt-2">Creator Behind Arts</p>
+    <div class="bg-black w-full lg:h-[100px] h-[80px] flex flex-col items-center justify-center border-t-2 border-b-2 border-white relative z-10">
+        <h1 class="font-playfair font-semibold lg:text-[35px] text-[25px] text-white">ARTIST</h1>
+        <p class="font-lato font-light lg:text-[18px] text-[13px] text-gray-300 -mt-2">Creator Behind Arts</p>
     </div>
 
-    <div class="w-full bg-gallery h-[800px]">
-        <div class="max-w-[1200px] mx-auto flex justify-center gap-30">
+    <div class="w-full bg-gallery lg:h-[700px] h-[650px]">
+        <div class=" mx-auto flex flex-col md:flex-row justify-center gap-2 z-10">
 
              <!-- EMEL CALOMOS -->
-            <div class="relative h-[450px] w-[410px] bg-black rounded-[25px] border-4 border-white
-    hover:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.7)]
-    transition-transform transition-shadow duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group overflow-hidden mt-40">
+            <div class="relative h-[250px] w-[200px] bg-black rounded-[15px] border-[3px] border-white 
+                lg:h-[450px] lg:w-[390px] md:w-[390px] md:h-[390px] sm:h-[350px] sm:w-[290px]
+                hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.7)]
+                transition-transform transition-shadow duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] group overflow-hidden mt-[60px] lg:mt-28 ml-[80px] z-10">
 
-    <!-- Image (blurs on hover) -->
-    <img
-        src="{{ url_for('static', filename='images/emel.jpg') }}"
-        alt="Gallery Image"
-        class="h-full w-full object-cover rounded-[20px] transition duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:blur-sm"
-    />
+                <!-- Image (blurs on hover) -->
+                <img
+                    src="{{ url_for('static', filename='images/emel.jpg') }}"
+                    alt="Gallery Image"
+                    class="h-full w-full object-cover rounded-[10px] transition duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:blur-sm"
+                />
 
-    <!-- Hover overlay that reveals the button -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
-            transition-opacity duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none font-montserrat z-10">
-           <button data-barber="emel"
-                class="book-now-btn pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-500 ease-out">
-                Book Now
-            </button>
-        </div>
+                <div class="absolute top-[40%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100"
+                    style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                    <h1 class="text-white font-playfair lg:text-5xl text-2xl font-semibold mb-5">
+                    Emel Calomos
+                    </h1>
+                    <h1 class="text-white lg:text-base text-xs font-semibold text-center absolute lg:top-[80%] top-[65%] md:top-[80%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100 mb-5">
+                    Established the Slick Grind 
+                    </h1>
+                    <h1 class="text-white lg:text-base text-xs font-semibold text-center absolute lg:top-[115%] top-[100%] md:top-[115%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[2000ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100">
+                    Since 2019.
+                    </h1>
+                </div>
 
-    <!-- Name label -->
-    <div class="absolute bottom-[20px] left-[20px] text-white text-2xl font-semibold 
-        transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
-        group-hover:left-1/2 group-hover:-translate-x-1/2"
-        style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
-        Emel Calomos
-    </div>
-</div>
+                <!-- Name label -->
+                <div class="absolute lg:bottom-[20px] bottom-[8px] left-[8px] lg:left-[20px] text-white text-lg lg:text-3xl font-semibold
+                    transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[150%] group-hover:opacity-0"
+                    style="font-family:'Play Fair', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                    Emel Calomos
+                    
+                </div>
+                <img
+                    src="{{ url_for('static', filename='images/Slick.jpg') }}"
+                    alt="Gallery Image"
+                    class="absolute lg:top-[10px] top-[5px] left-[5px] lg:left-[10px] w-8 lg:w-15 h-6 lg:h-15 rounded-[4px] opacity-85
+                    transition-all duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[250%] group-hover:opacity-0"
+                    />
+            </div>
 
                 <!-- ANGELO PABALLA -->
-            <div class="relative h-[450px] w-[410px] bg-black rounded-[25px] border-4 border-white
-    hover:scale-95 hover:shadow-[0_0_30px_rgba(255,255,255,0.7)]
-    transition-transform transition-shadow duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group overflow-hidden mt-40">
-                    <img src="{{ url_for('static', filename='images/boboy.jpg') }}"
-                        alt="Gallery Image" 
-                        class="h-full w-full object-cover rounded-[20px] transition duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:blur-sm">
+            <div class="relative h-[250px] w-[200px] bg-black rounded-[15px] border-[3px] border-white
+                 lg:h-[450px] lg:w-[390px] md:w-[390px] md:h-[390px] sm:h-[350px] sm:w-[290px]
+                hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.7)]
+                transition-transform transition-shadow duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] group overflow-hidden lg:mt-28 mt-4 ml-[80px] z-10">
 
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100
-            transition-opacity duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] pointer-events-none font-montserrat z-10">
-           <button data-barber="angelo"
-                class="book-now-btn pointer-events-auto text-black font-bold bg-white px-4 py-2 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-500 ease-out">
-                Book Now
-            </button>
-        </div>
-                        
-                    <div class="absolute bottom-[20px] left-[20px] text-white text-2xl font-semibold 
-        transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
-        group-hover:left-1/2 group-hover:-translate-x-1/2"
-                        style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
-                        Angelo Paballa
-                    </div>
-        </div>
+                <!-- Image (blurs on hover) -->
+                <img
+                    src="{{ url_for('static', filename='images/boboy.jpg') }}"
+                    alt="Gallery Image"
+                    class="h-full w-full object-cover rounded-[10px] transition duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:blur-sm"
+                />
+
+                <div class="absolute top-[40%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100"
+                    style="font-family:'Faustina', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                    <h1 class="text-white font-playfair lg:text-5xl text-2xl font-semibold mb-5">
+                    Angelo Paballa
+                    </h1>
+                    <h1 class="text-white lg:text-base text-xs font-semibold text-center absolute lg:top-[80%] top-[65%] md:top-[80%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[1800ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100 mb-5">
+                    First barber of Slick Grind Team
+                    </h1>
+                    <h1 class="text-white lg:text-base text-xs font-semibold text-center absolute lg:top-[115%] top-[100%] md:top-[115%] right-1/2 opacity-0 translate-x-[150%]
+                    transition-all duration-[2000ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[-25%] group-hover:opacity-100">
+                    Artist since 2019.
+                    </h1>
+                </div>
+
+                <!-- Name label -->
+                <div class="absolute lg:bottom-[20px] bottom-[8px] left-[8px] lg:left-[20px] text-white text-lg lg:text-3xl font-semibold
+                    transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[150%] group-hover:opacity-0"
+                    style="font-family:'Play Fair', serif; text-shadow: 4px 4px 6px rgba(0,0,0,0.8);">
+                    Angelo Paballa
+                    
+                </div>
+                <img
+                    src="{{ url_for('static', filename='images/Slick.jpg') }}"
+                    alt="Gallery Image"
+                    class="absolute lg:top-[10px] top-[5px] left-[5px] lg:left-[10px] w-8 lg:w-15 h-6 lg:h-15 rounded-[4px] opacity-85
+                    transition-all duration-[1000ms] ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap
+                    group-hover:-translate-x-[150%] group-hover:opacity-0"
+                    />
+            </div>
 
             </div>
         </div>
@@ -74,7 +118,12 @@
     background-size: cover; 
     background-position: center;
 }
-.font-faustina {
-        font-family: 'Faustina', serif;
+  .font-playfair { font-family: 'Playfair Display', serif; }
+  .font-lato { font-family: 'Lato', sans-serif; }
+  .font-faustina {
+        font-family: "Faustina", serif;
     }
+     .font-montserrat {
+    font-family: "Montserrat", sans-serif;
+  }
     </style>

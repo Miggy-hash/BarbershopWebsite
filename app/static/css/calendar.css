@@ -1,0 +1,70 @@
+.day {
+    aspect-ratio: 1 / 1; 
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    font-size: 16px;
+    border-color: rgb(185, 185, 185);
+    border-width: 1px;
+    background-color: white;
+}
+@media (min-width: 300px) {
+  .day {
+    width: 40px;
+    height: 40px;
+  }
+}
+@media (min-width: 768px) {
+  .day {
+    width: 65px;
+    height: 65px;
+  }
+}
+@media (min-width: 1024px) {
+  .day {
+    width: 65px;
+    height: 65px;
+  }
+}
+.day:hover {
+    border-width: 3px;
+    border-radius: 8px;
+    border-color: black;
+    background-color: #ffffff; 
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+}
+.selected {
+    border-width: 3px;
+    border-color: rgb(0, 0, 0);
+    background-color: #ffffff; 
+    color: rgb(0, 0, 0);
+    border-radius: 8px;
+    
+}
+.time {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+}
+
+.today {
+    background-color: oklch(88.2% 0.059 254.128);
+    color: rgb(0, 0, 0); 
+    border-color: rgb(0, 0, 0);
+    border-width: 3px;
+    border-radius: 8px;
+}
+
+.date {
+    background-color: #ffffff; 
+    color: #000000;
+}
+#calendarDays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    max-height: 400px; /* Adjust as needed */
+    overflow-y: auto;
+}
