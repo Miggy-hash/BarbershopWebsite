@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@600&family=Faustina:wght@400;700&family=Lato:wght@300&display=swap" rel="stylesheet">
     <style>
@@ -102,17 +103,17 @@
                     <h1 class="font-playfair font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="relative z-50">
-                        <button id="notificationBtn" class="text-white text-xs md:text-lg lg:text-xl xl:text-base relative">
-                            <i class="fas fa-bell"></i>
-                            <span id="unreadCount" class="notification-badge hidden">0</span>
-                        </button>
-                        <div id="notificationDropdown" class="notification-dropdown">
-                            <h3 class="text-lg font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
-                            <div id="notificationList" class="space-y-2"></div>
-                            <div id="showMoreBtn" class="show-more-btn">Show More</div>
-                        </div>
-                    </div>
+                    <div class="relative">
+    <button id="notification-btn" class="text-white text-xs md:text-lg lg:text-xl xl:text-base relative">
+        <i class="fas fa-bell"></i>
+        <span id="unread-count" class="notification-badge hidden">0</span>
+    </button>
+    <div id="notification-dropdown" class="notification-dropdown">
+        <h3 class="text-lg font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
+        <div id="notification-list" class="space-y-2"></div>
+        <button id="show-more-btn" class="show-more-btn">Show More</button>
+    </div>
+</div>
                         <a href="{{ url_for('admin.logout') }}" class="btn btn-danger text-xs md:text-lg lg:text-xl xl:text-base">
                             Log out
                         </a>
@@ -167,7 +168,7 @@
                             <img src="{{ url_for('static', filename='images/Slick.jpg')}}" 
                             class="w-[70px] h-[50px] md:w-[70px] md:h-[50px] lg:w-[70px] rounded-[6px] lg:h-[50px] mb-4">
                         </div>
-                        <div class="space-y-2">
+                        <div id="dailyScheduleList" class="space-y-2">
                             {% for slot in time_slots %}
                                 {% set time_24 = slot['24h'] %}
                                 {% if time_24 in booked %}

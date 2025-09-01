@@ -1,16 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from app import db, socketio
-from app.models import Appointment, User
-from datetime import datetime
-from flask_socketio import emit
-from datetime import datetime, timedelta
+import logging
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
-import logging
-
+from app import db, socketio
+from app.models import Appointment, User
+from datetime import datetime, timedelta
+from flask_socketio import join_room
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+
 
 # Function to sanitize strings for JSON
 def sanitize_string(s):
@@ -18,41 +15,102 @@ def sanitize_string(s):
         return 'N/A'
     return str(s)
 
-admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+admin_bp = Blueprint('admin', __name__, template_folder='templates/admin', static_folder='static')
+logger = logging.getLogger(__name__)
 
-# Hardcoded credentials
-VALID_USERS = {"emel", "boboy"}
-ADMIN_PASSWORD = "slick123"
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+@socketio.on('join')
+def on_join(data):
+    room = data  # Assuming client sends string room name
+    join_room(room)
+    logger.info(f"Socket {request.sid} joined room: {room}")
+
+@admin_bp.route('/test-slot-booked', methods=['GET'])
+@login_required
+def test_slot_booked():
+    appointment_data = {
+        "id": 999,
+        "full_name": "Test User",
+        "cellphone": "1234567890",
+        "email": "test@example.com",
+        "service": "Regular Haircut",
+        "barber": "Emel Calomos",
+        "date": "2025-09-02",
+        "time": "10:00",
+        "created_at": datetime.utcnow().isoformat(),
+        "is_read": False
+    }
+    logger.debug(f"Test emitting slot_booked: {appointment_data}")
+    socketio.emit("slot_booked", appointment_data, room="emel_calomos")
+    logger.info("Test slot_booked emitted")
+    return jsonify({"success": True, "message": "Test slot_booked emitted"})
+
+def cleanup_old_appointments():
+    try:
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        Appointment.query.filter(Appointment.created_at < cutoff_date).delete()
+        db.session.commit()
+        logger.debug("Cleaned up old appointments")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error cleaning up old appointments: {e}")
 
 @admin_bp.route("/login", methods=["GET", "POST"])
 def ADMINLOGIN():
     if current_user.is_authenticated:
+        logger.info(f"User already authenticated: {current_user.username}")
         DASHBOARD_ROUTES = {
             "emel": "admin.Edashboard_home",
             "boboy": "admin.Bdashboard_home"
         }
         return redirect(url_for(DASHBOARD_ROUTES[current_user.username]))
 
+    logger.info(f"Request headers: {request.headers}")
     if request.method == "POST":
         username = request.form.get("admin_username")
         password = request.form.get("admin_password")
+        logger.info(f"Login attempt for username: {username}")
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            DASHBOARD_ROUTES = {
-                "emel": "admin.Edashboard_home",
-                "boboy": "admin.Bdashboard_home"
-            }
-            return redirect(url_for(DASHBOARD_ROUTES[username]))
+        if user:
+            logger.info(f"User found: {user.username}, ID: {user.id}")
+            if check_password_hash(user.password, password):
+                logger.info("Password verification successful")
+                login_user(user, remember=True)
+                session.clear()  # Clear existing session data
+                session['_user_id'] = str(user.id)
+                session.permanent = True
+                session.modified = True
+                logger.info(f"User logged in: {user.username}, Session: {session}")
+                logger.info(f"Session cookie should be set: myapp_session")
+                DASHBOARD_ROUTES = {
+                    "emel": "admin.Edashboard_home",
+                    "boboy": "admin.Bdashboard_home"
+                }
+                target = DASHBOARD_ROUTES.get(username, 'admin.Edashboard_home')
+                logger.info(f"Redirecting to: {target}")
+                return redirect(url_for(target))
+            else:
+                logger.info("Password verification failed")
+                flash("Invalid username or password", "error")
         else:
+            logger.info(f"User not found: {username}")
             flash("Invalid username or password", "error")
 
+    logger.info("Rendering admin login page")
     return render_template("admin/adminLogin.html")
 
 @admin_bp.route("/edashboard")
+@login_required
 def Edashboard_home():
-    if "username" not in session:
-        return redirect(url_for("admin.ADMINLOGIN"))
+    logger.info(f"Current user: {current_user.username if current_user.is_authenticated else 'None'}")
+    logger.info(f"Session contents: {session}")
+    logger.info(f"Request cookies: {request.cookies}")
+    logger.info(f"Request headers: {request.headers}")
+    if not current_user.is_authenticated:
+        logger.info("User not authenticated, redirecting to login")
+        return redirect(url_for("admin.login"))
 
     today_dt = datetime.today()
     date_for_check = today_dt.strftime("%B %d, %Y")
@@ -62,14 +120,19 @@ def Edashboard_home():
         appointments = Appointment.query.filter_by(barber="Emel Calomos", date=date_for_check).all()
         booked = {a.time: {
             'full_name': sanitize_string(a.full_name),
-            'service': sanitize_string(a.service)
+            'service': sanitize_string(a.service),
+            'cellphone': sanitize_string(a.cellphone),
+            'email': sanitize_string(a.email),
+            'barber': sanitize_string(a.barber),
+            'date': sanitize_string(a.date),
+            'time': sanitize_string(a.time)
         } for a in appointments}
         logger.debug(f"Edashboard: Found {len(appointments)} appointments")
     except Exception as e:
         logger.error(f"Edashboard: Error querying appointments: {e}")
         booked = {}
 
-    display_date = f"{today_dt.strftime('%B')} {today_dt.day}, {today_dt.year}"
+    display_date = today_dt.strftime("%B %d, %Y")
 
     time_slots = [
         {'24h': '09:00', 'label': '9:00 AM'},
@@ -83,7 +146,7 @@ def Edashboard_home():
     ]
 
     return render_template("admin/emel-dashboard_home.html",
-                           username=session["username"],
+                           username=current_user.username,
                            booked=booked,
                            time_slots=time_slots,
                            display_date=display_date)
@@ -125,17 +188,19 @@ def get_emel_appointments_count(year, month):
         first_day = datetime(year, month, 1)
         last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
-        appointments = Appointment.query.filter(
-            Appointment.barber == "Emel Calomos",
-            Appointment.date >= first_day.strftime("%B %d, %Y"),
-            Appointment.date < last_day.strftime("%B %d, %Y")
-        ).all()
-        logger.debug(f"Found {len(appointments)} appointments for month {month}/{year}")
+        # Fetch all appointments for the barber (small DB, efficient enough)
+        appointments = Appointment.query.filter(Appointment.barber == "Emel Calomos").all()
+        logger.debug(f"Found {len(appointments)} total appointments for Emel Calomos")
 
         appointment_counts = {}
         for a in appointments:
-            date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
-            appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+            try:
+                dt = datetime.strptime(a.date, "%B %d, %Y")
+                if first_day <= dt < last_day:
+                    date_key = dt.strftime("%Y-%m-%d")
+                    appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+            except ValueError as e:
+                logger.warning(f"Invalid date format for appointment {a.id}: {a.date} - {e}")
 
         return jsonify(appointment_counts)
     except Exception as e:
@@ -193,51 +258,46 @@ def add_appointment():
         return jsonify({'error': 'Internal server error'}), 500
 
 @admin_bp.route('/remove-appointment', methods=['POST'])
+@login_required
 def remove_appointment():
-    logger.debug("Processing remove appointment request")
     try:
+        if current_user.username != 'emel':
+            logger.warning(f"Unauthorized attempt to remove appointment by {current_user.username}")
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+
         data = request.get_json()
+        if not data:
+            logger.error("No JSON data in remove-appointment request")
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
         barber = data.get('barber')
         date = data.get('date')
         time = data.get('time')
 
-        valid_times = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
-        valid_barbers = ["Emel Calomos", "Angelo Paballa"]
+        logger.debug(f"Remove appointment request: barber={barber}, date={date}, time={time}")
 
         if not all([barber, date, time]):
-            return jsonify({'error': 'All fields are required'}), 400
-        if time not in valid_times:
-            return jsonify({'error': 'Invalid time slot'}), 400
-        if barber not in valid_barbers:
-            return jsonify({'error': 'Invalid barber'}), 400
+            logger.error("Missing required fields in remove-appointment request")
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
 
         appointment = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
         if not appointment:
-            return jsonify({'error': 'No appointment found for the selected time slot'}), 404
+            logger.warning(f"No appointment found for barber={barber}, date={date}, time={time}")
+            return jsonify({"success": False, "message": "Time slot is empty, select existing time slot!"}), 404
 
-        # Store appointment details for emitting
-        appointment_data = {
-            "full_name": sanitize_string(appointment.full_name),
-            "cellphone": sanitize_string(appointment.cellphone),
-            "email": sanitize_string(appointment.email),
-            "service": sanitize_string(appointment.service),
-            "barber": barber,
-            "date": date,
-            "time": time
-        }
-
+        appointment_id = appointment.id
         db.session.delete(appointment)
         db.session.commit()
-        logger.debug(f"Removed appointment for {barber} on {date} at {time}")
+        logger.info(f"Appointment deleted: id={appointment_id}, barber={barber}, date={date}, time={time}")
 
-        # Emit deletion event to all clients
-        socketio.emit("slot_deleted", appointment_data)  # Removed broadcast=True
+        socketio.emit('slot_deleted', {'id': appointment_id, 'barber': barber, 'date': date, 'time': time}, room=barber.lower().replace(" ", "_"))
+        logger.info(f"Emitted slot_deleted to room={barber.lower().replace(' ', '_')}: id={appointment_id}")
 
-        return jsonify({'success': True})
+        return jsonify({"success": True, "message": "Appointment deleted successfully"})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error removing appointment: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        logger.error(f"Error in remove_appointment: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
 
 @admin_bp.route("/bdashboard")
 def Bdashboard_home():
@@ -384,16 +444,6 @@ def mark_notifications_read():
     except Exception as e:
         logger.error(f"Error marking notifications read: {e}")
         return jsonify({'error': 'Failed to mark notifications read'}), 500
-
-def cleanup_old_appointments():
-    try:
-        cutoff_date = datetime.utcnow() - timedelta(days=7)
-        Appointment.query.filter(Appointment.created_at < cutoff_date).delete()
-        db.session.commit()
-        logger.debug("Cleaned up old appointments")
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error cleaning up old appointments: {e}")
 
     
 @admin_bp.route('/logout')

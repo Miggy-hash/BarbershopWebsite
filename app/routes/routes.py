@@ -8,35 +8,42 @@ from flask_socketio import emit
 from app import socketio
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
-routes_bp = Blueprint('routes', __name__)
+routes_bp = Blueprint('routes', __name__, template_folder='templates', static_folder='static')
+logger = logging.getLogger(__name__)
 
 @routes_bp.route('/')
 def HOME():
     return render_template('home.html')
 
-@routes_bp.route('/login')
-def login():
-    return render_template('login.html')
 
 @routes_bp.route("/login", methods=["POST", "GET"])
 def LOGIN():
-    full_name = request.form.get("full_name")
-    cellphone = request.form.get("cellphone")
-    email = request.form.get("email")
-
-    # Store details (DB, session, etc.)
-    # e.g. save to session:
-    session["user"] = {
-        "full_name": full_name,
-        "cellphone": cellphone,
-        "email": email
-    }
-
-    # Redirect to barber page
-    return redirect(url_for('routes.BARBER'))
+    if "user" in session:
+        logger.info(f"User already in session: {session['user']}")
+        return redirect(url_for('routes.BARBER'))
+    logger.info(f"Request headers: {request.headers}")
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        cellphone = request.form.get("cellphone")
+        email = request.form.get("email")
+        logger.info(f"User login attempt: {full_name}, {cellphone}, {email}")
+        if not all([full_name, cellphone, email]):
+            logger.info("Missing login fields")
+            return render_template("login.html")
+        session.clear()  # Clear existing session data
+        session["user"] = {
+            "full_name": full_name,
+            "cellphone": cellphone,
+            "email": email
+        }
+        session.permanent = True
+        session.modified = True
+        logger.info(f"Session set: {session['user']}")
+        logger.info(f"Redirecting to: routes.BARBER")
+        return redirect(url_for('routes.BARBER'))
+    logger.info("Rendering user login page")
+    return render_template("login.html")
 
 @routes_bp.route('/barber')
 def BARBER():
@@ -216,15 +223,13 @@ def confirm_booking():
         date = request.form["date"]
         time = request.form["time"]
 
-        logger.debug(f"Confirm booking: {full_name}, {cellphone}, {email}, {service}, {barber}, {date}, {time}")
+        logger.debug(f"Confirm booking: full_name={full_name}, cellphone={cellphone}, email={email}, service={service}, barber={barber}, date={date}, time={time}")
 
-        # Check if slot already exists
         existing = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
         if existing:
-            logger.warning(f"Slot already booked: {barber}, {date}, {time}")
+            logger.warning(f"Slot already booked: barber={barber}, date={date}, time={time}")
             return jsonify({"success": False, "message": "This time slot has already been booked."}), 400
 
-        # Insert new appointment
         new_appointment = Appointment(
             full_name=full_name,
             cellphone=cellphone,
@@ -239,15 +244,15 @@ def confirm_booking():
 
         db.session.add(new_appointment)
         db.session.commit()
-        logger.debug(f"Appointment saved: {new_appointment.id}")
+        logger.info(f"Appointment saved: id={new_appointment.id}, barber={barber}, date={date}, time={time}")
 
         session["selected_date"] = date
         session["selected_time"] = time
         session["booking_complete"] = True
 
-        # Emit to all clients with full appointment details
         room = barber.lower().replace(" ", "_")
-        socketio.emit("slot_booked", {
+        appointment_data = {
+            "id": new_appointment.id,
             "full_name": full_name,
             "cellphone": cellphone,
             "email": email,
@@ -257,8 +262,10 @@ def confirm_booking():
             "time": time,
             "created_at": new_appointment.created_at.isoformat(),
             "is_read": new_appointment.is_read
-        }, room=room)
-        logger.debug(f"Emitted new_appointment to room: {room}")
+        }
+        logger.debug(f"Emitting slot_booked to room={room}: {appointment_data}")
+        socketio.emit("slot_booked", appointment_data, room=room)
+        logger.info(f"Successfully emitted slot_booked to room={room}")
 
         return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
     except Exception as e:
