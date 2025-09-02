@@ -35,7 +35,7 @@ def create_app():
     app.config['SESSION_COOKIE_PATH'] = '/'
 
     db.init_app(app)
-    socketio.init_app(app, cors_allowed_origins=["http://127.0.0.1:5000"])
+    socketio.init_app(app, cors_allowed_origins=["http://127.0.0.1:5000", "http://192.168.100.94:5000"])
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'admin.ADMINLOGIN'

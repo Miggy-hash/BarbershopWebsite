@@ -106,11 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}">
                         <div class="flex justify-between">
                             <div>
-                                <p class="font-semibold">${n.full_name}</p>
-                                <p class="text-sm">${n.service}</p>
-                                <p class="text-sm">${n.date} at ${formatTime(n.time)}</p>
+                                <p class="lg:text-base text-xs font-semibold">${n.full_name}</p>
+                                <p class="lg:text-base text-[10px]">${n.service}</p>
+                                <p class="lg:text-base text-[10px]">${n.date} at ${formatTime(n.time)}</p>
                             </div>
-                            <div class="text-xs text-gray-400">${createdAt.fromNow()}</div>
+                            <div class="lg:text-xs text-[8px] text-gray-400">${createdAt.fromNow()}</div>
                         </div>
                     </div>
                 `;

@@ -48,9 +48,9 @@
             display: none; 
             position: absolute; 
             top: 100%; 
-            right: 0; 
-            width: 400px; 
-            max-height: 500px; 
+            right: -460%; 
+            width: 260px; 
+            max-height: 400px; 
             overflow-y: auto; 
             background-color: #000; 
             border: 2px solid #000000; 
@@ -58,6 +58,9 @@
             box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3); 
             z-index: 50; 
             padding: 15px;
+        }
+        @media (min-width: 1280px){
+            .notification-dropdown { width: 400px;  max-height: 500px; right: -280%;  }
         }
         .notification-dropdown.show { display: block; }
         .notification-item { 
@@ -75,9 +78,11 @@
         .show-more-btn { 
             display: block; 
             text-align: center; 
-            padding: 10px; 
+            justify-content: center; 
+            padding: 5px; 
             color: #3b82f6; 
             cursor: pointer; 
+            font-size: 13px;
         }
         .show-more-btn:hover { color: #60a5fa; }
         .notification-badge { 
@@ -122,17 +127,17 @@
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="flex flex-row m-4">
-                    <img src="{{ url_for('static', filename='images/SG-LOGO.jpg')}}" class="w-[50px] h-[50px] rounded-full md:w-[60px] md:h-[60px] lg:w-[90px] lg:h-[90px]">
-                    <h1 class="font-playfair font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px] ml-3">Emel's Dashboard</h1>
+                    <img src="{{ url_for('static', filename='images/SG-LOGO.jpg')}}" class="w-[50px] h-[50px] rounded-full md:w-[60px] md:h-[60px] lg:w-[90px] lg:h-[90px] ml-[-30px]">
+                    <h1 class="font-playfair font-bold text-xl md:text-xl lg:text-2xl xl:text-3xl mt-[12px] sm:mt-[12px] md:mt-[16px] lg:mt-[24px]">Emel's Dashboard</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
                         <button id="notification-btn" class="text-white text-xs md:text-lg lg:text-xl xl:text-base relative">
-                            <i class="fas fa-bell"></i>
+                            <i class="fas fa-bell lg:fa-sm fa-lg lg:mr-[10px]"></i>
                             <span id="unread-count" class="notification-badge hidden">0</span>
                         </button>
                         <div id="notification-dropdown" class="notification-dropdown">
-                            <h3 class="text-lg font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
+                            <h3 class="lg:text-lg text-sm font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
                             <div id="notification-list" class="space-y-1.5"></div>
                             <button id="show-more-btn" class="show-more-btn">Show More</button>
                         </div>
