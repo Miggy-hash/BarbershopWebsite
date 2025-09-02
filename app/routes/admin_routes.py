@@ -27,26 +27,6 @@ def on_join(data):
     join_room(room)
     logger.info(f"Socket {request.sid} joined room: {room}")
 
-@admin_bp.route('/test-slot-booked', methods=['GET'])
-@login_required
-def test_slot_booked():
-    appointment_data = {
-        "id": 999,
-        "full_name": "Test User",
-        "cellphone": "1234567890",
-        "email": "test@example.com",
-        "service": "Regular Haircut",
-        "barber": "Emel Calomos",
-        "date": "2025-09-02",
-        "time": "10:00",
-        "created_at": datetime.utcnow().isoformat(),
-        "is_read": False
-    }
-    logger.debug(f"Test emitting slot_booked: {appointment_data}")
-    socketio.emit("slot_booked", appointment_data, room="emel_calomos")
-    logger.info("Test slot_booked emitted")
-    return jsonify({"success": True, "message": "Test slot_booked emitted"})
-
 def cleanup_old_appointments():
     try:
         cutoff_date = datetime.utcnow() - timedelta(days=7)
@@ -259,7 +239,7 @@ def add_appointment():
 
 @admin_bp.route('/remove-appointment', methods=['POST'])
 @login_required
-def remove_appointment():
+def E_remove_appointment():
     try:
         if current_user.username != 'emel':
             logger.warning(f"Unauthorized attempt to remove appointment by {current_user.username}")
@@ -298,28 +278,92 @@ def remove_appointment():
         db.session.rollback()
         logger.error(f"Error in remove_appointment: {str(e)}", exc_info=True)
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+  
+@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>', methods=['GET'])
+@login_required
+def E_get_notifications(limit, offset):
+    logger.debug(f"Fetching notifications for Emel Calomos: limit={limit}, offset={offset}")
+    try:
+        # Clean up appointments older than 7 days
+        cleanup_old_appointments()
+
+        cutoff_date = datetime.utcnow() - timedelta(days=5)
+        appointments = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.created_at >= cutoff_date
+        ).order_by(Appointment.created_at.desc()).offset(offset).limit(limit).all()
+        logger.debug(f"Found {len(appointments)} appointments")
+
+        unread_count = Appointment.query.filter(
+            Appointment.barber == "Emel Calomos",
+            Appointment.is_read == False,
+            Appointment.created_at >= cutoff_date
+        ).count()
+        logger.debug(f"Unread count: {unread_count}")
+
+        notifications = [{
+            'id': appt.id,
+            'full_name': appt.full_name,
+            'service': appt.service,
+            'date': appt.date,
+            'time': appt.time,
+            'created_at': appt.created_at.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'is_read': appt.is_read
+        } for appt in appointments]
+
+        return jsonify({'notifications': notifications, 'unread_count': unread_count})
+    except Exception as e:
+        logger.error(f"Error fetching notifications: {e}")
+        return jsonify({'error': 'Failed to fetch notifications'}), 500
+
+@admin_bp.route('/emel-mark-notifications-read', methods=['POST'])
+@login_required
+def E_mark_notifications_read():
+    logger.debug("Marking notifications as read for Emel Calomos")
+    try:
+        appointments = Appointment.query.filter_by(barber='Emel Calomos', is_read=False).all()
+        logger.info(f"Found {len(appointments)} unread appointments for Emel Calomos")
+        for appt in appointments:
+            appt.is_read = True
+        db.session.commit()
+        logger.info("Notifications marked as read")
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Error marking notifications read: {e}")
+        return jsonify({'error': 'Failed to mark notifications read'}), 500
 
 @admin_bp.route("/bdashboard")
+@login_required
 def Bdashboard_home():
-    if "username" not in session:
-        return redirect(url_for("admin.ADMINLOGIN"))
-    
+    logger.info(f"Current user: {current_user.username if current_user.is_authenticated else 'None'}")
+    logger.info(f"Session contents: {session}")
+    logger.info(f"Request cookies: {request.cookies}")
+    logger.info(f"Request headers: {request.headers}")
+    if not current_user.is_authenticated:
+        logger.info("User not authenticated, redirecting to login")
+        return redirect(url_for("admin.login"))
+
     today_dt = datetime.today()
     date_for_check = today_dt.strftime("%B %d, %Y")
-    logger.debug(f"Bdashboard: Querying for date {date_for_check}")
+    logger.debug(f"Edashboard: Querying for date {date_for_check}")
 
     try:
         appointments = Appointment.query.filter_by(barber="Angelo Paballa", date=date_for_check).all()
         booked = {a.time: {
             'full_name': sanitize_string(a.full_name),
-            'service': sanitize_string(a.service)
+            'service': sanitize_string(a.service),
+            'cellphone': sanitize_string(a.cellphone),
+            'email': sanitize_string(a.email),
+            'barber': sanitize_string(a.barber),
+            'date': sanitize_string(a.date),
+            'time': sanitize_string(a.time)
         } for a in appointments}
-        logger.debug(f"Bdashboard: Found {len(appointments)} appointments")
+        logger.debug(f"Edashboard: Found {len(appointments)} appointments")
     except Exception as e:
-        logger.error(f"Bdashboard: Error querying appointments: {e}")
+        logger.error(f"Edashboard: Error querying appointments: {e}")
         booked = {}
 
-    display_date = f"{today_dt.strftime('%B')} {today_dt.day}, {today_dt.year}"
+    display_date = today_dt.strftime("%B %d, %Y")
 
     time_slots = [
         {'24h': '09:00', 'label': '9:00 AM'},
@@ -332,8 +376,8 @@ def Bdashboard_home():
         {'24h': '17:00', 'label': '5:00 PM'},
     ]
 
-    return render_template("admin/boboy-dashboard_home.html", 
-                           username=session["username"],
+    return render_template("admin/boboy-dashboard_home.html",
+                           username=current_user.username,
                            booked=booked,
                            time_slots=time_slots,
                            display_date=display_date)
@@ -375,40 +419,83 @@ def get_boboy_appointments_count(year, month):
         first_day = datetime(year, month, 1)
         last_day = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
-        appointments = Appointment.query.filter(
-            Appointment.barber == "Angelo Paballa",
-            Appointment.date >= first_day.strftime("%B %d, %Y"),
-            Appointment.date < last_day.strftime("%B %d, %Y")
-        ).all()
-        logger.debug(f"Found {len(appointments)} appointments for month {month}/{year}")
+        appointments = Appointment.query.filter(Appointment.barber == "Angelo Paballa").all()
+        logger.debug(f"Found {len(appointments)} total appointments for Angelo Paballa")
 
         appointment_counts = {}
         for a in appointments:
-            date_key = datetime.strptime(a.date, "%B %d, %Y").strftime("%Y-%m-%d")
-            appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+            try:
+                dt = datetime.strptime(a.date, "%B %d, %Y")
+                if first_day <= dt < last_day:
+                    date_key = dt.strftime("%Y-%m-%d")
+                    appointment_counts[date_key] = appointment_counts.get(date_key, 0) + 1
+            except ValueError as e:
+                logger.warning(f"Invalid date format for appointment {a.id}: {a.date} - {e}")
 
         return jsonify(appointment_counts)
     except Exception as e:
         logger.error(f"Error fetching appointment counts: {e}")
         return jsonify({'error': 'Internal server error'}), 500
-    
-@admin_bp.route('/emel-notifications/<int:limit>/<int:offset>', methods=['GET'])
+  
+@admin_bp.route('/remove-appointment', methods=['POST'])
 @login_required
-def get_notifications(limit, offset):
-    logger.debug(f"Fetching notifications for Emel Calomos: limit={limit}, offset={offset}")
+def B_remove_appointment():
+    try:
+        if current_user.username != 'boboy':
+            logger.warning(f"Unauthorized attempt to remove appointment by {current_user.username}")
+            return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+        data = request.get_json()
+        if not data:
+            logger.error("No JSON data in remove-appointment request")
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        barber = data.get('barber')
+        date = data.get('date')
+        time = data.get('time')
+
+        logger.debug(f"Remove appointment request: barber={barber}, date={date}, time={time}")
+
+        if not all([barber, date, time]):
+            logger.error("Missing required fields in remove-appointment request")
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+        appointment = Appointment.query.filter_by(barber=barber, date=date, time=time).first()
+        if not appointment:
+            logger.warning(f"No appointment found for barber={barber}, date={date}, time={time}")
+            return jsonify({"success": False, "message": "Time slot is empty, select existing time slot!"}), 404
+
+        appointment_id = appointment.id
+        db.session.delete(appointment)
+        db.session.commit()
+        logger.info(f"Appointment deleted: id={appointment_id}, barber={barber}, date={date}, time={time}")
+
+        socketio.emit('slot_deleted', {'id': appointment_id, 'barber': barber, 'date': date, 'time': time}, room=barber.lower().replace(" ", "_"))
+        logger.info(f"Emitted slot_deleted to room={barber.lower().replace(' ', '_')}: id={appointment_id}")
+
+        return jsonify({"success": True, "message": "Appointment deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in remove_appointment: {str(e)}", exc_info=True)
+        return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
+
+@admin_bp.route('/boboy-notifications/<int:limit>/<int:offset>', methods=['GET'])
+@login_required
+def B_get_notifications(limit, offset):
+    logger.debug(f"Fetching notifications for Angelo Paballa: limit={limit}, offset={offset}")
     try:
         # Clean up appointments older than 7 days
         cleanup_old_appointments()
 
-        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        cutoff_date = datetime.utcnow() - timedelta(days=5)
         appointments = Appointment.query.filter(
-            Appointment.barber == "Emel Calomos",
+            Appointment.barber == "Angelo Paballa",
             Appointment.created_at >= cutoff_date
         ).order_by(Appointment.created_at.desc()).offset(offset).limit(limit).all()
         logger.debug(f"Found {len(appointments)} appointments")
 
         unread_count = Appointment.query.filter(
-            Appointment.barber == "Emel Calomos",
+            Appointment.barber == "Angelo Paballa",
             Appointment.is_read == False,
             Appointment.created_at >= cutoff_date
         ).count()
@@ -429,13 +516,13 @@ def get_notifications(limit, offset):
         logger.error(f"Error fetching notifications: {e}")
         return jsonify({'error': 'Failed to fetch notifications'}), 500
 
-@admin_bp.route('/emel-mark-notifications-read', methods=['POST'])
+@admin_bp.route('/boboy-mark-notifications-read', methods=['POST'])
 @login_required
-def mark_notifications_read():
-    logger.debug("Marking notifications as read for Emel Calomos")
+def B_mark_notifications_read():
+    logger.debug("Marking notifications as read for Angelo Paballa")
     try:
-        appointments = Appointment.query.filter_by(barber='Emel Calomos', is_read=False).all()
-        logger.info(f"Found {len(appointments)} unread appointments for Emel Calomos")
+        appointments = Appointment.query.filter_by(barber='Angelo Paballa', is_read=False).all()
+        logger.info(f"Found {len(appointments)} unread appointments for Angelo Paballa")
         for appt in appointments:
             appt.is_read = True
         db.session.commit()
@@ -445,7 +532,6 @@ def mark_notifications_read():
         logger.error(f"Error marking notifications read: {e}")
         return jsonify({'error': 'Failed to mark notifications read'}), 500
 
-    
 @admin_bp.route('/logout')
 @login_required
 def logout():

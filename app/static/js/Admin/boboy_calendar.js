@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevBtn = document.getElementById("prevMonthBtn");
   const nextBtn = document.getElementById("nextMonthBtn");
   const daysContainer = document.getElementById("calendarDays");
-  const scheduleContainer = document.querySelector('.space-y-2');
+  const scheduleContainer = document.getElementById('dailyScheduleList');
   const appointmentDetails = document.getElementById("appointmentDetails");
   const addAppointmentBtn = document.getElementById("addAppointmentBtn");
   const removeAppointmentBtn = document.getElementById("removeAppointmentBtn");
@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelRemoveBtn = document.getElementById("cancelRemoveBtn");
   const addDateSelect = document.getElementById("addDate");
   const removeDateSelect = document.getElementById("removeDate");
+  const debouncedUpdateCalendar = debounce(updateCalendar);
+  const debouncedUpdateDailySchedule = debounce(updateDailySchedule);
   let currentDate = new Date();
   let selectedCell = null;
   let activeSlot = null;
@@ -43,14 +45,22 @@ document.addEventListener("DOMContentLoaded", () => {
     { '24h': '17:00', 'label': '5:00 PM' },
   ];
 
-  // Initialize Socket.IO
   const socket = io('http://127.0.0.1:5000', {
     transports: ['websocket']
-}); // Adjust URL if needed
+});
 
-// ... (other code unchanged)
+function debounce(func, delay = 300) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
 
-// Helper function to parse "Month DD, YYYY" to ISO format
+socket.on('connect', () => {
+    socket.emit('join', 'angelo_paballa');
+});
+
 function parseDateToISO(dateStr) {
     const monthNames = [
         "January", "February", "March", "April", "May", "June",
@@ -81,46 +91,46 @@ function parseDateToISO(dateStr) {
 
 socket.on('slot_booked', (data) => {
     if (data.barber !== 'Angelo Paballa') {
+        console.log('Ignoring slot_booked for non-Angelo barber:', data.barber);
         return;
     }
-    const eventDate = data.date.trim();
-    const selectedDate = dailyDateEl.textContent.trim();
+    const eventDate = data.date.trim().replace(/\s+/g, ' '); // Normalize spaces
+    const selectedDate = dailyDateEl.textContent.trim().replace(/\s+/g, ' ');
     const isoDate = parseDateToISO(eventDate);
     if (!isoDate) {
+        console.error('Invalid isoDate from eventDate:', eventDate);
         return;
     }
     if (eventDate === selectedDate) {
-        updateDailySchedule(eventDate);
-    }
-    updateCalendar();
+        debouncedUpdateDailySchedule(eventDate);
+        }
+        debouncedUpdateCalendar();
 });
 
 socket.on('slot_deleted', (data) => {
-    if (data.barber !== 'Angelo Paballa') {
-        return;
-    }
-    const eventDate = data.date.trim();
-    const selectedDate = dailyDateEl.textContent.trim();
+    if (data.barber !== 'Angelo Paballa') return;
+    const eventDate = data.date.trim().replace(/\s+/g, ' ');
+    const selectedDate = dailyDateEl.textContent.trim().replace(/\s+/g, ' ');
     const isoDate = parseDateToISO(eventDate);
-    if (!isoDate) {
-        return;
-    }
+    if (!isoDate) return;
     if (eventDate === selectedDate) {
-        updateDailySchedule(eventDate);
-    }
-    // Remove redundant updateCalendar call here, handled by confirmRemoveBtn
+        debouncedUpdateDailySchedule(eventDate);
+        }
+        if (!isCalendarUpdating) {
+        isCalendarUpdating = true;
+        debouncedUpdateCalendar();
+        isCalendarUpdating = false;
+        }
 });
 
-// ... (rest of the code unchanged)
 
-  // Populate date dropdowns
   function populateDateDropdown(selectElement) {
     selectElement.innerHTML = '';
     const today = new Date();
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      const formatted = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      const formatted = `${monthNames[date.getMonth()]} ${String(date.getDate()).padStart(2, '0')}, ${date.getFullYear()}`;
       const option = document.createElement('option');
       option.value = formatted;
       option.textContent = formatted;
@@ -284,6 +294,8 @@ addAppointmentForm.addEventListener('submit', async (e) => {
             currentDate.setDate(parseInt(day.replace(',', '')));
             dailyDateEl.textContent = newDateStr;
             const isoDate = parseDateToISO(newDateStr);
+            await debouncedUpdateDailySchedule(newDateStr);
+            debouncedUpdateCalendar();
             try {
                 await updateDailySchedule(newDateStr);
             } catch (err) {
@@ -356,12 +368,12 @@ confirmRemoveBtn.addEventListener('click', async () => {
             currentDate.setDate(parseInt(day.replace(',', '')));
             dailyDateEl.textContent = removedDateStr;
             const isoDate = parseDateToISO(removedDateStr);
-            await updateDailySchedule(removedDateStr);
-            if (!isCalendarUpdating) {
+            await debouncedUpdateDailySchedule(removedDateStr);
+                if (!isCalendarUpdating) {
                 isCalendarUpdating = true;
-                await updateCalendar();
+                debouncedUpdateCalendar();
                 isCalendarUpdating = false;
-            }
+                }
         } else {
             alert(`Error: ${result.error}`);
         }
@@ -374,19 +386,19 @@ confirmRemoveBtn.addEventListener('click', async () => {
 async function updateDailySchedule(date) {
     try {
         const isoDate = parseDateToISO(date);
-        if (!isoDate) {
-            return;
-        }
+        if (!isoDate) return;
         const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(isoDate)}`;
         const response = await fetch(endpoint);
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const booked = await response.json();
 
         if (!scheduleContainer) {
+            console.error('dailyScheduleList not found');
             return;
         }
+
+        if (appointmentDetails) appointmentDetails.classList.add('hidden');
+            activeSlot = null;
 
         let html = '';
         timeSlots.forEach(slot => {
@@ -430,13 +442,15 @@ async function updateDailySchedule(date) {
                         activeSlot = slot;
                     }
                 } catch (err) {
-                    appointmentDetails.innerHTML = '<p class="text-red-600">Error loading appointment details</p>';
+                    console.error('Parse error:', err);
+                    appointmentDetails.innerHTML = '<p class="text-red-600">Error loading details</p>';
                     appointmentDetails.classList.remove('hidden');
                     activeSlot = slot;
                 }
             });
         });
     } catch (err) {
+        console.error('Error in updateDailySchedule:', err);
     }
 }
 
@@ -521,7 +535,7 @@ async function updateCalendar() {
         const isSelected = day === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear();
         if (isSelected) {
             dayDiv.classList.add("bg-blue-200");
-            dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
+            dailyDateEl.textContent = `${monthNames[month]} ${String(day).padStart(2, '0')}, ${year}`;
         }
 
         const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -548,8 +562,8 @@ async function updateCalendar() {
             dayDiv.classList.add("ring-4", "ring-red-600");
             dayDiv.setAttribute("aria-selected", "true");
             selectedCell = dayDiv;
-            dailyDateEl.textContent = `${monthNames[month]} ${day}, ${year}`;
-            await updateDailySchedule(dateKey);
+            dailyDateEl.textContent = `${monthNames[month]} ${String(day).padStart(2, '0')}, ${year}`;
+            await debouncedUpdateDailySchedule(dateKey);
         });
 
         daysContainer.appendChild(dayDiv);
@@ -575,6 +589,6 @@ async function updateCalendar() {
   });
 
   const todayIso = currentDate.toISOString().split('T')[0];
-  updateDailySchedule(todayIso);
-  updateCalendar();
+    debouncedUpdateDailySchedule(todayIso);
+    debouncedUpdateCalendar();
 });

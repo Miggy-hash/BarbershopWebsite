@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('connect', () => {
         console.log('Socket.IO connected, socket ID:', socket.id);
-        socket.emit('join', 'emel_calomos');
-        console.log('Joined room: emel_calomos');
+        socket.emit('join', 'angelo_paballa');
+        console.log('Joined room: angelo_paballa');
     });
 
     socket.on('reconnect', (attempt) => {
         console.log('Socket.IO reconnected after', attempt, 'attempts');
-        socket.emit('join', 'emel_calomos');
-        console.log('Rejoined room: emel_calomos');
+        socket.emit('join', 'angelo_paballa');
+        console.log('Rejoined room: angelo_paballa');
     });
 
     socket.on('reconnect_attempt', (attempt) => {
@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('slot_booked', (data) => {
         console.log('New appointment received:', JSON.stringify(data, null, 2));
-        if (data.barber !== 'Emel Calomos') {
-            console.log('Ignoring slot_booked for non-Emel barber:', data.barber);
+        if (data.barber !== 'Angelo Paballa') {
+            console.log('Ignoring slot_booked for non-Angelo barber:', data.barber);
             return;
         }
         data.id = data.id || `temp-${Date.now()}`;
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchNotifications(append = false) {
-        fetch(`/admin/emel-notifications/${limit}/${offset}`)
+        fetch(`/admin/boboy-notifications/${limit}/${offset}`)
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched notifications:', JSON.stringify(data, null, 2));
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         notificationBtn.addEventListener('click', () => {
             console.log('Notification button clicked, toggling dropdown');
             notificationDropdown.classList.toggle('show');
-            fetch(`/admin/emel-mark-notifications-read`, { method: 'POST' })
+            fetch(`/admin/boboy-mark-notifications-read`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     console.log('Notifications marked as read:', data);

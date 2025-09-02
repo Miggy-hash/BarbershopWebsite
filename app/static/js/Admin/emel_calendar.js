@@ -58,9 +58,7 @@ function debounce(func, delay = 300) {
 }
 
 socket.on('connect', () => {
-    console.log('Socket.IO connected for calendar:', socket.id);
     socket.emit('join', 'emel_calomos');
-    console.log('Joined room: emel_calomos');
 });
 
 function parseDateToISO(dateStr) {
@@ -103,7 +101,6 @@ socket.on('slot_booked', (data) => {
         console.error('Invalid isoDate from eventDate:', eventDate);
         return;
     }
-    console.log('slot_booked: Event date:', eventDate, 'Selected:', selectedDate, 'Match:', eventDate === selectedDate);
     if (eventDate === selectedDate) {
         debouncedUpdateDailySchedule(eventDate);
         }
@@ -116,7 +113,6 @@ socket.on('slot_deleted', (data) => {
     const selectedDate = dailyDateEl.textContent.trim().replace(/\s+/g, ' ');
     const isoDate = parseDateToISO(eventDate);
     if (!isoDate) return;
-    console.log('slot_deleted: Event date:', eventDate, 'Selected:', selectedDate, 'Match:', eventDate === selectedDate);
     if (eventDate === selectedDate) {
         debouncedUpdateDailySchedule(eventDate);
         }
@@ -388,16 +384,13 @@ confirmRemoveBtn.addEventListener('click', async () => {
 });
 
 async function updateDailySchedule(date) {
-    console.log('updateDailySchedule called with:', date);
     try {
         const isoDate = parseDateToISO(date);
-        console.log('Parsed ISO:', isoDate);
         if (!isoDate) return;
         const endpoint = `/admin/${window.APPOINTMENT_ENDPOINT}/${encodeURIComponent(isoDate)}`;
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const booked = await response.json();
-        console.log('Fetched booked:', booked);
 
         if (!scheduleContainer) {
             console.error('dailyScheduleList not found');
@@ -435,13 +428,10 @@ async function updateDailySchedule(date) {
             }
         });
         scheduleContainer.innerHTML = html;
-        console.log('Set new HTML');
 
         const bookedSlots = document.querySelectorAll('.time-slot.booked');
-        console.log('Attaching to', bookedSlots.length, 'booked slots');
         bookedSlots.forEach(slot => {
             slot.addEventListener('click', () => {
-                console.log('Clicked booked slot:', slot.dataset.appointment);
                 try {
                     const appointment = JSON.parse(slot.dataset.appointment);
                     if (activeSlot === slot && !appointmentDetails.classList.contains('hidden')) {
