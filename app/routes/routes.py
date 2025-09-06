@@ -1,16 +1,20 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
-from app import db
+from app import db, socketio, mail
 from app.models import Appointment
 from datetime import datetime
 from flask import jsonify
 from flask import request
 from flask_socketio import emit
-from app import socketio
 import logging
+from flask_mail import Message
+from threading import Thread
+from flask import current_app
+
 
 
 routes_bp = Blueprint('routes', __name__, template_folder='templates', static_folder='static')
 logger = logging.getLogger(__name__)
+
 
 @routes_bp.route('/')
 def HOME():
@@ -245,6 +249,27 @@ def confirm_booking():
         db.session.add(new_appointment)
         db.session.commit()
         logger.info(f"Appointment saved: id={new_appointment.id}, barber={barber}, date={date}, time={time}")
+
+        def send_async_email(app, msg):
+            with app.app_context():
+                mail.send(msg)
+
+        try:
+            dt = datetime.strptime(time, "%H:%M")
+            formatted_time = dt.strftime("%I:%M %p").lstrip("0")
+            html_body = render_template('email_confirmation.html', appointment=new_appointment, formatted_time=formatted_time)
+            msg = Message(
+                subject="Your Barbershop Appointment Confirmation",
+                recipients=[email],
+                html=html_body,
+                body=f"Your appointment is confirmed for {date} at {formatted_time} with {barber} for {service}."
+            )
+            Thread(target=send_async_email, args=(current_app._get_current_object(), msg)).start()
+            logger.info(f"Async confirmation email queued for {email} for appointment ID {new_appointment.id}")
+        except Exception as email_err:
+            logger.error(f"Failed to queue email to {email}: {str(email_err)}")
+
+
 
         session["selected_date"] = date
         session["selected_time"] = time

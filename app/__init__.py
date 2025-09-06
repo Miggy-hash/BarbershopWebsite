@@ -8,6 +8,11 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_mail import Mail
+from dotenv import load_dotenv  
+
+mail = Mail()
+load_dotenv()
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -34,6 +39,15 @@ def create_app():
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
     app.config['SESSION_COOKIE_PATH'] = '/'
 
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_USERNAME') # Your Gmail email
+    app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD')  # App Password
+    app.config['MAIL_DEFAULT_SENDER'] = ('Slick Grind Barbers', os.environ.get('GMAIL_USERNAME'))
+
+    mail.init_app(app)
     db.init_app(app)
     socketio.init_app(app, cors_allowed_origins=["http://127.0.0.1:5000", "http://192.168.100.94:5000"])
     migrate.init_app(app, db)
