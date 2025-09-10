@@ -19,7 +19,10 @@
             <div class="flex flex-col gap-2 bg-black p-7 sm:p-7 md:p-10 lg:p-10 rounded-xl border-2 border-white w-[330px] sm:w-[330px] md:w-auto lg:w-auto">
                 <h2 class="text-white text-xs sm:text-xs md:text-normal lg:text-base ml-2 font-montserrat">Select a service for your appointment:</h2>
 
-              <!-- Mens' Haircut -->
+
+
+
+              <!--Regular Haircut -->
                <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='haircut') }}">
               <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
@@ -71,11 +74,10 @@
                 <div class="absolute top-1/2 left-full -translate-y-1/2 inline-flex items-center opacity-0 whitespace-nowrap
                             transition-all duration-700 ease-in-out
                             group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:opacity-100">
-                  <span class=" text-2xl font-faustina font-bold">Full Service</span>
+                  <span class="text-2xl font-faustina font-bold">Full Service</span>
                 </div>
               </div>
               </a>
-</div>
               </div>
 
 
@@ -107,7 +109,7 @@
     </div>
 
 
-
+</div>
 
            
 
