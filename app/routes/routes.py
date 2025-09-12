@@ -6,20 +6,20 @@ from flask import jsonify
 from flask import request
 from flask_socketio import emit
 import logging
+import requests
+import os
 from flask_mail import Message
 from threading import Thread
 from flask import current_app
+from dotenv import load_dotenv
 
-
-
+load_dotenv()
 routes_bp = Blueprint('routes', __name__, template_folder='templates', static_folder='static')
 logger = logging.getLogger(__name__)
-
 
 @routes_bp.route('/')
 def HOME():
     return render_template('home.html')
-
 
 @routes_bp.route("/login", methods=["POST", "GET"])
 def LOGIN():
@@ -35,7 +35,7 @@ def LOGIN():
         if not all([full_name, cellphone, email]):
             logger.info("Missing login fields")
             return render_template("login.html")
-        session.clear()  # Clear existing session data
+        session.clear()
         session["user"] = {
             "full_name": full_name,
             "cellphone": cellphone,
@@ -211,7 +211,19 @@ def select_service(barber, service_name):
         return redirect(url_for("routes.BCALENDAR"))
     else:
         return redirect(url_for("routes.home"))
-    
+
+def format_phone_number(cellphone):
+    if not cellphone:
+        return None
+    cellphone = cellphone.strip()
+    if cellphone.startswith('0') and len(cellphone) == 11:
+        return '+63' + cellphone[1:]
+    elif cellphone.startswith('+63') and len(cellphone) == 12:
+        return cellphone
+    else:
+        logger.warning(f"Invalid phone format: {cellphone}")
+        return None 
+
 @routes_bp.route("/confirm", methods=["POST"])
 def confirm_booking():
     try:
@@ -254,6 +266,8 @@ def confirm_booking():
             with app.app_context():
                 mail.send(msg)
 
+        # --- Send Confirmation Email ---
+        email_sent = False
         try:
             dt = datetime.strptime(time, "%H:%M")
             formatted_time = dt.strftime("%I:%M %p").lstrip("0")
@@ -266,11 +280,48 @@ def confirm_booking():
             )
             Thread(target=send_async_email, args=(current_app._get_current_object(), msg)).start()
             logger.info(f"Async confirmation email queued for {email} for appointment ID {new_appointment.id}")
+            email_sent = True
         except Exception as email_err:
             logger.error(f"Failed to queue email to {email}: {str(email_err)}")
 
+        # --- Send Confirmation SMS ---
+        sms_sent = False
+        try:
+            dt = datetime.strptime(time, "%H:%M")
+            formatted_time = dt.strftime("%I:%M %p").lstrip("0")
+            message = f"Hi {full_name}! Your appt with {barber} on {date} at {formatted_time} for {service} is confirmed. Reply STOP to cancel. - SlickGrind"
+            if len(message) > 160:
+                logger.warning(f"SMS message too long ({len(message)} chars), truncating")
+                message = message[:157] + "..."
 
+            formatted_phone = format_phone_number(cellphone)
+            if not formatted_phone:
+                logger.error(f"Invalid phone number for SMS: {cellphone}")
+            else:
+                api_key = os.environ.get('SEMAPHORE_API_KEY')
+                sender_id = os.environ.get('SEMAPHORE_SENDER_ID')
+                url = 'https://api.semaphore.co/api/v4/messages'
+                payload = {
+                    'apikey': api_key,
+                    'number': formatted_phone,
+                    'message': message,
+                    'senderid': sender_id
+                }
+                response = requests.post(url, data=payload)
+                response.raise_for_status()
+                if response.json().get('status') == 'success':
+                    logger.info(f"SMS sent to {formatted_phone} for appointment ID {new_appointment.id}")
+                    sms_sent = True
+                else:
+                    logger.error(f"SMS API error for {formatted_phone}: {response.text}")
+        except Exception as sms_err:
+            logger.error(f"Failed to send SMS to {cellphone}: {str(sms_err)}")
 
+        session["full_name"] = full_name
+        session["cellphone"] = cellphone
+        session["email"] = email
+        session["service"] = service
+        session["barber"] = barber
         session["selected_date"] = date
         session["selected_time"] = time
         session["booking_complete"] = True
@@ -292,12 +343,11 @@ def confirm_booking():
         socketio.emit("slot_booked", appointment_data, room=room)
         logger.info(f"Successfully emitted slot_booked to room={room}")
 
-        return jsonify({"success": True, "redirect": url_for("routes.RECEIPT")})
+        return jsonify({"success": True, "redirect": url_for("routes.RECEIPT", email_sent=email_sent, sms_sent=sms_sent)})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error in confirm_booking: {str(e)}", exc_info=True)
         return jsonify({"success": False, "message": f"Server error: {str(e)}"}), 500
-
 
 @routes_bp.route('/logout')
 def logout():
