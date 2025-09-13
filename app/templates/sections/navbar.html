@@ -1,9 +1,9 @@
-<header class="relative bg-black text-white xs:w-[360px] sm:w-[360px] max-w-full lg:w-full">
+<header class="relative bg-black text-white xs:w-[360px] sm:w-[360px] md:w-full max-w-full lg:w-full">
   <!-- IMPORTANT: put the peer checkbox BEFORE the elements it controls -->
   <input id="menu-checkbox" type="checkbox" class="hidden peer" />
 
   <!-- Top bar (logo, hamburger, desktop nav) -->
-  <div class="h-[60px] sm:h-[60px] md:h-[75px] lg:h-[75px] flex items-center justify-between">
+  <div class="h-[50px] sm:h-[60px] md:h-[75px] lg:h-[60px] flex items-center justify-between">
     <!-- Logo -->
     <div class="ml-[10px] sm:ml-[10px] md:ml-[40px] lg:ml-[40px]">
       <a href="{{ url_for('admin.ADMINLOGIN') }}">
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Hamburger Toggle (visible on mobile only) -->
-    <div class="lg:hidden mr-[15px] flex items-center">
+    <div class="lg:hidden md:hidden mr-[15px] flex items-center">
      <label for="menu-checkbox" 
   class="cursor-pointer lg:w-8 w-[30px] lg:h-8 h-[30px] flex flex-col justify-center items-end space-y-1 relative z-50">
         <span class="block h-[3px] w-6 bg-white transition-transform duration-300 ease-in-out peer-checked:rotate-45 peer-checked:translate-y-[9px] justify-end"></span>
@@ -24,13 +24,13 @@
     </div>
 
     <!-- Nav Links (desktop only) -->
-    <nav id="nav-menu" class="hidden lg:flex gap-[25px] mr-[40px] font-playfair text-[15px]">
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Gallery</a>
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Team</a>
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Services Offered</a>
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Ratings</a>
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Book Now</a>
-      <a href="#" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Contact Us</a>
+    <nav id="nav-menu" class="hidden lg:flex md:flex gap-[20px] mr-[40px] font-playfair text-[12px]">
+      <a href="#gallery" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Gallery</a>
+      <a href="#artist" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Artist</a>
+      <a href="#services" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Services Offered</a>
+      <a href="#location" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Location</a>
+      <a href="#ratings" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Ratings</a>
+      <a href="{{ url_for('routes.LOGIN') }}" class="relative after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-white after:transition-all after:duration-300 hover:after:w-full hover:text-gray-300">Book Now</a>
     </nav>
   </div>
 

@@ -5,42 +5,135 @@
     <title>My Flask App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    .back-to-top {
+        position: fixed;
+        bottom: 1rem;
+        right: 0.8rem;
+        background-color: #000;
+        color: #fff;
+        border: 2px solid #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        z-index: 1000;
+    }
+    .back-to-top.visible{
+        opacity: 0.8;
+    }
+    .back-to-top{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+    .back-to-top::before{
+        content: '↑';
+        color: #fff;
+        font-size: 22px;
+    }
+    @media (min-width: 640px) {
+        .back-to-top{
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .back-to-top::before{
+        content: '↑';
+        color: #fff;
+        font-size: 22px;
+        }
+    }
+    @media (min-width: 768px){
+        .back-to-top{
+            width: 100px;
+            height: 40px;
+            border-radius: 8px;
+            bottom: 1.5rem;
+            right: 1.5rem;
+        }
+        .back-to-top::before{
+            content: 'Back to top';
+            font-size: 10px;
+    }
+}
+    @media (min-width: 1024px) {
+        .back-to-top{
+            width: 85px;
+            height: 38px;
+            border-radius: 8px;
+            bottom: 1.5rem;
+            right: 1.5rem;
+        }
+        .back-to-top::before{
+            content: 'Book now';
+            font-size: 12px;
+    }
+    }
+
+    </style>
 </head>
+
 <body>
-    
     <header class="navbar fixed top-0 left-0 w-full z-50">
         {% include '/sections/navbar.html' %}
     </header>
     <main class="pt-[50px]"> 
-    <section class="banner h-screen relative">
+    <section class="banner relative">
         {% include '/sections/banner.html' %}
     </section>
-    <section class="gallery">
+    <section id="gallery" class="gallery">
         {% include '/sections/gallery.html' %}
     </section>
-    <section class="artist">
+    <section id="artist" class="artist">
         {% include '/sections/artist.html' %}
     </section>
-    <section class="services">
+    <section id="services" class="services">
         {% include '/sections/services.html' %}
     </section>
-    <section class="location relative z-10">
+    <section id="location" class="location relative z-10">
         {% include '/sections/location.html' %}
     </section>
-    <section class="feedback relative z-10">
+    <section id="ratings" class="feedback relative z-10">
         {% include '/sections/feedback.html' %}
     </section>
     <section class="footer">
         {% include '/sections/footer.html' %}
     </section>
     </main>
-</body>
-</html>
+    <button class="back-to-top" aria-label="Back to top"></button>
+
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
   const socket = io("http://localhost:5000");
-
   socket.on("connect", () => {
     console.log("✅ Connected to server via WebSocket");
   });
+
+  document.addEventListener('DOMContentLoaded', () =>{
+    const backToTopButton = document.querySelector('.back-to-top');
+    const bannerSection = document.querySelector('.banner');
+
+    backToTopButton.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                    if (entry.isIntersecting){
+                        backToTopButton.classList.remove('visible');
+                    }
+                    else{
+                        backToTopButton.classList.add('visible');
+                    }
+            });
+        }, { threshold: 0.1 }
+    );
+    observer.observe(bannerSection);
+  });
 </script>
+</body>
+</html>
