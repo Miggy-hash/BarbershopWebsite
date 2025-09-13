@@ -32,33 +32,33 @@
                {# Right column: Rate our service form #}
 
         
-        <section class="bg-white rounded-lg p-4 max-w-sm lg:w-[330px] w-[320px] h-[190px] lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),
+        <section class="bg-white rounded-lg p-4 max-w-sm lg:w-[370px] w-[320px] md:w-[700px] lg:h-[220px] h-[190px] md:h-auto lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),
             -4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] 
-            transition duration-300">
+            transition duration-300 md:ml-[180px]">
     <div class="flex flex-col items-start">
-        <h3 class=" font-faustina text-[20px] font-bold text-gray-800 mb-2 ml-2">Ratings and Reviews</h3>
+        <h3 class=" font-faustina text-[20px] md:text-[25px] font-bold text-gray-800 mb-2 ml-2">Ratings and Reviews</h3>
 
         <!-- Main container: row layout -->
-        <div class="flex items-start gap-2">
+        <div class="flex items-start gap-8 lg:gap-8 md:gap-6">
 
             <!-- Left: average rating, stars, total reviews -->
-            <div class="flex flex-col items-center mt-2">
-                <div class="text-6xl font-montserrat leading-none text-black">{{ average_rating }}</div>
+            <div class="flex flex-col items-center mt-2 ml-3">
+                <div class="text-6xl lg:text-7xl md:text-7xl font-montserrat leading-none text-black">{{ average_rating }}</div>
                 <div class="flex items-center gap-1">
                     {% set full_stars = (average_rating // 1) | int %}
                     {% for i in range(1,6) %}
                         {% if i <= full_stars %}
-                            <svg class="w-6 h-6 text-black-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="w-6 h-6 lg:w-7 lg:h-7 md:w-[30px] md:h-[30px] text-black-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
                             </svg>
                         {% else %}
-                            <svg class="w-4 h-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 md:w-[25px] md:h-[25px] text-gray-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/>
                             </svg>
                         {% endif %}
                     {% endfor %}
                 </div>
-                <div class="text-xs font-montserrat text-gray-500">{{ total_reviews }} reviews</div>
+                <div class="text-xs lg:text-xs md:text-[13px] font-montserrat text-gray-500">{{ total_reviews }} reviews</div>
             </div>
 
             <!-- Right: rating breakdown -->
@@ -70,14 +70,14 @@
                 {% else %}
                     {% set pct = 0 %}
                 {% endif %}
-                <li class="flex items-center gap-3">
-                    <div class="flex items-center gap-2 w-full">
-                        <div class="flex-shrink-0 text-base w-6 text-right text-gray-700">{{ n }}</div>
-                        <div class="relative w-[130px] h-2">
-                            <div class="absolute inset-0 bg-gray-300 border border-black rounded-full" style="height:11px"></div>
-                            <div class="absolute left-0 top-0 bg-black border border-black rounded-full bar" data-count="{{ count }}" data-total="{{ total_reviews }}" style="height:10px; width:0px;"></div>
+                <li class="flex items-center gap-[12px] lg:gap-[12px] md:gap-[10px]">
+                    <div class="flex items-center gap-[12px] lg:gap-[12px] md:gap-[12px] w-full">
+                        <div class="flex-shrink-0 text-[16px] lg:text-[18px] md:text-[20px] text-right text-gray-700">{{ n }}</div>
+                        <div class="relative w-[130px] h-2 lg:h-2 md:h-[12px]">
+                            <div class="absolute inset-0 bg-gray-300 border border-black rounded-full h-[11px]"></div>
+                            <div class="absolute left-0 top-0 bg-black border border-black rounded-full bar h-[11px] w-[0px]" data-count="{{ count }}" data-total="{{ total_reviews }}"></div>
                         </div>
-                        <div class="text-[10px] font-montserrat text-gray-600 ml-2">{{ count }}</div>
+                        <div class="text-[10px] font-montserrat text-gray-600">{{ count }}</div>
                     </div>
                 </li>
                 {% endfor %}
@@ -87,13 +87,15 @@
     </div>
 </section>
 
-       <section class="bg-white rounded-lg p-4 w-auto h-[230px] lg:w-[350px] mb-15 lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),
-            -4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] 
-            transition duration-300">
+            <section class="bg-white rounded-lg p-4 w-auto h-[250px] lg:w-[500px] md:w-[500px] mb-15
+            lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),-4px_-4px_10px_rgba(255,255,255,0.3)]
+            hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)]
+            transition duration-300 ml-[0px] lg:ml-[0px] md:ml-[120px]
+            overflow-y-auto">
 
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <img src="/static/icons/star.png" alt="Star Icon" class="w-10 h-10">
+                    <img src="/static/icons/star.png" alt="Star Icon" class="w-8 h-8">
                     <div>
                         <div class="font-faustina text-[20px] font-bold text-gray-800">Rate our service</div>
                         <div class="font-montserrat text-[10px] font-light text-gray-500 mt-[-3px]">Tell other's what you think</div>
@@ -103,15 +105,15 @@
                 
             
 
-            <div class="mt-2 lg:ml-12 ml-7">
-                <div class="rating-widget inline-flex gap-2" data-rating="0">
+            <div class="mt-2 lg:ml-[90px] md:ml-[100px] ml-[70px]">
+                <div class="rating-widget inline-flex gap-5" data-rating="0">
                     {% for i in range(1,6) %}
                         <button type="button" class="star p-1" data-value="{{ i }}" aria-label="Rate {{ i }} stars">
                             <img 
                                 src="/static/icons/star(1).png" 
                                 alt="Star Icon" 
                                 class="w-8 h-8 transition duration-1200"
-                            >
+                            >   
                         </button>
                     {% endfor %}
                 </div>
@@ -121,7 +123,7 @@
                 <label class="block font-montserrat text-[10px] text-black mb-1">Leave a comment.</label>
                 <textarea 
                     name="comment" 
-                    class="lg:w-[320px] w-[280px] lg:h-15 h-12 p-2 border-2 border-black rounded resize-y text-[14px]" 
+                    class="lg:w-full md:w-full w-[280px] min-h-[48px] p-2 border-2 border-black rounded resize-y text-[14px]" 
                     placeholder="Write your comment here..."
                     maxlength="250"
                     oninput="autoResize(this)"></textarea>
@@ -141,7 +143,7 @@
             {'name':'Leopard Lucy','rating':2,'date':'2025-08-10T16:45:00Z','text':'I went for the first time and unfortunately I wasn\'t impressed. The barber seemed rushed and didn\'t listen to what I asked for.'}
         ]) %}
 
-        <section class="bg-transparent w-full lg:w-[500px] flex flex-col gap-2 lg:mt-[60px] mt-[15px]">
+        <section class="bg-transparent w-full lg:w-[500px] md:w-[500px] flex flex-col gap-2 lg:mt-[60px] mt-[15px] ml-[0px] lg:ml-[0px] md:ml-[120px]">
     {% for c in comments %}
     <article class="bg-white rounded-lg shadow p-3 relative">
         <div class="flex">
@@ -158,7 +160,7 @@
                         <div class="flex items-center">
                             {% for i in range(1,6) %}
                                 {% if i <= c.rating %}
-                                    <svg class="w-3 h-3 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
+                                    <svg class="w-3 h-3 text-black" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
                                 {% else %}
                                     <svg class="w-3 h-3 text-gray-300" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118L10 13.347l-3.387 2.658c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.627 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z"/></svg>
                                 {% endif %}

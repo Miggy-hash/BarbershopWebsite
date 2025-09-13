@@ -17,14 +17,14 @@
 
             <!-- Services -->
             <div class="flex flex-col gap-2 bg-black p-7 sm:p-7 md:p-10 lg:p-10 rounded-xl border-2 border-white w-[330px] sm:w-[330px] md:w-auto lg:w-auto">
-                <h2 class="text-white text-xs sm:text-xs md:text-normal lg:text-base ml-2 font-montserrat">Select a service for your appointment:</h2>
+                <h2 class="text-white text-xs sm:text-xs md:text-base lg:text-base ml-2 font-montserrat">Select the service for your appointment:</h2>
 
 
 
 
               <!--Regular Haircut -->
                <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='haircut') }}">
-              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[300px] lg:w-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/erazor.png') }}" 
                     alt="Beard Service" 
                     class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
@@ -43,7 +43,7 @@
 
               <!-- Home Service -->
                <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='home') }}">
-              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[300px] lg:w-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/home.png') }}" 
                     alt="Beard Service" 
                     class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
@@ -62,7 +62,7 @@
 
               <!-- Full Service -->
                <a href="{{ url_for('routes.select_service', barber='Emel Calomos', service_name='full') }}">
-              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[350px] lg:-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
+              <div class="group relative w-[275px] h-[85px] sm:w-[275px] md:w-[300px] lg:w-[350px] bg-white border-black border-[6px] p-2 rounded-[15px] flex items-center overflow-hidden">
                 <img src="{{ url_for('static', filename ='icons/chair.png') }}" 
                     alt="Beard Service" 
                     class="w-[45px] h-[45px] object-contain ml-3 transition-all duration-700 ease-in-out group-hover:-translate-x-10 group-hover:opacity-0">
@@ -83,7 +83,7 @@
 
     <!-- Appointment Section (Right) -->
     <div class="bg-black text-white md:w-auto md:h-auto p-6 rounded-xl shadow-md border-2 border-white">
-        <h2 class="text-lg font-normal mb-4">Schedule Information:</h2>
+        <h2 class="text-base lg:text-base md:text-base font-montserrat mb-4 ml-2">Schedule Information:</h2>
 
               <div class="flex justify-center">
                 <div class="relative h-[200px] w-[180px] bg-black rounded-[25px] border-4 border-white">

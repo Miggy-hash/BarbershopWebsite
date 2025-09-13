@@ -48,9 +48,9 @@
             display: none; 
             position: absolute; 
             top: 100%; 
-            right: 0; 
-            width: 400px; 
-            max-height: 500px; 
+            right: -460%; 
+            width: 260px; 
+            max-height: 400px; 
             overflow-y: auto; 
             background-color: #000; 
             border: 2px solid #000000; 
@@ -58,6 +58,9 @@
             box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3); 
             z-index: 50; 
             padding: 15px;
+        }
+        @media (min-width: 1280px){
+            .notification-dropdown { width: 400px;  max-height: 500px; right: -280%;  }
         }
         .notification-dropdown.show { display: block; }
         .notification-item { 
@@ -75,9 +78,10 @@
         .show-more-btn { 
             display: block; 
             text-align: center; 
-            padding: 10px; 
+            padding: 5px; 
             color: #3b82f6; 
             cursor: pointer; 
+            font-size: 13px;
         }
         .show-more-btn:hover { color: #60a5fa; }
         .notification-badge { 
@@ -132,7 +136,7 @@
                             <span id="unread-count" class="notification-badge hidden">0</span>
                         </button>
                         <div id="notification-dropdown" class="notification-dropdown">
-                            <h3 class="text-lg font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
+                            <h3 class="lg:text-lg text-sm font-bold font-montserrat text-white mb-2">Newest Appointments</h3>
                             <div id="notification-list" class="space-y-1.5"></div>
                             <button id="show-more-btn" class="show-more-btn">Show More</button>
                         </div>
