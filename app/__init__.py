@@ -55,7 +55,7 @@ def create_app():
     login_manager.login_view = 'admin.ADMINLOGIN'
     logger.info("LoginManager initialized")
 
-    from app.models import User
+    from app.models import User, Appointment, Review
     @login_manager.user_loader
     def load_user(user_id):
         logger.info(f"Loading user with ID: {user_id}, type: {type(user_id)}")

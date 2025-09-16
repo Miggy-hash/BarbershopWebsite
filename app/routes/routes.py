@@ -1,25 +1,78 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, session, make_response, jsonify
 from app import db, socketio, mail
-from app.models import Appointment
+from app.models import Appointment, Review
 from datetime import datetime
-from flask import jsonify
 from flask import request
 from flask_socketio import emit
-import logging
-import requests
-import os
 from flask_mail import Message
 from threading import Thread
 from flask import current_app
 from dotenv import load_dotenv
+import logging, requests, os, bleach
 
 load_dotenv()
 routes_bp = Blueprint('routes', __name__, template_folder='templates', static_folder='static')
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def get_review_data():
+    logger.debug("Computing review data")
+    try:
+        logger.debug(f"Database URI: {db.engine.url}")
+        reviews = Review.query.order_by(Review.created_at.desc()).all()
+        logger.debug(f"Found {len(reviews)} reviews: {[{'id': r.id, 'rating': r.rating, 'comment': r.comment, 'appointment_id': r.appointment_id} for r in reviews]}")
+        total_reviews = len(reviews)
+        if total_reviews > 0:
+            average_rating = round(sum(r.rating for r in reviews) / total_reviews, 1)
+        else:
+            average_rating = 0.0
+
+        ratings_counts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
+        for r in reviews:
+            if r.rating in ratings_counts:
+                ratings_counts[r.rating] += 1
+
+        comments = []
+        for r in reviews:
+            try:
+                appointment = Appointment.query.get(r.appointment_id)
+                name = appointment.full_name if appointment else 'Anonymous'
+            except Exception as e:
+                logger.warning(f"Failed to get appointment for review {r.id}: {str(e)}")
+                name = 'Anonymous'
+            comments.append({
+                'name': name,
+                'rating': r.rating,
+                'date': r.created_at.isoformat(),
+                'text': r.comment or ''
+            })
+        logger.debug(f"Review data: average_rating={average_rating}, total_reviews={total_reviews}, ratings_counts={ratings_counts}, comments={comments}")
+        return {
+            'average_rating': average_rating,
+            'total_reviews': total_reviews,
+            'ratings_counts': ratings_counts,
+            'comments': comments
+        }
+    except Exception as e:
+        logger.error(f"Error computing review data: {str(e)}")
+        return {
+            'average_rating': 0.0,
+            'total_reviews': 0,
+            'ratings_counts': {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
+            'comments': []
+        }
 
 @routes_bp.route('/')
 def HOME():
-    return render_template('home.html')
+    review_data = get_review_data()
+    logger.debug(f"Rendering home.html with review_data: {review_data}")
+    print(f"Review data sent to template: {review_data}")
+    return render_template('home.html', **review_data)
+
+@routes_bp.route('/debug-reviews')
+def debug_reviews():
+    reviews = Review.query.all()
+    return jsonify([{'id': r.id, 'rating': r.rating, 'comment': r.comment, 'created_at': r.created_at.isoformat(), 'appointment_id': r.appointment_id} for r in reviews])
 
 @routes_bp.route("/login", methods=["POST", "GET"])
 def LOGIN():
@@ -351,5 +404,42 @@ def confirm_booking():
 
 @routes_bp.route('/logout')
 def logout():
-    session.clear()  # removes all session data
+    session.clear()
     return redirect(url_for('routes.HOME'))
+
+
+@routes_bp.route('/submit-review', methods=['POST'])
+def submit_review():
+    try:
+        data = request.json
+        full_name = data.get('full_name')
+        date = data.get('date')
+        rating = int(data.get('rating'))
+        comment = data.get('comment', '')
+
+        if not all([full_name, date, rating]) or rating < 1 or rating > 5:
+            return jsonify({'success': False, 'message': 'Invalid input'}), 400
+
+        comment = bleach.clean(comment, tags=[], strip=True)[:250]
+
+        appointment = Appointment.query.filter_by(full_name=full_name, date=date).first()
+        if not appointment:
+            return jsonify({'success': False, 'message': 'No appointment found for this name and date'}), 404
+
+        existing_review = Review.query.filter_by(appointment_id=appointment.id).first()
+        if existing_review:
+            return jsonify({'success': False, 'message': 'A review has already been submitted for this appointment'}), 400
+
+        new_review = Review(
+            appointment_id=appointment.id,
+            rating=rating,
+            comment=comment if comment else None
+        )
+        db.session.add(new_review)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Review submitted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error submitting review: {str(e)}")
+        return jsonify({'success': False, 'message': 'Server error'}), 500
