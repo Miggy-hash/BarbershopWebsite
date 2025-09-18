@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app import db, socketio, mail
 from app.models import Appointment, Review
 from datetime import datetime
-from flask import request
-from flask_socketio import emit
+from flask_socketio import SocketIO, emit
 from flask_mail import Message
 from threading import Thread
 from flask import current_app
@@ -115,19 +114,15 @@ def BARBER():
     response.headers["Expires"] = "0"
     return response
 
-@routes_bp.route('/emel-calendar', methods=['GET']) 
+@routes_bp.route('/emel-calendar', methods=['GET'])
 def ECALENDAR():
     if session.get("booking_complete"):
         session.clear()
-        return redirect("/login")  # Added explicit return
+        return redirect("/login")
     if "user" not in session:
         return redirect("/login")
     selected_service = session.get("selected_service")
-
-    # Use consistent date format with zero-padded day
     date_for_check = session.get("selected_date", datetime.today().strftime("%B %d, %Y"))
-
-    # Query for booked times on this date for this barber
     appointments = Appointment.query.filter_by(barber="Emel Calomos", date=date_for_check).all()
     booked_times = [a.time for a in appointments]
 
@@ -144,38 +139,30 @@ def ECALENDAR():
 @routes_bp.route('/emel-calendar/times/<barber>/<date>')
 def Eget_booked_times(barber, date):
     try:
-        # Convert incoming YYYY-MM-DD to stored format "%B %d, %Y" (with zero-padded day)
         dt = datetime.strptime(date, "%Y-%m-%d")
         formatted_date = dt.strftime("%B %d, %Y")
     except ValueError:
-        # Invalid date: return empty list
         return jsonify([])
-
-    # Query using formatted date
     appointments = Appointment.query.filter_by(barber=barber, date=formatted_date).all()
-    booked_times = [a.time for a in appointments]  # 24-hour format
+    booked_times = [a.time for a in appointments]
     return jsonify(booked_times)
 
 @routes_bp.route('/boboy-calendar/times/<barber>/<date>')
 def Bget_booked_times(barber, date):
     try:
-        # Convert incoming YYYY-MM-DD to stored format "%B %d, %Y" (with zero-padded day)
         dt = datetime.strptime(date, "%Y-%m-%d")
         formatted_date = dt.strftime("%B %d, %Y")
     except ValueError:
-        # Invalid date: return empty list
         return jsonify([])
-
-    # Query using formatted date
     appointments = Appointment.query.filter_by(barber=barber, date=formatted_date).all()
-    booked_times = [a.time for a in appointments]  # 24-hour format
+    booked_times = [a.time for a in appointments]
     return jsonify(booked_times)
 
 @routes_bp.route('/boboy-calendar', methods=['GET'])
 def BCALENDAR():
     if session.get("booking_complete"):
         session.clear()
-        return redirect("/login")  # Added explicit return
+        return redirect("/login")
     if "user" not in session:
         return redirect("/login")
     selected_service = session.get("selected_service")
@@ -197,7 +184,7 @@ def BCALENDAR():
 def ESERVICES():
     if session.get("booking_complete"):
         session.clear()
-        return redirect("/login")  # Added explicit return
+        return redirect("/login")
     if "user" not in session:
         return redirect("/login")
     response = make_response(render_template('emel-services.html'))
@@ -210,7 +197,7 @@ def ESERVICES():
 def BSERVICES():
     if session.get("booking_complete"):
         session.clear()
-        return redirect("/login")  # Added explicit return
+        return redirect("/login")
     if "user" not in session:
         return redirect("/login")
     response = make_response(render_template('boboy-services.html'))
@@ -223,12 +210,10 @@ def BSERVICES():
 def RECEIPT():
     stored_time = session.get("selected_time", "00:00")
     dt = datetime.strptime(stored_time, "%H:%M")
-
     try:
-        time_12h = dt.strftime("%-I:%M %p")  # No leading zero (Unix-like)
+        time_12h = dt.strftime("%-I:%M %p")
     except ValueError:
         time_12h = dt.strftime("%I:%M %p").lstrip("0")
-
     return render_template('receipt.html',
                            full_name=session["user"]["full_name"],
                            cellphone=session["user"]["cellphone"],
@@ -236,15 +221,13 @@ def RECEIPT():
                            service=session["selected_service"]["name"],
                            barber=session["selected_barber"],
                            date=session.get("selected_date"),
-                           time=time_12h
-                           )
+                           time=time_12h)
 
-# routing select services
 @routes_bp.route("/select_service/<barber>/<service_name>")
 def select_service(barber, service_name):
     if session.get("booking_complete"):
         session.clear()
-        return redirect("/login")  # Added check here for completeness
+        return redirect("/login")
     services = {
         "beard": {"name": "Beard Service", "price": 250, "icon": "icons/beard.png"},
         "haircut": {"name": "Regular Haircut", "price": 250, "icon": "icons/erazor.png"},
@@ -252,18 +235,15 @@ def select_service(barber, service_name):
         "full": {"name": "Full Service", "price": 250, "icon": "icons/chair.png"},
         "shave": {"name": "Full Shave", "price": 250, "icon": "icons/razor.png"}
     }
-
     if service_name in services:
         session["selected_service"] = services[service_name]
-        session["selected_barber"] = barber  # keep track of which barber
-
-    # Decide which calendar to redirect to
+        session["selected_barber"] = barber
     if barber == "Emel Calomos":
         return redirect(url_for("routes.ECALENDAR"))
     elif barber == "Angelo Paballa":
         return redirect(url_for("routes.BCALENDAR"))
     else:
-        return redirect(url_for("routes.home"))
+        return redirect(url_for("routes.HOME"))
 
 def format_phone_number(cellphone):
     if not cellphone:
@@ -275,7 +255,7 @@ def format_phone_number(cellphone):
         return cellphone
     else:
         logger.warning(f"Invalid phone format: {cellphone}")
-        return None 
+        return None
 
 @routes_bp.route("/confirm", methods=["POST"])
 def confirm_booking():
@@ -310,7 +290,6 @@ def confirm_booking():
             created_at=datetime.utcnow(),
             is_read=False
         )
-
         db.session.add(new_appointment)
         db.session.commit()
         logger.info(f"Appointment saved: id={new_appointment.id}, barber={barber}, date={date}, time={time}")
@@ -319,7 +298,6 @@ def confirm_booking():
             with app.app_context():
                 mail.send(msg)
 
-        # --- Send Confirmation Email ---
         email_sent = False
         try:
             dt = datetime.strptime(time, "%H:%M")
@@ -337,7 +315,6 @@ def confirm_booking():
         except Exception as email_err:
             logger.error(f"Failed to queue email to {email}: {str(email_err)}")
 
-        # --- Send Confirmation SMS ---
         sms_sent = False
         try:
             dt = datetime.strptime(time, "%H:%M")
@@ -407,18 +384,31 @@ def logout():
     session.clear()
     return redirect(url_for('routes.HOME'))
 
-
 @routes_bp.route('/submit-review', methods=['POST'])
 def submit_review():
     try:
         data = request.json
         full_name = data.get('full_name')
         date = data.get('date')
-        rating = int(data.get('rating'))
+        rating = data.get('rating')
         comment = data.get('comment', '')
 
-        if not all([full_name, date, rating]) or rating < 1 or rating > 5:
-            return jsonify({'success': False, 'message': 'Invalid input'}), 400
+        logger.debug(f"Received review data: full_name={full_name}, date={date}, rating={rating}, comment={comment}")
+
+        if not all([full_name, date, rating]):
+            return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                return jsonify({'success': False, 'message': 'Rating must be between 1 and 5'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'message': 'Invalid rating format'}), 400
+
+        try:
+            datetime.strptime(date, '%B %d, %Y')
+        except ValueError:
+            return jsonify({'success': False, 'message': 'Invalid date format'}), 400
 
         comment = bleach.clean(comment, tags=[], strip=True)[:250]
 
@@ -433,13 +423,19 @@ def submit_review():
         new_review = Review(
             appointment_id=appointment.id,
             rating=rating,
-            comment=comment if comment else None
+            comment=comment if comment else None,
+            created_at=datetime.utcnow()
         )
         db.session.add(new_review)
         db.session.commit()
+        logger.info(f"Review saved: id={new_review.id}, appointment_id={appointment.id}, rating={rating}")
+
+        review_data = get_review_data()
+        socketio.emit('new_review', review_data, namespace='/')
+        logger.info("Emitted new_review event")
 
         return jsonify({'success': True, 'message': 'Review submitted successfully'})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error submitting review: {str(e)}")
-        return jsonify({'success': False, 'message': 'Server error'}), 500
+        logger.error(f"Error submitting review: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'message': f'Server error: {str(e)}'}), 500

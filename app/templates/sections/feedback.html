@@ -45,7 +45,7 @@
                         {% for n in [5, 4, 3, 2, 1] %}
                             {% set count = ratings_counts.get(n, 0) %}
                             <div class="flex items-center gap-2 mb-2">
-                                <span class="text-sm font-montserrat text-gray-700">{{ n }} Stars</span>
+                                <span class="text-sm font-montserrat text-gray-700">{{ n }} Stars</span> 
                                 <div class="flex-1 h-[10px] w-[100px] bg-gray-200 rounded border border-black">
                                     <div class="h-[10px] bg-black rounded bar" data-count="{{ count }}" data-total="{{ total_reviews | default(0) }}"></div>
                                 </div>
@@ -124,20 +124,20 @@
     <div id="verificationModal" class="modal hidden fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
         <div class="bg-white p-6 rounded-lg border-2 border-white max-w-md w-full">
             <span id="modalClose" class="modal-close absolute top-2 right-4 text-white text-2xl cursor-pointer">&times;</span>
-            <h2 class="text-white text-xl font-bold mb-4">Verify Your Appointment</h2>
+            <h2 class="text-black text-xl font-bold mb-4">Verify Your Appointment</h2>
             <form id="verificationForm">
                 <div class="mb-4">
-                    <label class="block text-white text-sm mb-1">Full Name</label>
-                    <input type="text" id="modalFullName" class="w-full p-2 bg-gray-800 text-white border border-white rounded" placeholder="Enter the full name used for your appointment">
+                    <label class="block text-black text-sm mb-1">Full Name</label>
+                    <input type="text" id="modalFullName" class="w-full p-2 bg-[#191919] text-white border border-white rounded" placeholder="Enter the full name used for your appointment">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-white text-sm mb-1">Date</label>
-                    <select id="modalDate" class="w-full p-2 bg-gray-800 text-white border border-white rounded">
+                    <label class="block text-black text-sm mb-1">Date</label>
+                    <select id="modalDate" class="w-full p-2 bg-[#191919] text-white border border-white rounded">
                         <!-- Populated by JS -->
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-white text-sm mb-1">Your Rating</label>
+                    <label class="block text-black text-sm mb-1">Your Rating</label>
                     <div id="modalRatingWidget" class="rating-widget inline-flex gap-2" data-rating="0">
                         {% for i in range(1,6) %}
                             <button type="button" class="star p-1" data-value="{{ i }}" aria-label="Rate {{ i }} stars">
@@ -147,8 +147,8 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-white text-sm mb-1">Your Comment</label>
-                    <textarea id="modalComment" class="w-full p-2 bg-gray-800 text-white border border-white rounded resize-y" maxlength="250"></textarea>
+                    <label class="block text-black text-sm mb-1">Your Comment</label>
+                    <textarea id="modalComment" class="w-full p-2 bg-[#191919] text-white border border-white rounded resize-y" maxlength="250"></textarea>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" id="cancelBtn" class="bg-gray-600 text-white px-4 py-2 rounded">Cancel</button>
