@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         `).join('')}
                                     </div>
                                 </div>
-                                <div class="text-xs text-gray-500 timestamp" data-date="${comment.date}">${moment(comment.date).fromNow()}</div>
+                                <div class="text-xs text-gray-500 timestamp" data-date="${comment.date}">${moment.tz(comment.date, 'UTC').tz('Asia/Manila').fromNow()}</div>
                             </div>
                             <div class="h-px bg-gray-400 my-1"></div>
                             <div class="text-xs text-gray-700 leading-snug">${comment.text}</div>
@@ -143,7 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.timestamp').forEach(el => {
                 const dateStr = el.dataset.date;
                 if (dateStr) {
-                    el.textContent = moment(dateStr).fromNow();
+                    const parsedDate = moment.tz(dateStr, 'UTC').tz('Asia/Manila');
+                    el.textContent = parsedDate.fromNow();
+                    console.log(`Updated timestamp to ${el.textContent} for date ${dateStr} (parsed as ${parsedDate.format('YYYY-MM-DD HH:mm:ss z')})`);
                 }
             });
             console.log('Updated comment section');
@@ -189,11 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.backgroundColor = colors[colorIndex];
     });
 
-    // Set timestamps with Moment.js
+    // Set timestamps with Moment.js on page load
     document.querySelectorAll('.timestamp').forEach(el => {
         const dateStr = el.dataset.date;
         if (dateStr) {
-            el.textContent = moment(dateStr).fromNow();
+            const parsedDate = moment.tz(dateStr, 'UTC').tz('Asia/Manila');
+            el.textContent = parsedDate.fromNow();
+            console.log(`Initialized timestamp to ${el.textContent} for date ${dateStr} (parsed as ${parsedDate.format('YYYY-MM-DD HH:mm:ss z')})`);
         }
     });
 
