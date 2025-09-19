@@ -37,21 +37,35 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Total reviews element not found');
         }
 
-        // Update average stars
+        // Update average stars with partial fill
         const avgStarsContainer = document.querySelector('.flex.items-center.gap-1');
         if (avgStarsContainer) {
-            const avgRating = Math.round(review_data.average_rating);
-            avgStarsContainer.innerHTML = Array.from({ length: 5 }, (_, i) => 
-                `<img src="/static/icons/star${i < avgRating ? '' : '(1)'}.png" class="w-4 h-4">`
-            ).join('');
-            console.log(`Updated average stars to ${avgRating}`);
+            const avgRating = review_data.average_rating;
+            const fullStars = Math.floor(avgRating); // Full stars (e.g., 4 for 4.8)
+            const partialStarFraction = avgRating - fullStars; // Fractional part (e.g., 0.8)
+            avgStarsContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
+                if (i < fullStars) {
+                    return `<img src="/static/icons/star.png" class="w-4 h-4">`; // Full star
+                } else if (i === fullStars && partialStarFraction > 0) {
+                    return `<img src="/static/icons/half-star.png" class="w-4 h-4" style="opacity: ${partialStarFraction}">`; // Partial star
+                } else {
+                    return `<img src="/static/icons/star(1).png" class="w-4 h-4">`; // Empty star
+                }
+            }).join('');
+            console.log(`Updated average stars to ${avgRating} (full: ${fullStars}, partial: ${partialStarFraction})`);
         } else {
             console.warn('Average stars container not found');
         }
 
         // Update rating bars
-        document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200').forEach(el => {
+        const barContainers = document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
+        console.log(`Found ${barContainers.length} bar containers`);
+        barContainers.forEach(el => {
             const rating = parseInt(el.dataset.rating);
+            if (isNaN(rating)) {
+                console.error(`Invalid data-rating for element:`, el);
+                return;
+            }
             const count = review_data.ratings_counts[rating] || 0;
             const total = review_data.total_reviews || 1;
             const pct = total > 0 ? (count / total * 100).toFixed(2) : 0;
@@ -67,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Update comments
-        const commentsContainer = document.querySelector('.space-y-4.max-h-\\[450px\\].overflow-y-auto');
+        const commentsContainer = document.querySelector('#comments-container, .space-y-4.max-h-\\[450px\\].overflow-y-auto');
         if (commentsContainer) {
             commentsContainer.innerHTML = ''; // Clear existing comments
             review_data.comments.forEach(comment => {
@@ -111,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             console.log('Updated comment section');
         } else {
-            console.error('Comments container not found');
+            console.error('Comments container not found. Selector tried: #comments-container, .space-y-4.max-h-\\[450px\\].overflow-y-auto');
         }
     });
 
@@ -119,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const colors = ['hsl(220, 70%, 40%)', 'hsl(140, 70%, 40%)', 'hsl(0, 70%, 40%)', 'hsl(260, 70%, 40%)', 'hsl(30, 70%, 40%)'];
 
     // Set bar widths on page load
-    document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200').forEach(el => {
+    const barContainers = document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
+    console.log(`Found ${barContainers.length} bar containers on page load`);
+    barContainers.forEach(el => {
         const count = parseFloat(el.querySelector('.bar').dataset.count) || 0;
         const total = parseFloat(el.querySelector('.bar').dataset.total) || 0;
         const pct = total > 0 ? (count / total * 100).toFixed(2) : 0;
@@ -150,6 +166,27 @@ document.addEventListener('DOMContentLoaded', () => {
             el.textContent = moment(dateStr).fromNow();
         }
     });
+
+    // Initialize average stars on page load
+    const avgStarsContainer = document.querySelector('.flex.items-center.gap-1');
+    const avgRatingEl = document.querySelector('.text-6xl.lg\\:text-7xl.md\\:text-7xl');
+    if (avgStarsContainer && avgRatingEl) {
+        const avgRating = parseFloat(avgRatingEl.textContent) || 0;
+        const fullStars = Math.floor(avgRating);
+        const partialStarFraction = avgRating - fullStars;
+        avgStarsContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
+            if (i < fullStars) {
+                return `<img src="/static/icons/star.png" class="w-4 h-4">`; // Full star
+            } else if (i === fullStars && partialStarFraction > 0) {
+                return `<img src="/static/icons/half-star.png" class="w-4 h-4" style="opacity: ${partialStarFraction}">`; // Partial star
+            } else {
+                return `<img src="/static/icons/star(1).png" class="w-4 h-4">`; // Empty star
+            }
+        }).join('');
+        console.log(`Initialized average stars on page load: ${avgRating} (full: ${fullStars}, partial: ${partialStarFraction})`);
+    } else {
+        console.warn('Average stars container or rating element not found on page load');
+    }
 
     // Star rating widgets
     const widgets = document.querySelectorAll('.rating-widget');

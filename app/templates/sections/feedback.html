@@ -19,11 +19,11 @@
     <div class="w-auto lg:h-[500px] h-auto flex flex-col lg:flex-row justify-center p-6 lg:gap-4 bg-[#191919]">
 
         <!-- Ratings & Reviews -->
-        <section class="bg-white rounded-lg p-4 max-w-sm lg:w-[370px] w-[320px] md:w-[700px] lg:h-[220px] h-[190px] md:h-auto lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),-4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] transition duration-300 md:ml-[180px]">
+        <section class="bg-white rounded-lg p-4 max-w-sm lg:w-[400px] w-[320px] md:w-[700px] lg:h-[230px] h-[190px] md:h-auto lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),-4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] transition duration-300 md:ml-[180px]">
             <div class="flex flex-col items-start">
                 <h3 class="font-faustina text-[20px] md:text-[25px] font-bold text-gray-800 mb-2 ml-2">Ratings and Reviews</h3>
-                <div class="flex items-start gap-8 lg:gap-8 md:gap-6">
-                    <div class="flex flex-col items-center mt-2 ml-3">
+                <div class="flex items-start gap-6 lg:gap-6 md:gap-6">
+                    <div class="flex flex-col items-center mt-2 ">
                         <div class="text-6xl lg:text-7xl md:text-7xl font-montserrat leading-none text-black">{{ average_rating | default(0.0) }}</div>
                         <div class="flex items-center gap-1">
                             {% set full_stars = ((average_rating | default(0.0)) // 1) | int %}
@@ -58,7 +58,7 @@
         </section>
 
         <!-- Rate Our Service -->
-        <section class="bg-white rounded-lg p-4 w-auto h-[250px] lg:w-[500px] md:w-[500px] mb-15 lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),-4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] transition duration-300 ml-[0px] lg:ml-[0px] md:ml-[120px] overflow-y-auto">
+        <section class="bg-white rounded-lg p-4 w-auto h-[250px] lg:w-[450px] md:w-[500px] mb-15 lg:mt-[60px] mt-[15px] shadow-[4px_4px_10px_rgba(255,255,255,0.3),-4px_-4px_10px_rgba(255,255,255,0.3)] hover:shadow-[4px_4px_16px_rgba(255,255,255,0.6),-4px_-4px_16px_rgba(255,255,255,0.6)] transition duration-300 ml-[0px] lg:ml-[0px] md:ml-[120px] overflow-y-auto">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <img src="/static/icons/star.png" alt="Star Icon" class="w-8 h-8">
@@ -88,7 +88,7 @@
         </section>
 
         <!-- Comments Section -->
-        <section class="bg-transparent w-full lg:w-[500px] md:w-[500px] flex flex-col gap-2 lg:mt-[60px] mt-[15px] ml-[0px] lg:ml-[0px] md:ml-[120px]">
+        <section class="bg-transparent w-full lg:w-[450px] md:w-[500px] flex flex-col gap-2 lg:mt-[60px] mt-[15px] ml-[0px] lg:ml-[0px] md:ml-[120px]">
             {% for c in comments %}
             <article class="bg-white rounded-lg shadow p-3 relative">
                 <div class="flex">
