@@ -37,33 +37,38 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Total reviews element not found');
         }
 
-        // Update average stars with partial fill
+        // Update average stars with images
         const avgStarsContainer = document.querySelector('.flex.items-center.gap-1');
         if (avgStarsContainer) {
             const avgRating = review_data.average_rating;
-            const fullStars = Math.floor(avgRating); // Full stars (e.g., 4 for 4.8)
-            const partialStarFraction = avgRating - fullStars; // Fractional part (e.g., 0.8)
+            const fullStars = Math.floor(avgRating);
+            const partialStar = avgRating - fullStars > 0;
             avgStarsContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
                 if (i < fullStars) {
-                    return `<img src="/static/icons/star.png" class="w-4 h-4">`; // Full star
-                } else if (i === fullStars && partialStarFraction > 0) {
-                    return `<img src="/static/icons/half-star.png" class="w-4 h-4" style="opacity: ${partialStarFraction}">`; // Partial star
+                    return `<img src="/static/icons/star.png" alt="Filled Star" class="w-6 h-6 lg:w-3 lg:h-3 md:w-[30px] md:h-[30px]">`;
+                } else if (i === fullStars && partialStar) {
+                    return `<img src="/static/icons/half-star.png" alt="Partial Star" class="w-6 h-6 lg:w-3 lg:h-3 md:w-[30px] md:h-[30px]">`;
                 } else {
-                    return `<img src="/static/icons/star(1).png" class="w-4 h-4">`; // Empty star
+                    return `<img src="/static/icons/hollow-star.png" alt="Hollow Star" class="w-4 h-4 lg:w-2 lg:h-2 md:w-[25px] md:h-[25px]">`;
                 }
             }).join('');
-            console.log(`Updated average stars to ${avgRating} (full: ${fullStars}, partial: ${partialStarFraction})`);
+            console.log(`Updated average stars to ${avgRating} (full: ${fullStars}, partial: ${partialStar ? 'yes' : 'no'})`);
         } else {
             console.warn('Average stars container not found');
         }
 
-        // Update rating bars
-        const barContainers = document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
+        // Update rating bars and counts
+        const barContainers = document.querySelectorAll('.rating-bars .flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
         console.log(`Found ${barContainers.length} bar containers`);
+        if (barContainers.length === 0) {
+            console.error('No bar containers found. Check selector or DOM structure.');
+            console.log('Available elements with similar classes:', Array.from(document.querySelectorAll('[class*="bg-gray-200"]')).map(el => el.outerHTML));
+        }
         barContainers.forEach(el => {
             const rating = parseInt(el.dataset.rating);
             if (isNaN(rating)) {
-                console.error(`Invalid data-rating for element:`, el);
+                console.error(`Invalid data-rating for element:`, el.outerHTML);
+                console.log(`Element classes: ${el.className}, dataset:`, el.dataset);
                 return;
             }
             const count = review_data.ratings_counts[rating] || 0;
@@ -78,26 +83,44 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.warn(`Bar element not found for rating ${rating}`);
             }
+            // Update count display
+            const countSpan = el.parentElement.querySelector('.text-sm.font-montserrat.text-gray-700:last-child');
+            if (countSpan) {
+                countSpan.textContent = count;
+                console.log(`Updated count display for rating ${rating} to ${count}`);
+            } else {
+                console.warn(`Count span not found for rating ${rating}`);
+            }
         });
 
         // Update comments
-        const commentsContainer = document.querySelector('#comments-container, .space-y-4.max-h-\\[450px\\].overflow-y-auto');
+        const commentsContainer = document.querySelector('#comments-container');
         if (commentsContainer) {
-            commentsContainer.innerHTML = ''; // Clear existing comments
+            commentsContainer.innerHTML = '';
             review_data.comments.forEach(comment => {
                 const commentEl = document.createElement('article');
                 commentEl.className = 'bg-white rounded-lg shadow p-3 relative';
                 commentEl.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="avatar w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" data-name="${comment.name}">${comment.name.charAt(0).toUpperCase()}</div>
-                        <div>
-                            <div class="flex items-center gap-1">
-                                ${Array.from({length: 5}, (_, i) => `<img src="/static/icons/star${i < comment.rating ? '' : '(1)'}.png" class="w-4 h-4">`).join('')}
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="avatar w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" data-name="${comment.name}">${comment.name.charAt(0).toUpperCase()}</div>
+                        </div>
+                        <div class="ml-2 flex-1">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="font-semibold text-gray-800 text-sm">${comment.name}</div>
+                                    <div class="flex items-center">
+                                        ${Array.from({length: 5}, (_, i) => `
+                                            <img src="/static/icons/${i < comment.rating ? 'star' : 'hollow-star'}.png" alt="${i < comment.rating ? 'Filled' : 'Hollow'} Star" class="w-3 h-3">
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="text-xs text-gray-500 timestamp" data-date="${comment.date}">${moment(comment.date).fromNow()}</div>
                             </div>
-                            <p class="text-sm font-montserrat text-gray-500 timestamp" data-date="${comment.date}">${moment(comment.date).fromNow()}</p>
+                            <div class="h-px bg-gray-400 my-1"></div>
+                            <div class="text-xs text-gray-700 leading-snug">${comment.text}</div>
                         </div>
                     </div>
-                    <p class="mt-2 text-sm font-montserrat text-gray-600">${comment.text}</p>
                 `;
                 commentsContainer.appendChild(commentEl);
             });
@@ -125,15 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             console.log('Updated comment section');
         } else {
-            console.error('Comments container not found. Selector tried: #comments-container, .space-y-4.max-h-\\[450px\\].overflow-y-auto');
+            console.error('Comments container not found. Selector tried: #comments-container');
+            console.log('Available elements with similar classes:', Array.from(document.querySelectorAll('[class*="flex-col"], [class*="gap-2"], [id*="comments"]')).map(el => el.outerHTML));
         }
     });
 
     // Fixed color palette
     const colors = ['hsl(220, 70%, 40%)', 'hsl(140, 70%, 40%)', 'hsl(0, 70%, 40%)', 'hsl(260, 70%, 40%)', 'hsl(30, 70%, 40%)'];
 
-    // Set bar widths on page load
-    const barContainers = document.querySelectorAll('.flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
+    // Set bar widths and counts on page load
+    const barContainers = document.querySelectorAll('.rating-bars .flex-1.h-\\[10px\\].w-\\[100px\\].bg-gray-200');
     console.log(`Found ${barContainers.length} bar containers on page load`);
     barContainers.forEach(el => {
         const count = parseFloat(el.querySelector('.bar').dataset.count) || 0;
@@ -143,6 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const bar = el.querySelector('.bar');
         if (bar) {
             bar.style.width = `${pct}%`;
+        }
+        // Initialize count display
+        const countSpan = el.parentElement.querySelector('.text-sm.font-montserrat.text-gray-700:last-child');
+        if (countSpan) {
+            countSpan.textContent = count;
+            console.log(`Initialized count display for rating ${el.dataset.rating} to ${count}`);
         }
     });
 
@@ -173,24 +203,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (avgStarsContainer && avgRatingEl) {
         const avgRating = parseFloat(avgRatingEl.textContent) || 0;
         const fullStars = Math.floor(avgRating);
-        const partialStarFraction = avgRating - fullStars;
+        const partialStar = avgRating - fullStars > 0;
         avgStarsContainer.innerHTML = Array.from({ length: 5 }, (_, i) => {
             if (i < fullStars) {
-                return `<img src="/static/icons/star.png" class="w-4 h-4">`; // Full star
-            } else if (i === fullStars && partialStarFraction > 0) {
-                return `<img src="/static/icons/half-star.png" class="w-4 h-4" style="opacity: ${partialStarFraction}">`; // Partial star
+                return `<img src="/static/icons/star.png" alt="Filled Star" class="w-6 h-6 lg:w-3 lg:h-3 md:w-[30px] md:h-[30px]">`;
+            } else if (i === fullStars && partialStar) {
+                return `<img src="/static/icons/half-star.png" alt="Partial Star" class="w-6 h-6 lg:w-3 lg:h-3 md:w-[30px] md:h-[30px]">`;
             } else {
-                return `<img src="/static/icons/star(1).png" class="w-4 h-4">`; // Empty star
+                return `<img src="/static/icons/hollow-star.png" alt="Hollow Star" class="w-4 h-4 lg:w-2 lg:h-2 md:w-[25px] md:h-[25px]">`;
             }
         }).join('');
-        console.log(`Initialized average stars on page load: ${avgRating} (full: ${fullStars}, partial: ${partialStarFraction})`);
+        console.log(`Initialized average stars on page load: ${avgRating} (full: ${fullStars}, partial: ${partialStar ? 'yes' : 'no'})`);
     } else {
         console.warn('Average stars container or rating element not found on page load');
     }
 
     // Star rating widgets
     const widgets = document.querySelectorAll('.rating-widget');
-    const hollowStar = '/static/icons/star(1).png';
+    const hollowStar = '/static/icons/hollow-star.png';
     const filledStar = '/static/icons/star.png';
 
     widgets.forEach(widget => {
